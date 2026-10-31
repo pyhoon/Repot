@@ -27,6 +27,7 @@ Public Sub Run (FixturesDir As String)
 	TestPagination
 	TestGoldens
 	TestPdfExport
+	TestHtmlExport
 	TestFixturesLoadAndRoundTrip
 	TestValidationFailures
 	TestExpressionScanner
@@ -708,6 +709,53 @@ Private Sub TestPdfExport
 	Check(lok, "listing pdf exports successfully")
 	If File.Exists(File.DirApp, "test-listing.pdf") Then
 		Check(lpdf.PageCount(loutPath) = ldoc.PageCount, "listing pdf page count matches layout")
+	End If
+End Sub
+'--------------------------------------------------------------- html export
+
+Private Sub TestHtmlExport
+	Dim invDir As String = File.Combine(mFixtures, "invoice-basic")
+	Dim loader As ReportTemplateLoader
+	loader.Initialize
+	Dim def As ReportDefinition = loader.LoadFromFile(invDir, "template.b4xr")
+	Check(loader.Diagnostics.HasErrors = False, "invoice loads for html")
+
+	Dim binder As ReportDataBinder
+	binder.Initialize(def)
+	Dim params As Map = LoadJsonMap(invDir, "params.json")
+	For Each k As String In params.Keys
+		binder.SetParameter(k, params.Get(k))
+	Next
+	Dim data As Map = LoadJsonMap(invDir, "data.json")
+	For Each name As String In data.Keys
+		Dim o As Object = data.Get(name)
+		If o Is List Then
+			binder.SetDataSource(name, o)
+		Else If o Is Map Then
+			binder.SetDataSourceSingle(name, o)
+		End If
+	Next
+	Check(binder.Validate, "invoice binds for html")
+
+	Dim diags As ReportDiagnostics
+	diags.Initialize
+	Dim measure As ReportB4JMeasure
+	measure.Initialize(diags)
+	Dim pag As ReportPaginator
+	pag.Initialize(def, binder, measure, diags)
+	Dim doc As ReportRenderDocument = pag.Render
+
+	Dim outPath As String = File.Combine(File.DirApp, "test-invoice.html")
+	Dim html As ReportHtmlExporter
+	html.Initialize(diags)
+	Dim ok As Boolean = html.Export(doc, outPath)
+	Check(ok, "invoice html exports successfully")
+	Check(File.Exists(File.DirApp, "test-invoice.html"), "invoice html file exists")
+	If File.Exists(File.DirApp, "test-invoice.html") Then
+		Dim content As String = File.ReadString(File.DirApp, "test-invoice.html")
+		Check(content.IndexOf("INVOICE") >= 0, "invoice html contains INVOICE")
+		Check(content.IndexOf("page-break-after") >= 0, "invoice html has page break css")
+		Check(content.IndexOf("<!DOCTYPE html>") >= 0, "invoice html is a document")
 	End If
 End Sub
 '--------------------------------------------------------------- fixtures

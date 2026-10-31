@@ -42,9 +42,10 @@ Module35=ReportValidator
 Module36=ReportVersion
 Module37=ReportRenderJsonWriter
 Module38=ReportPdfExporter
+Module39=ReportHtmlExporter
 NumberOfFiles=0
 NumberOfLibraries=3
-NumberOfModules=38
+NumberOfModules=39
 Version=10.7
 @EndOfDesignText@
 #Region Project Attributes

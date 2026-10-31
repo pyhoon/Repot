@@ -43,9 +43,10 @@ Module36=|relative|..\Repot\ReportImage
 Module37=|relative|..\Repot\ReportPaginator
 Module38=|relative|..\Repot\ReportRenderJsonWriter
 Module39=|relative|..\Repot\ReportPdfExporter
+Module40=|relative|..\Repot\ReportHtmlExporter
 NumberOfFiles=0
 NumberOfLibraries=3
-NumberOfModules=39
+NumberOfModules=40
 Version=10.7
 @EndOfDesignText@
 'Repot fixture checker and engine unit-test harness.
