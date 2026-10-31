@@ -44,9 +44,11 @@ Module37=ReportRenderJsonWriter
 Module38=ReportPdfExporter
 Module39=ReportHtmlExporter
 Module40=ReportDataExporter
+Module41=ReportDocxExporter
+Module42=ReportXlsxExporter
 NumberOfFiles=0
 NumberOfLibraries=3
-NumberOfModules=40
+NumberOfModules=42
 Version=10.7
 @EndOfDesignText@
 #Region Project Attributes
