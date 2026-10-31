@@ -78,7 +78,8 @@ Sub AppStart (Args() As String)
 	If Args.Length > 0 Then
 		root = Args(0)
 	Else
-		root = "fixtures"
+		root = FindFixturesFolder
+		Log("No fixtures path supplied; using: " & root)
 	End If
 
 	Dim names As List
@@ -153,6 +154,25 @@ Sub AppStart (Args() As String)
 	Log("----")
 	Log(result)
 	Log("Result written to: " & File.Combine(OutDir, "fixture-check.txt"))
+End Sub
+
+Private Sub FindFixturesFolder As String
+	Dim candidates() As String = Array As String("..\..\fixtures", "..\fixtures", "fixtures", "..\..\..\fixtures")
+	For Each c As String In candidates
+		If FolderExists(c) Then Return c
+	Next
+	Return "fixtures"
+End Sub
+
+Private Sub FolderExists (Path As String) As Boolean
+	Dim ok As Boolean = False
+	Try
+		Dim l As List = File.ListFiles(Path)
+		ok = True
+	Catch
+		ok = False
+	End Try
+	Return ok
 End Sub
 
 Private Sub Reset

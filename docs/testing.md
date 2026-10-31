@@ -123,6 +123,12 @@ Run both with:
 .\tools\run-fixtures.ps1 -NoBuild   # reuse the existing jar
 ```
 
+To run from the B4J IDE, open `source\RepotTests\RepotTests.b4j` and
+press F5. With no command-line arguments the harness probes
+`..\..\fixtures`, `..\fixtures`, `fixtures`, then a deeper fallback, and
+uses the first folder that exists. The PASS/FAIL lines appear in the IDE
+Logs tab.
+
 The wrapper treats a non-zero Java exit code as failure and removes the
 previous result file before a run, so a stale `errors=0` cannot hide a
 crash.
