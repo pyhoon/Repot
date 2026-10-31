@@ -8,16 +8,16 @@ by the host application into paginated documents and structured exports.
 The same template is intended to work from B4J desktop, B4J server, and
 B4A, and to render to HTML for browsers.
 
-> **Project status: M0 complete, M2 in progress (layout).**
+> **Project status: M0 complete, M1 complete, M2 complete (layout).**
 >
-> The repository contains design documentation, the fixture set, a B4J
-> fixture checker, and the first engine modules: template model, `.b4xr`
-> loader, canonical writer, validation, dataset/parameter binding,
-> render-document types, a headless text measurement adapter, and unit
-> tests. The adapter and render-document contracts are accepted and the
-> fixture-driven schema review is signed off. There is **no renderer yet**;
-> layout, pagination, PDF, HTML and data exporters are planned and must not
-> be read as implemented.
+> The repository contains design documentation, the fixture set with layout
+> goldens, a B4J fixture checker, and the engine modules: template model,
+> `.b4xr` loader, canonical writer, validation, dataset/parameter binding,
+> render-document types, a headless text measurement adapter, band layout,
+> pagination with render-document emission, and unit tests. The adapter and
+> render-document contracts are accepted and the fixture-driven schema
+> review is signed off. There is **no exporter yet**; PDF, HTML and data
+> exporters are planned and must not be read as implemented.
 
 ## Why this exists
 

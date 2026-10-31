@@ -5,7 +5,7 @@
 **Ecosystem:** B4X (B4J first, B4A second)\
 **Template format:** Versioned JSON, `.b4xr` extension\
 **License:** MIT, all components\
-**Current stage:** M0 complete, M1 core complete, M2 in progress (layout)
+**Current stage:** M2 complete (layout, pagination, goldens); M3 exporters next
 
 ---
 
