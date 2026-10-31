@@ -1,313 +1,216 @@
 # B4XReport
 
-A cross-platform reporting and document-generation framework for the B4X
-ecosystem.
+A cross-platform reporting and document-generation engine for the B4X
+ecosystem, written in B4X and licensed MIT.
 
-B4XReport is intended to let developers define a report once and use
-that definition from B4J desktop applications, B4J server applications,
-and B4A Android applications. The same report definition should also be
-usable by the HTML/browser output pipeline.
+B4XReport turns a portable report definition (`.b4xr`) plus data supplied
+by the host application into paginated documents and structured exports.
+The same template is intended to work from B4J desktop, B4J server, and
+B4A, and to render to HTML for browsers.
 
-The project aims to provide the reusable reporting foundation that B4X
-applications currently have to assemble from separate libraries and
-custom code.
-
-> **Project status:** Planning / initial implementation.
+> **Project status: pre-M0.**
 >
-> This README describes the intended product. It is not a claim that
-> every listed feature is already implemented.
+> This repository currently contains design documentation only. There is
+> no engine code yet. Every capability described here is planned and
+> must not be read as implemented.
 
-## Goals
+## Why this exists
 
-1.  Define reports in a portable, versioned JSON-based template format
-    (`.b4xr`).
-2.  Keep report processing independent of B4J, B4A, JavaFX, Android UI
-    classes, and browser APIs.
-3.  Reuse the same data binding, expressions, grouping, aggregation, and
-    layout rules across supported platforms.
-4.  Support both visual document generation and structured data export.
-5.  Provide a programmatic API as well as a future visual report
-    designer.
-6.  Make exporters optional so applications only include the formats
-    they need.
-7.  Keep templates portable, inspectable, version-controllable, and
-    independent of any one application.
+B4X developers who need real reports currently choose between three
+unattractive options:
 
-## Target platforms
+1. Wrap a Java reporting library such as Crystal Reports or JasperReports
+   and absorb its dependency, licensing, and deployment problems.
+2. Draw PDF primitives by hand for every report.
+3. Build a report writer from scratch and maintain it forever.
 
-### Initial targets
+Forum history shows all three happening repeatedly, and the from-scratch
+attempts stall at roughly the same place: a grid canvas, a hand-rolled
+template file, one hard-coded output format, and no pagination, grouping,
+or data pipeline. The landscape is summarised in
+[docs/prior-art.md](docs/prior-art.md).
 
--   **B4J desktop:** report generation, preview, PDF/HTML output, and
-    desktop integration.
--   **B4J server:** server-side generation of PDF, HTML, and supported
-    document/data formats; suitable for REST endpoints, downloads,
-    scheduled reports, and email attachments.
--   **B4A:** Android report generation and native preview/printing
-    integration where supported.
--   **Web/browser:** HTML output and a lightweight browser viewer.
-    Browser rendering is an output target; it must not become a
-    dependency of the shared core.
+B4XReport is the engine those applications keep re-implementing: banded
+sections, grouping and totals, deterministic pagination, a versioned
+template format, and as many output formats as a report can honestly
+support.
 
-### Future consideration
+## Design commitments
 
--   **B4i:** Keep the architecture portable enough to allow a future
-    adapter, but do not make B4i support a blocker for the first
-    release.
+1. **MIT for everything.** Engine, exporters, adapters, documentation,
+   fixtures, examples. No crippled edition, no license keys, no
+   activator, no feature gating.
+2. **Data belongs to the application.** The engine never opens a
+   database and never executes SQL from a template. The host application
+   supplies typed data through a provider interface.
+3. **One template, several outputs, honest fidelity.** PDF is the
+   fixed-layout target. DOCX and ODT produce editable document
+   structures. XLSX and ODS produce real cells and values. CSV, XML, and
+   JSON are data exports and do not pretend to be pages.
+4. **The layout model is the product.** Text measurement, push-down,
+   band overflow, and pagination are the hard parts. They are specified
+   in [docs/layout.md](docs/layout.md) and exercised by fixtures before
+   the template schema is frozen.
+5. **Deterministic by default.** No ambient clock, locale, or filesystem
+   access during rendering. Everything that varies is passed in
+   explicitly, so identical input produces identical output.
+6. **Platform independence.** No JavaFX, Android UI, browser DOM, or
+   server request types in the core. Platform behaviour sits behind
+   narrow adapters.
 
 ## Output formats
 
-The architecture must accommodate these formats:
+| Format | Intended use | Target release |
+|--------|--------------|----------------|
+| PDF | Fixed-layout, print-ready reports | 0.1 |
+| HTML | Preview, web reports, printing | 0.1 |
+| CSV | Flat tabular data | 0.1 |
+| JSON | Data interchange and diagnostics | 0.1 |
+| XML | Structured data interchange | 0.2 |
+| DOCX | Editable word-processing documents | 1.0 |
+| XLSX | Spreadsheets with real cells and values | 1.x |
+| ODT | OpenDocument text | on request |
+| ODS | OpenDocument spreadsheets | on request |
 
-  -----------------------------------------------------------------------
-  Format                  Intended use            Pipeline
-  ----------------------- ----------------------- -----------------------
-  PDF                     Fixed-layout documents  Visual
-                          and print-ready reports 
+ODT and ODS are deliberately unscheduled. If demand appears, they are
+implemented with the same office-document writer used for DOCX and XLSX.
+No format is withheld from the MIT release.
 
-  HTML                    Browser preview, web    Visual
-                          reports, printing       
+## Target platforms
 
-  DOCX                    Editable                Document
-                          word-processing         
-                          documents               
+| Platform | Scope |
+|----------|-------|
+| B4J desktop | Generation, HTML preview, PDF/HTML/data output, printing where practical |
+| B4J server | Headless generation to files or memory; no UI or JavaFX requirement |
+| B4A | Template reuse and on-device output; native preview/print integration |
+| Browser | Consumes generated HTML; optional lightweight viewer |
+| B4i | Not targeted for 1.0. The architecture should not preclude it, but no claim is made. |
 
-  ODT                     OpenDocument text       Document
-                          documents               
+B4A delivery is scheduled after the B4J engine is stable, because
+Android cannot use the same PDF backend. See
+[docs/compatibility.md](docs/compatibility.md) and
+[docs/decisions/0004-b4a-output-strategy.md](docs/decisions/0004-b4a-output-strategy.md).
 
-  XLSX                    Editable spreadsheets,  Spreadsheet/data
-                          formulas, worksheets    
+## How it fits together
 
-  ODS                     OpenDocument            Spreadsheet/data
-                          spreadsheets            
-
-  CSV                     Flat tabular data       Data
-
-  XML                     Structured data         Data
-                          interchange             
-
-  JSON                    Structured data         Data
-                          interchange and         
-                          diagnostics             
-  -----------------------------------------------------------------------
-
-The implementation should not assume that every output format can
-reproduce identical visual layout. PDF is the primary fixed-layout
-target. DOCX and ODT should create editable document structures. XLSX
-and ODS should create real cells, values, formulas where appropriate,
-worksheets, and spreadsheet formatting. CSV, XML, and JSON are data
-exports and do not need to preserve page layout, logos, or page numbers.
-
-## Architectural principles
-
-### 1. One template, multiple renderers/exporters
-
-A `.b4xr` template describes report content, data bindings, layout,
-sections, groups, parameters, and formatting. Platform-specific adapters
-and format exporters consume the shared report model.
-
-### 2. Separate processing from rendering
-
-The shared processing pipeline should handle:
-
--   Template parsing and validation
--   Parameters and data binding
--   Sorting and grouping
--   Expressions and calculated values
--   Aggregations and running totals
--   Layout measurement and pagination where applicable
--   A normalized intermediate report model
-
-Renderers/exporters should convert that model into their respective
-output formats.
-
-### 3. Separate visual output from data export
-
-Maintain two related pipelines:
-
--   **Visual/document pipeline:** layout, text measurement, sections,
-    pagination, drawing, and document generation.
--   **Data pipeline:** rows, columns, typed values, group results, and
-    serialization.
-
-They may share data preparation and expression evaluation, but they must
-not force CSV or XML to behave like paginated documents.
-
-### 4. Platform-independent core
-
-The core must not directly depend on:
-
--   JavaFX classes
--   Android View or Canvas classes
--   Browser DOM APIs
--   B4J server request/response objects
--   A specific database engine
-
-Use narrow interfaces/adapters for platform-specific drawing, text
-measurement, file access, fonts, printing, and server integration.
-
-### 5. Optional exporters
-
-A developer should be able to include only the required exporter
-modules. Do not make a PDF-only application depend on spreadsheet or
-word-processing libraries.
-
-### 6. Portable templates
-
-Templates should be JSON-based, UTF-8, versioned, and deterministic. Use
-stable identifiers for report elements. Keep localized text, themes, and
-runtime data separate from structural identity where practical.
-
-## Conceptual module layout
-
-The final repository layout may be adjusted after dependency validation,
-but preserve these responsibilities:
-
-``` text
-B4XReport/
-├── README.md
-├── PLAN.md
-├── LICENSE
-├── docs/
-│   ├── architecture.md
-│   ├── template-format.md
-│   ├── api-design.md
-│   └── compatibility.md
-├── src/
-│   ├── B4XReportCore/
-│   ├── B4XReportLayout/
-│   ├── B4XReportPDF/
-│   ├── B4XReportHTML/
-│   ├── B4XReportCSV/
-│   ├── B4XReportXML/
-│   ├── B4XReportJSON/
-│   ├── B4XReportB4J/
-│   └── B4XReportB4A/
-├── commercial/
-│   ├── B4XReportDOCX/
-│   ├── B4XReportXLSX/
-│   ├── B4XReportODF/
-│   └── B4XReportDesigner/
-├── examples/
-│   ├── B4J/
-│   ├── B4A/
-│   ├── Server/
-│   └── Templates/
-└── tests/
-    ├── Core/
-    ├── Layout/
-    ├── Exporters/
-    └── Fixtures/
+```text
+  .b4xr template ──┐
+                   ├─► template model ─► processing ─► layout ─► render document
+  host data ───────┘        │                          │              │
+  parameters ───────────────┘                          │              ├─► PDF
+                                                       │              ├─► HTML
+                                                       └─► data ──────├─► CSV / JSON / XML
+                                                                      └─► DOCX / XLSX
 ```
 
-This is a conceptual structure, not a requirement to create empty
-modules immediately. Keep proprietary components out of the public
-source repository if they are not intended to be distributed under the
-public license.
+Processing (binding, expressions, sorting, grouping, aggregates) is
+shared. The visual pipeline then paginates and emits a render document;
+exporters translate that render document into a format. Data exports use
+the same processed data without pretending to paginate.
 
-## Proposed public/commercial boundary
+Details: [docs/architecture.md](docs/architecture.md).
 
-The current proposal is:
+## Quick start (API is not finalized)
 
-### Public, MIT-licensed
+The intended experience is two-phase: build a report once, then export it
+to as many formats as needed without re-running layout.
 
--   B4XReportCore
--   B4XReportLayout
--   PDF exporter
--   HTML exporter
--   CSV exporter
--   XML exporter
--   JSON exporter
--   B4J and B4A integration adapters, subject to dependency review
--   Basic examples and documentation
-
-### Commercial, separately distributed
-
--   DOCX exporter
--   XLSX exporter
--   ODT/ODS exporter
--   Visual report designer
--   Premium support and custom integrations
-
-This boundary is a product proposal, not a substitute for legal review.
-Verify the license and redistribution terms of every third-party
-dependency. Do not copy or bundle code/assets whose license is
-incompatible with the intended distribution. Keep the public core
-genuinely useful; do not deliberately cripple basic reporting features
-to force an upgrade.
-
-The project should not depend on community contributions to meet its
-roadmap. Contributions may be accepted later under a clearly documented
-process, but the maintainer remains responsible for planning,
-implementation, releases, and support.
-
-## Quick-start direction (API is not finalized)
-
-The intended developer experience should be concise and asynchronous
-where generation can take significant time. The following is
-illustrative pseudocode only; do not treat method names or signatures as
-finalized:
-
-``` vb
+```vb
 Dim Report As B4XReport
 Report.Initialize
 Report.LoadTemplate(File.DirAssets, "Invoice.b4xr")
-Report.SetDataSource("Items", InvoiceItems)
-Report.SetParameter("InvoiceNumber", InvoiceNumber)
+Report.SetDataSource("Items", InvoiceItems)      ' List of Maps or custom objects
+Report.SetParameter("InvoiceNumber", "INV-1042")
+Report.SetTimestamp(DateTime.Now)                ' explicit clock, no ambient time
+Report.SetLocale("en-GB")                        ' explicit formatting culture
 
-Wait For (Report.Generate) Complete (Result As B4XReportResult)
-
+Wait For (Report.Build) Complete (Result As B4XReportResult)
 If Result.Success Then
-    ' Export using the required exporter.
+    Dim Pdf As B4XReportPdf
+    Pdf.Initialize(Result)
+    Wait For (Pdf.Export(File.DirApp, "invoice.pdf")) Complete (Ok As Boolean)
 End If
 ```
 
-Also support programmatic report construction. JSON-first must not mean
-JSON-only.
+Method and class names in this document are illustrative. Programmatic
+report construction is equally supported; JSON-first must not mean
+JSON-only. See [docs/api-design.md](docs/api-design.md).
 
-## Template design requirements
+## Repository layout
 
-The template specification must define, at minimum:
+```text
+B4XReport/
+├── README.md
+├── PLAN.md                      Engineering plan and milestone brief
+├── CONTRIBUTING.md              Contribution terms, review and support policy
+├── LICENSE                      MIT
+├── docs/                        Design documentation
+│   └── decisions/               Architecture decision records
+├── source/                      B4X library projects (B4J first)
+├── demo/                        Minimal B4XPages demos for each platform
+└── fixtures/                    Templates, data, and expected layout output
+```
 
--   Schema version and report metadata
--   Page size, orientation, units, and margins
--   Report sections (report header/footer, page header/footer, group
-    header/footer, detail)
--   Stable IDs for sections and report elements
--   Text, field, image, line, rectangle, and other basic elements
--   Data sources, fields, and parameters
--   Sorting and grouping
--   Expressions and aggregate definitions
--   Formatting, alignment, borders, visibility, and conditional
-    formatting
--   Page-break and pagination behavior
--   Resource references (images and fonts)
--   Export-specific hints without making the base template format
-    exporter-dependent
+Directories are created as milestones land; `docs/` is the only part
+that is populated today.
 
-Unknown optional properties should be handled safely. Breaking schema
-changes require a version increment and migration/compatibility policy.
+The engine ships as one `.b4xlib` containing all public modules, plus
+optional jar dependencies where a format needs them. Exporters are
+ordinary modules inside the library, not separate products. The real
+optional boundary is the jar dependency, not the B4X module. See
+[docs/decisions/0006-packaging.md](docs/decisions/0006-packaging.md).
 
-## Non-goals for the first release
+## Documentation index
 
--   Full feature parity with SAP Crystal Reports
--   A complete visual designer before the engine is stable
--   Arbitrary user-supplied executable code inside templates
--   A universal database ORM
--   Identical layout fidelity across PDF, DOCX, ODT, HTML, and
-    spreadsheets
--   Mandatory B4i support in the first release
--   Mandatory dependence on a specific web framework or B4J server
-    framework
+| Document | Contents |
+|----------|----------|
+| [PLAN.md](PLAN.md) | Scope, milestones, acceptance criteria, agent instructions |
+| [docs/architecture.md](docs/architecture.md) | Layers, interfaces, units, determinism, error model |
+| [docs/layout.md](docs/layout.md) | Band model, grid positioning, push-down, pagination |
+| [docs/template-format.md](docs/template-format.md) | `.b4xr` schema draft |
+| [docs/api-design.md](docs/api-design.md) | Public API shape and invariants |
+| [docs/compatibility.md](docs/compatibility.md) | Platform matrix and fidelity tolerances |
+| [docs/dependencies.md](docs/dependencies.md) | Dependency audit and licensing decisions |
+| [docs/testing.md](docs/testing.md) | Fixtures, golden data, headless CI |
+| [docs/prior-art.md](docs/prior-art.md) | Existing B4X reporting tools and lessons |
+| [docs/decisions/](docs/decisions/) | Recorded architecture decisions |
 
-## Development approach
+## What 1.0 means
 
-Build and validate the engine in B4J first, because desktop debugging
-and visual inspection are practical there. Keep the core portable from
-the beginning, then implement B4A integration and test the same
-templates on Android.
+Version 1.0 is a stable, versioned template format and a documented public
+API, proven by:
 
-The first useful release should prioritize a reliable invoice and
-multi-page tabular report workflow over advanced features.
+- PDF output for multi-page, grouped reports with page numbering.
+- HTML output from the same template.
+- CSV, JSON, and XML data export from the same data preparation.
+- DOCX output containing real paragraphs and tables, not images.
+- A B4J desktop example, a B4J server example, and a B4A example that
+  reuses the same template.
+- Regression fixtures and documented fidelity tolerances.
+- A dependency and license inventory.
 
-See [PLAN.md](PLAN.md) for milestones, acceptance criteria, risks, and
-coding-agent instructions.
+## Non-goals
+
+- Feature parity with Crystal Reports or JasperReports.
+- A built-in database layer, query editor, or SQL execution from
+  templates.
+- A visual designer in 1.0. The designer is a separate application that
+  consumes the public model and API.
+- Identical pixel output across platforms and formats.
+- Right-to-left text, complex script shaping, or text shaping ligatures in
+  1.0.
+- A support contract. The project is best-effort, MIT, and maintained by
+  its author.
+
+## License, support, and contributions
+
+MIT. Everything in this repository. See [LICENSE](LICENSE).
+
+There is no paid tier and no plan to close any source. Funding, if it
+happens at all, will be in the form of sponsorship or paid integration
+work under separate agreement, never by withholding capability. See
+[docs/decisions/0001-open-source-model.md](docs/decisions/0001-open-source-model.md).
+
+Support is best-effort through the issue tracker and the B4X forum.
+There is no SLA. Contribution terms, review expectations, and the DCO
+sign-off requirement are in [CONTRIBUTING.md](CONTRIBUTING.md).

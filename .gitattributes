@@ -9,3 +9,7 @@
 *.b4i linguist-detectable=true
 *.b4j linguist-detectable=true
 *.bas linguist-detectable=true
+
+*.b4xr linguist-language=JSON
+*.b4xr linguist-detectable=false
+*.b4xr text eol=lf
