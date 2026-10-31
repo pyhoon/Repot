@@ -46,6 +46,12 @@ Sub Class_Globals
 	Private mCurrentRecord As Map
 	Private mCurrentDataSet As String
 	Private mAggregates As Map
+	Private mGroupAggregates As Map
+	Private mHasGroup As Boolean
+	Private mGroupId As String
+	Private mGroupRepeatHeader As Boolean
+	Private mGroupHeaderSection As ReportSection
+	Private mGroupFooterSection As ReportSection
 End Sub
 
 Public Sub Initialize (Def As ReportDefinition, B As ReportDataBinder, M As ReportB4JMeasure, Diags As ReportDiagnostics)
@@ -60,7 +66,24 @@ Public Sub Initialize (Def As ReportDefinition, B As ReportDataBinder, M As Repo
 	End If
 	mBandLayout.Initialize(Diagnostics, Measure)
 	mAggregates.Initialize
-	ComputeAggregates()
+	mGroupAggregates.Initialize
+	ComputeAggregates
+	' detect a group bound to the detail dataset
+	mHasGroup = False
+	mGroupId = ""
+	If mDetailDataSetName.Length > 0 Then
+		For Each g As ReportGroupDef In Definition.Groups
+			If g.DataSet = mDetailDataSetName And (mHasGroup = False) Then
+				mHasGroup = True
+				mGroupId = g.Id
+				mGroupRepeatHeader = g.RepeatHeader
+			End If
+		Next
+	End If
+	If mHasGroup Then
+		mGroupHeaderSection = GroupSection("GroupHeader", mGroupId)
+		mGroupFooterSection = GroupSection("GroupFooter", mGroupId)
+	End If
 
 	mContentWidth = Def.Page.ContentWidth
 	mContentHeight = Def.Page.ContentHeight
@@ -129,32 +152,9 @@ Private Sub RunPass
 		mCurrentY = mCurrentY + phBand.Height
 	End If
 
-	' detail loop
+	' detail loop (grouped or flat)
 	If mDetailSection <> Null Then
-		Dim ds As ReportDataSet = Binder.GetDataSet(mDetailDataSetName)
-		Dim records As List
-		If ds <> Null Then records = ds.Records Else records = Null
-		If records <> Null Then
-			For Each rec As Map In records
-				mCurrentRecord = rec
-				mCurrentDataSet = mDetailDataSetName
-				Dim dband As ReportBand = mBandLayout.LayoutBand(Definition, mDetailSection, mContentWidth, mContentHeight, BuildValues(mDetailSection, rec))
-				Dim contentBottom As Double = mPageHeight - mMarginBottom - mPageFooterHeight
-				If mCurrentY + dband.Height > contentBottom + 0.000001 Then
-					FinishPage
-					NewPage
-					' page header on new page
-					If mHasPageHeader Then
-						Dim ph2 As ReportSection = Definition.SectionByType("PageHeader")
-						Dim phBand2 As ReportBand = mBandLayout.LayoutBand(Definition, ph2, mContentWidth, mContentHeight, BuildValues(ph2, Null))
-						PlaceBand(phBand2, mCurrentY)
-						mCurrentY = mCurrentY + phBand2.Height
-					End If
-				End If
-				PlaceBand(dband, mCurrentY)
-				mCurrentY = mCurrentY + dband.Height
-			Next
-		End If
+		EmitDetails
 	End If
 
 	' report footer
@@ -278,7 +278,9 @@ Private Sub ResolveInner (Expr As String) As Object
 		End If
 	End If
 
-	If mAggregates.ContainsKey(first) Then Return mAggregates.Get(first)
+	If mGroupAggregates.ContainsKey(first) Then Return mGroupAggregates.Get(first)
+If mGroupAggregates.ContainsKey(first) Then Return mGroupAggregates.Get(first)
+If mAggregates.ContainsKey(first) Then Return mAggregates.Get(first)
 	If mCurrentRecord.IsInitialized Then
 		If mCurrentRecord.ContainsKey(first) Then Return mCurrentRecord.Get(first)
 	End If
@@ -336,6 +338,20 @@ Private Sub SplitDots (s As String) As List
 End Sub
 
 '--------------------------------------------------------------- aggregates
+
+Private Sub GroupSection (SType As String, GId As String) As ReportSection
+	For Each s As ReportSection In Definition.Sections
+		If s.SectionType = SType And s.GroupId = GId Then Return s
+	Next
+	Return Null
+End Sub
+
+Private Sub PrimaryGroup As ReportGroupDef
+	For Each g As ReportGroupDef In Definition.Groups
+		If g.DataSet = mDetailDataSetName Then Return g
+	Next
+	Return Null
+End Sub
 
 Private Sub ComputeAggregates
 	mAggregates.Initialize
@@ -557,4 +573,297 @@ Private Sub EmitTextItem (item As ReportLayoutElement, x As Double, y As Double)
 		Dim txt As String = lines.Get(i)
 		mCurrentPage.AddText(x, lineY, item.Width, lh, item.Font.Ascent, txt, item.Font.Family, item.Font.Size, item.Font.Bold, item.Font.Italic, item.Style.Underline, item.Style.Colour, item.Align)
 	Next
+End Sub
+
+'--------------------------------------------------------------- details
+
+Private Sub EmitDetails
+	Dim ds As ReportDataSet = Binder.GetDataSet(mDetailDataSetName)
+	If ds = Null Then Return
+	Dim records As List = ds.Records
+	If records = Null Then Return
+
+	If mHasGroup Then
+		EmitGrouped(records)
+	Else
+		EmitFlat(records)
+	End If
+End Sub
+
+Private Sub EmitFlat (records As List)
+	For Each rec As Map In records
+		mCurrentRecord = rec
+		mCurrentDataSet = mDetailDataSetName
+		Dim dband As ReportBand = mBandLayout.LayoutBand(Definition, mDetailSection, mContentWidth, mContentHeight, BuildValues(mDetailSection, rec))
+		Dim contentBottom As Double = mPageHeight - mMarginBottom - mPageFooterHeight
+		If mCurrentY + dband.Height > contentBottom + 0.000001 Then
+			FinishPage
+			NewPage
+			If mHasPageHeader Then
+				Dim ph2 As ReportSection = Definition.SectionByType("PageHeader")
+				Dim phBand2 As ReportBand = mBandLayout.LayoutBand(Definition, ph2, mContentWidth, mContentHeight, BuildValues(ph2, Null))
+				PlaceBand(phBand2, mCurrentY)
+				mCurrentY = mCurrentY + phBand2.Height
+			End If
+		End If
+		PlaceBand(dband, mCurrentY)
+		mCurrentY = mCurrentY + dband.Height
+	Next
+End Sub
+
+Private Sub EmitGrouped (records As List)
+	Dim grp As ReportGroupDef = PrimaryGroup
+	If grp = Null Then
+		EmitFlat(records)
+		Return
+	End If
+
+	' stable sort by group key then declared sort fields
+	Dim sorted As List = SortRecords(records, grp)
+
+	Dim i As Int = 0
+	Dim n As Int = sorted.Size
+	Do While i < n
+		' collect run with same group key
+		Dim firstRec As Map = sorted.Get(i)
+		mCurrentRecord = firstRec
+		mCurrentDataSet = mDetailDataSetName
+		Dim keyVal As Object = EvalGroupKey(grp, firstRec)
+		Dim runRecs As List
+		runRecs.Initialize
+		' collect run (aggregates computed after the run is known)
+		' We'll recompute aggregates over the run below; first collect run
+		Dim j As Int = i
+		Do While j < n
+			Dim r As Map = sorted.Get(j)
+			mCurrentRecord = r
+			Dim kv As Object = EvalGroupKey(grp, r)
+			If GroupKeyEqual(kv, keyVal) Then
+				runRecs.Add(r)
+				j = j + 1
+			Else
+				Exit
+			End If
+		Loop
+
+		' compute group aggregates over runRecs
+		mGroupAggregates.Initialize
+		For Each agg As ReportAggregateDef In grp.Aggregates
+			mGroupAggregates.Put(agg.Name, ComputeGroupAggregate(agg, runRecs))
+		Next
+
+		' set current record to first for header field resolution
+		mCurrentRecord = runRecs.Get(0)
+		mCurrentDataSet = mDetailDataSetName
+
+		' group header
+		If mGroupHeaderSection <> Null Then
+			Dim ghBand As ReportBand = mBandLayout.LayoutBand(Definition, mGroupHeaderSection, mContentWidth, mContentHeight, BuildValues(mGroupHeaderSection, mCurrentRecord))
+			Dim contentBottom As Double = mPageHeight - mMarginBottom - mPageFooterHeight
+			' orphan prevention: header + first detail must fit
+			Dim firstDetail As ReportBand = mBandLayout.LayoutBand(Definition, mDetailSection, mContentWidth, mContentHeight, BuildValues(mDetailSection, runRecs.Get(0)))
+			If mCurrentY + ghBand.Height + firstDetail.Height > contentBottom + 0.000001 Then
+				FinishPage
+				NewPage
+				If mHasPageHeader Then
+					Dim ph As ReportSection = Definition.SectionByType("PageHeader")
+					Dim phBand As ReportBand = mBandLayout.LayoutBand(Definition, ph, mContentWidth, mContentHeight, BuildValues(ph, Null))
+					PlaceBand(phBand, mCurrentY)
+					mCurrentY = mCurrentY + phBand.Height
+				End If
+			End If
+			PlaceBand(ghBand, mCurrentY)
+			mCurrentY = mCurrentY + ghBand.Height
+		End If
+
+		' details
+		For Each rec As Map In runRecs
+			mCurrentRecord = rec
+			mCurrentDataSet = mDetailDataSetName
+			Dim dband As ReportBand = mBandLayout.LayoutBand(Definition, mDetailSection, mContentWidth, mContentHeight, BuildValues(mDetailSection, rec))
+			Dim cb As Double = mPageHeight - mMarginBottom - mPageFooterHeight
+			If mCurrentY + dband.Height > cb + 0.000001 Then
+				FinishPage
+				NewPage
+				If mHasPageHeader Then
+					Dim ph2 As ReportSection = Definition.SectionByType("PageHeader")
+					Dim phBand2 As ReportBand = mBandLayout.LayoutBand(Definition, ph2, mContentWidth, mContentHeight, BuildValues(ph2, Null))
+					PlaceBand(phBand2, mCurrentY)
+					mCurrentY = mCurrentY + phBand2.Height
+				End If
+				' repeat group header if configured
+				If mGroupRepeatHeader And mGroupHeaderSection <> Null Then
+					Dim gh2 As ReportBand = mBandLayout.LayoutBand(Definition, mGroupHeaderSection, mContentWidth, mContentHeight, BuildValues(mGroupHeaderSection, mCurrentRecord))
+					PlaceBand(gh2, mCurrentY)
+					mCurrentY = mCurrentY + gh2.Height
+				End If
+			End If
+			PlaceBand(dband, mCurrentY)
+			mCurrentY = mCurrentY + dband.Height
+		Next
+
+		' group footer
+		If mGroupFooterSection <> Null Then
+			mCurrentRecord = runRecs.Get(runRecs.Size - 1)
+			mCurrentDataSet = mDetailDataSetName
+			Dim gfBand As ReportBand = mBandLayout.LayoutBand(Definition, mGroupFooterSection, mContentWidth, mContentHeight, BuildValues(mGroupFooterSection, mCurrentRecord))
+			Dim cb2 As Double = mPageHeight - mMarginBottom - mPageFooterHeight
+			If mCurrentY + gfBand.Height > cb2 + 0.000001 Then
+				FinishPage
+				NewPage
+				If mHasPageHeader Then
+					Dim ph3 As ReportSection = Definition.SectionByType("PageHeader")
+					Dim phBand3 As ReportBand = mBandLayout.LayoutBand(Definition, ph3, mContentWidth, mContentHeight, BuildValues(ph3, Null))
+					PlaceBand(phBand3, mCurrentY)
+					mCurrentY = mCurrentY + phBand3.Height
+				End If
+			End If
+			PlaceBand(gfBand, mCurrentY)
+			mCurrentY = mCurrentY + gfBand.Height
+		End If
+
+		i = j
+	Loop
+End Sub
+
+Private Sub EvalGroupKey (grp As ReportGroupDef, rec As Map) As Object
+	Dim ctx As ReportEvalContext
+	ctx.Initialize
+	ctx.CurrentRecord = rec
+	ctx.CurrentDataSet = mDetailDataSetName
+	ctx.DataSets = Binder.DataSets
+	ctx.Params = Binder.Parameters
+	ctx.Aggregates = mAggregates
+	Dim ev As ReportExpressionEvaluator
+	ev.Initialize
+	Return ev.Eval(grp.KeyExpression, ctx)
+End Sub
+
+Private Sub GroupKeyEqual (a As Object, b As Object) As Boolean
+	If a = Null And b = Null Then Return True
+	If a = Null Or b = Null Then Return False
+	Return (a = b) Or (("" & a) = ("" & b))
+End Sub
+
+Private Sub SortRecords (records As List, grp As ReportGroupDef) As List
+	' copy
+	Dim out As List
+	out.Initialize
+	For Each r As Map In records
+		out.Add(r)
+	Next
+	' stable insertion sort: group key primary, then declared sort fields
+	Dim i As Int
+	For i = 1 To out.Size - 1
+		Dim keyRec As Map = out.Get(i)
+		Dim keyKey As Object = EvalGroupKey(grp, keyRec)
+		Dim j As Int = i - 1
+		Do While j >= 0
+			Dim otherRec As Map = out.Get(j)
+			Dim otherKey As Object = EvalGroupKey(grp, otherRec)
+			If CompareGroupKeys(otherKey, keyKey) <= 0 And CompareSortFields(grp, otherRec, keyRec) <= 0 Then
+				' other <= key, stop
+				Exit
+			End If
+			out.Set(j + 1, otherRec)
+			j = j - 1
+		Loop
+		out.Set(j + 1, keyRec)
+	Next
+	Return out
+End Sub
+
+Private Sub CompareGroupKeys (a As Object, b As Object) As Int
+	Dim sa As String = ""
+	Dim sb As String = ""
+	If a <> Null Then sa = "" & a
+	If b <> Null Then sb = "" & b
+	If sa < sb Then Return -1
+	If sa > sb Then Return 1
+	Return 0
+End Sub
+
+Private Sub CompareSortFields (grp As ReportGroupDef, a As Map, b As Map) As Int
+	If grp.Sort.Size = 0 Then Return 0
+	For Each sd As ReportSortDef In grp.Sort
+		Dim fa As Object = a.Get(sd.FieldName)
+		Dim fb As Object = b.Get(sd.FieldName)
+		Dim cmp As Int = CompareGroupKeys(fa, fb)
+		If sd.Direction = "descending" Then cmp = -cmp
+		If cmp <> 0 Then Return cmp
+	Next
+	Return 0
+End Sub
+
+Private Sub ComputeGroupAggregate (agg As ReportAggregateDef, recs As List) As Object
+	Select Case agg.FunctionName
+		Case "count"
+			Return recs.Size
+		Case "sum"
+			Dim s As Double = 0
+			For Each r As Map In recs
+				If r.ContainsKey(agg.FieldName) Then
+					Dim d As Double = 0
+					If IsNumericValue(r.Get(agg.FieldName)) Then d = r.Get(agg.FieldName)
+					s = s + d
+				End If
+			Next
+			Return s
+		Case "avg"
+			Dim s2 As Double = 0
+			Dim n As Int = recs.Size
+			For Each r2 As Map In recs
+				If r2.ContainsKey(agg.FieldName) Then
+					Dim d2 As Double = 0
+					If IsNumericValue(r2.Get(agg.FieldName)) Then d2 = r2.Get(agg.FieldName)
+					s2 = s2 + d2
+				End If
+			Next
+			If n > 0 Then Return s2 / n Else Return 0
+		Case "min"
+			Dim have As Boolean = False
+			Dim m As Double = 0
+			For Each r3 As Map In recs
+				If r3.ContainsKey(agg.FieldName) Then
+					If IsNumericValue(r3.Get(agg.FieldName)) Then
+						Dim v As Double = r3.Get(agg.FieldName)
+						If have = False Or v < m Then
+							m = v
+							have = True
+						End If
+					End If
+				End If
+			Next
+			If have Then Return m Else Return 0
+		Case "max"
+			Dim have2 As Boolean = False
+			Dim m2 As Double = 0
+			For Each r4 As Map In recs
+				If r4.ContainsKey(agg.FieldName) Then
+					If IsNumericValue(r4.Get(agg.FieldName)) Then
+						Dim v2 As Double = r4.Get(agg.FieldName)
+						If have2 = False Or v2 > m2 Then
+							m2 = v2
+							have2 = True
+						End If
+					End If
+				End If
+			Next
+			If have2 Then Return m2 Else Return 0
+	End Select
+	Return 0
+End Sub
+
+Private Sub NewListFromRecord (rec As Map) As List
+	Dim l As List
+	l.Initialize
+	l.Add(rec)
+	Return l
+End Sub
+
+Private Sub IsNumericValue (v As Object) As Boolean
+	If v = Null Then Return False
+	If v Is Boolean Then Return False
+	If v Is String Then Return False
+	Return True
 End Sub

@@ -31,6 +31,7 @@ Public Sub Run (FixturesDir As String)
 	TestDataExport
 	TestOfficeExport
 	TestExpressions
+	TestGrouping
 	TestFixturesLoadAndRoundTrip
 	TestValidationFailures
 	TestExpressionScanner
@@ -912,6 +913,56 @@ Private Sub TestExpressions
 	' formatDate
 	Dim fd As String = ev.Eval("formatDate(0, " & Chr(34) & "yyyy" & Chr(34) & ")", ctx)
 	Check(fd.Length = 4, "formatDate returns a year")
+End Sub
+'--------------------------------------------------------------- grouping
+
+Private Sub TestGrouping
+	Dim dir As String = File.Combine(mFixtures, "statement-grouped")
+	Dim loader As ReportTemplateLoader
+	loader.Initialize
+	Dim def As ReportDefinition = loader.LoadFromFile(dir, "template.b4xr")
+	Check(loader.Diagnostics.HasErrors = False, "statement template loads")
+
+	Dim binder As ReportDataBinder
+	binder.Initialize(def)
+	Dim params As Map = LoadJsonMap(dir, "params.json")
+	For Each k As String In params.Keys
+		binder.SetParameter(k, params.Get(k))
+	Next
+	Dim data As Map = LoadJsonMap(dir, "data.json")
+	For Each name As String In data.Keys
+		Dim o As Object = data.Get(name)
+		If o Is List Then
+			binder.SetDataSource(name, o)
+		Else If o Is Map Then
+			binder.SetDataSourceSingle(name, o)
+		End If
+	Next
+	Check(binder.Validate, "statement data binds")
+
+	Dim diags As ReportDiagnostics
+	diags.Initialize
+	Dim measure As ReportB4JMeasure
+	measure.Initialize(diags)
+	Dim pag As ReportPaginator
+	pag.Initialize(def, binder, measure, diags)
+	Dim doc As ReportRenderDocument = pag.Render
+	Check(diags.HasErrors = False, "statement pagination has no errors")
+	Check(doc.PageCount >= 1, "statement renders at least one page")
+
+	' group header text (month) appears
+	Dim foundMonth As Boolean = False
+	Dim i As Int
+	For i = 1 To doc.PageCount
+		Dim p As ReportRenderPage = doc.PageAt(i)
+		For Each op As ReportDrawOp In p.Ops
+			If op.OpType = "text" Then
+				If op.Text.IndexOf("2026-08") >= 0 Then foundMonth = True
+				If op.Text.IndexOf("2026") >= 0 Then found2026 = True
+			End If
+		Next
+	Next
+	Check(foundMonth, "statement renders a group header")
 End Sub
 '--------------------------------------------------------------- fixtures
 

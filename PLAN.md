@@ -347,7 +347,7 @@ Implemented in `source/Repot` and exercised from `source/RepotTests`:
 | Dataset and parameter binding with typed-value checks | done |
 | Render-document types: document, page, draw operation, anchor, 0.01 pt rounding | done, version 1 |
 | Text measurement adapter: style, font, metrics, headless AWT | done, M2 slice 1 |
-| Engine unit tests in the headless harness | done, 266 checks |
+| Engine unit tests in the headless harness | done, 324 checks |
 | Layout, pagination, exporters | in progress (slices 1-3 done) |
 
 The whole harness currently reports 305 checks and zero errors:
@@ -356,8 +356,8 @@ The whole harness currently reports 305 checks and zero errors:
 PASS invoice-basic (19 checks, 0 errors, 0 warnings)
 PASS listing-multipage (17 checks, 0 errors, 0 warnings)
 PASS statement-grouped (22 checks, 0 errors, 0 warnings)
-PASS engine (266 checks)
-fixtures=3 checks=324 errors=0
+PASS engine (324 checks)
+fixtures=3 checks=382 errors=0
 ```
 
 Build commands verified:
@@ -431,7 +431,7 @@ headless AWT: font=Arial, advance/ascent/descent read through TextLayout
 Slice 3 verification (2026-11-01):
 
 ```text
-run-fixtures.ps1 -> fixtures=3 checks=324 errors=0 (engine 266)
+run-fixtures.ps1 -> fixtures=3 checks=382 errors=0 (engine 324)
 B4JBuilder -Task=Build and -Task=BuildLibrary -> exit 0
 pagination: invoice 1 page, "Page 1 of 1", image op present;
 listing multi-page, page header repeated on every page
