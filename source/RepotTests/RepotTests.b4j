@@ -39,9 +39,11 @@ Module32=|relative|..\Repot\RepotDiagnostics
 Module33=|relative|..\Repot\RepotDrawOp
 Module34=|relative|..\Repot\RepotElement
 Module35=RepotEngineTests
+Module36=|relative|..\Repot\RepotImage
+Module37=|relative|..\Repot\RepotPaginator
 NumberOfFiles=0
 NumberOfLibraries=3
-NumberOfModules=35
+NumberOfModules=37
 Version=10.7
 @EndOfDesignText@
 'Repot fixture checker and engine unit-test harness.

@@ -347,17 +347,17 @@ Implemented in `source/Repot` and exercised from `source/RepotTests`:
 | Dataset and parameter binding with typed-value checks | done |
 | Render-document types: document, page, draw operation, anchor, 0.01 pt rounding | done, version 1 |
 | Text measurement adapter: style, font, metrics, headless AWT | done, M2 slice 1 |
-| Engine unit tests in the headless harness | done, 234 checks |
-| Layout, pagination, exporters | in progress (slice 2 done) |
+| Engine unit tests in the headless harness | done, 247 checks |
+| Layout, pagination, exporters | in progress (slices 1-3 done) |
 
-The whole harness currently reports 292 checks and zero errors:
+The whole harness currently reports 305 checks and zero errors:
 
 ```text
 PASS invoice-basic (19 checks, 0 errors, 0 warnings)
 PASS listing-multipage (17 checks, 0 errors, 0 warnings)
 PASS statement-grouped (22 checks, 0 errors, 0 warnings)
-PASS engine (234 checks)
-fixtures=3 checks=292 errors=0
+PASS engine (247 checks)
+fixtures=3 checks=305 errors=0
 ```
 
 Build commands verified:
@@ -395,8 +395,8 @@ slices so each has a testable boundary:
 |-------|-------|--------|------------|
 | 1. Measurement | `RepotTextStyle`, `RepotTextMetrics`, `RepotFont`, `RepotB4JMeasure` | done 2026-10-31 | Headless AWT metrics with explicit fallback warnings; `MeasureLine` and `MeasureBlock`; no JavaFX or UI thread |
 | 2. Band layout | `RepotBand`, `RepotLayoutElement`, `RepotBandLayout` | done 2026-10-31 | Style resolution, grid-to-points, auto-grow, push-down, band height, bounds in points; 23 band-layout checks |
-| 3. Pagination | `RepotPaginator` | next | Page header/footer reserve, keep-together, page breaks, two-pass `Page N of M` |
-| 4. Goldens | `RepotRenderJsonWriter`, `fixtures/*/expected/layout.json` | planned | Canonical deterministic JSON; page count and geometry for the invoice and listing |
+| 3. Pagination | `RepotPaginator`, `RepotImage` | done 2026-11-01 | Page header/footer reserve, keep-together, page breaks, two-pass `Page N of M`, render-document emission, basic field-value interpolation and formatting; 13 pagination checks |
+| 4. Goldens | `RepotRenderJsonWriter`, `fixtures/*/expected/layout.json` | next | Canonical deterministic JSON; page count and geometry for the invoice and listing |
 
 Group headers, grouping and aggregates remain M6 work. M2 structures the
 pagination loop for them but does not claim them. Acceptance is Gate C for
@@ -426,6 +426,15 @@ Slice 1 verification (2026-10-31):
 run-fixtures.ps1 -> fixtures=3 checks=269 errors=0 (engine 211)
 B4JBuilder -Task=Build and -Task=BuildLibrary -> exit 0
 headless AWT: font=Arial, advance/ascent/descent read through TextLayout
+```
+
+Slice 3 verification (2026-11-01):
+
+```text
+run-fixtures.ps1 -> fixtures=3 checks=305 errors=0 (engine 247)
+B4JBuilder -Task=Build and -Task=BuildLibrary -> exit 0
+pagination: invoice 1 page, "Page 1 of 1", image op present;
+listing multi-page, page header repeated on every page
 ```
 
 Slice 2 verification (2026-10-31):

@@ -24,6 +24,7 @@ Public Sub Run (FixturesDir As String)
 	TestRenderDocument
 	TestMeasurement
 	TestBandLayout
+	TestPagination
 	TestFixturesLoadAndRoundTrip
 	TestValidationFailures
 	TestExpressionScanner
@@ -455,6 +456,113 @@ Private Sub MakeGridDefinition As RepotDefinition
 
 	def.Sections.Add(sec)
 	Return def
+End Sub
+'--------------------------------------------------------------- pagination
+
+Private Sub TestPagination
+	Dim fixtures As String = mFixtures
+	Dim invDir As String = File.Combine(fixtures, "invoice-basic")
+
+	Dim loader As RepotTemplateLoader
+	loader.Initialize
+	Dim def As RepotDefinition = loader.LoadFromFile(invDir, "template.b4xr")
+	Check(loader.Diagnostics.HasErrors = False, "invoice template loads: " & FirstErrors(loader.Diagnostics, 3))
+
+	Dim binder As RepotDataBinder
+	binder.Initialize(def)
+	' params
+	Dim params As Map = LoadJsonMap(invDir, "params.json")
+	For Each k As String In params.Keys
+		binder.SetParameter(k, params.Get(k))
+	Next
+	' data
+	Dim data As Map = LoadJsonMap(invDir, "data.json")
+	For Each name As String In data.Keys
+		Dim o As Object = data.Get(name)
+		If o Is List Then
+			binder.SetDataSource(name, o)
+		Else If o Is Map Then
+			binder.SetDataSourceSingle(name, o)
+		End If
+	Next
+	Check(binder.Validate, "invoice data binds: " & FirstErrors(binder.Diagnostics, 3))
+
+	Dim diags As RepotDiagnostics
+	diags.Initialize
+	Dim measure As RepotB4JMeasure
+	measure.Initialize(diags)
+	Dim pag As RepotPaginator
+	pag.Initialize(def, binder, measure, diags)
+	Dim doc As RepotRenderDocument = pag.Render
+	Check(doc.PageCount = 1, "invoice renders to one page")
+	Check(diags.HasErrors = False, "invoice pagination has no errors")
+
+	Dim p As RepotRenderPage = doc.PageAt(1)
+	Check(p <> Null, "invoice has page 1")
+	Check(p.Ops.Size > 0, "invoice page has operations")
+
+	' page footer contains "Page 1 of 1"
+	Dim foundPageText As Boolean = False
+	For Each op As RepotDrawOp In p.Ops
+		If op.OpType = "text" Then
+			If op.Text.IndexOf("Page 1 of 1") >= 0 Then foundPageText = True
+		End If
+	Next
+	Check(foundPageText, "invoice page footer says Page 1 of 1")
+
+	' image op present
+	Dim hasImage As Boolean = False
+	For Each op2 As RepotDrawOp In p.Ops
+		If op2.OpType = "image" Then hasImage = True
+	Next
+	Check(hasImage, "invoice page has an image operation")
+
+	' listing multipage
+	Dim listDir As String = File.Combine(fixtures, "listing-multipage")
+	Dim lloader As RepotTemplateLoader
+	lloader.Initialize
+	Dim ldef As RepotDefinition = lloader.LoadFromFile(listDir, "template.b4xr")
+	Check(lloader.Diagnostics.HasErrors = False, "listing template loads")
+
+	Dim lbinder As RepotDataBinder
+	lbinder.Initialize(ldef)
+	Dim ldata As Map = LoadJsonMap(listDir, "data.json")
+	For Each name As String In ldata.Keys
+		Dim lo As Object = ldata.Get(name)
+		If lo Is List Then
+			lbinder.SetDataSource(name, lo)
+		Else If lo Is Map Then
+			lbinder.SetDataSourceSingle(name, lo)
+		End If
+	Next
+	Dim lparams As Map = LoadJsonMap(listDir, "params.json")
+	For Each k As String In lparams.Keys
+		lbinder.SetParameter(k, lparams.Get(k))
+	Next
+	Check(lbinder.Validate, "listing data binds")
+
+	Dim ldiags As RepotDiagnostics
+	ldiags.Initialize
+	Dim lmeasure As RepotB4JMeasure
+	lmeasure.Initialize(ldiags)
+	Dim lpag As RepotPaginator
+	lpag.Initialize(ldef, lbinder, lmeasure, ldiags)
+	Dim ldoc As RepotRenderDocument = lpag.Render
+	Check(ldoc.PageCount > 1, "listing renders to more than one page")
+	Check(ldiags.HasErrors = False, "listing pagination has no errors")
+
+	' each page has a page header
+	Dim allHaveHeader As Boolean = True
+	Dim i As Int
+	For i = 1 To ldoc.PageCount
+		Dim lp As RepotRenderPage = ldoc.PageAt(i)
+		Dim hasHeader As Boolean = False
+		For Each op3 As RepotDrawOp In lp.Ops
+			If op3.OpType = "text" And op3.Text = "Region" Then hasHeader = True
+		Next
+		If hasHeader = False Then allHaveHeader = False
+	Next
+	Check(allHaveHeader, "every listing page repeats the page header")
 End Sub
 '--------------------------------------------------------------- fixtures
 

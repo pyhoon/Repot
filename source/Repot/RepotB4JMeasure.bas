@@ -376,6 +376,39 @@ Private Sub AddMeasuredLine (M As RepotTextMetrics, Line As String, F As RepotFo
 	M.AddLine(t, MeasureWithFont(t, F))
 End Sub
 
+Public Sub LoadImage (Path As String, MaxPixels As Long) As RepotImage
+	Dim img As RepotImage
+	img.Initialize
+	img.Path = Path
+	If IsAvailable = False Then
+		Diagnostics.AddError("E-MEA-001", "image loading is unavailable: " & LastError, "")
+		Return img
+	End If
+	Try
+		Dim f As JavaObject
+		f.InitializeNewInstance("java.io.File", Array(Path))
+		Dim iio As JavaObject
+		iio.InitializeStatic("javax.imageio.ImageIO")
+		Dim bi As JavaObject = iio.RunMethod("read", Array(f))
+		If bi = Null Then
+			Diagnostics.AddError("E-IO-001", "cannot read image '" & Path & "'", "")
+			Return img
+		End If
+		Dim pw As Int = bi.RunMethod("getWidth", Null)
+		Dim ph As Int = bi.RunMethod("getHeight", Null)
+		If MaxPixels > 0 And (pw * ph) > MaxPixels Then
+			Diagnostics.AddError("E-IO-001", "image '" & Path & "' exceeds the pixel limit", "")
+			Return img
+		End If
+		img.PixelWidth = pw
+		img.PixelHeight = ph
+		img.Handle = bi
+	Catch
+		Diagnostics.AddError("E-IO-001", "cannot read image '" & Path & "': " & LastException.Message, "")
+	End Try
+	Return img
+End Sub
+
 Private Sub SplitWords (Para As String) As List
 	Dim words As List
 	words.Initialize
