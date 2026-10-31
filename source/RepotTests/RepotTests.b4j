@@ -127,7 +127,7 @@ Sub AppStart (Args() As String)
 
 	For Each n As String In names
 		Dim full As String = File.Combine(root, n)
-		If File.Exists(full, "template.b4xr") Then
+		If File.Exists(full, "template.repot") Then
 			FixtureName = n
 			Dir1 = full
 			Reset
@@ -213,12 +213,12 @@ Private Sub Reset
 End Sub
 
 Private Sub CheckFixture
-	CheckFile("template.b4xr")
+	CheckFile("template.repot")
 	CheckFile("data.json")
 	CheckFile("params.json")
 	CheckFile("notes.md")
 
-	Dim tpl As Map = LoadMap("template.b4xr")
+	Dim tpl As Map = LoadMap("template.repot")
 	If tpl.Size = 0 Then Return
 
 	ValidateTemplate(tpl)

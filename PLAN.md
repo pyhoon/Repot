@@ -5,7 +5,7 @@
 **Ecosystem:** B4X (B4J first, B4A second)\
 **Template format:** Versioned JSON, `.b4xr` extension\
 **License:** MIT, all components\
-**Current stage:** M0–M7 complete; M8 (B4A adapter, HTML print path, cross-platform comparison) next
+**Current stage:** M8 B4A adapter, HTML print path, cross-platform comparison next
 
 ---
 

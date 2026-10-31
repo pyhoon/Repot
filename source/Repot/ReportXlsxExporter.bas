@@ -130,6 +130,7 @@ Private Sub ColLetter (n As Int) As String
 End Sub
 
 Private Sub DeleteFolder (path As String)
+	
 End Sub
 
 Private Sub ValueToString (v As Object) As String
