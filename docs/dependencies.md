@@ -58,7 +58,7 @@ This keeps fractional point sizes without rounding the template.
 
 | Candidate | Licence | Android | Size | Decision |
 |-----------|---------|---------|------|----------|
-| Apache PDFBox 3.0.x | Apache-2.0 | no | moderate (fontbox, commons-logging) | **primary for B4J** |
+| Apache PDFBox 3.0.8 | Apache-2.0 | no | moderate (fontbox, commons-logging) | **primary for B4J** |
 | Apache PDFBox 2.0.x | Apache-2.0 | no | moderate | fallback if 3.x misbehaves |
 | OpenPDF | LGPL-2.1 / MPL-2.0 dual | no | moderate | acceptable alternative; LGPL caveat applies |
 | iText 5 / 7 | AGPL-3.0 or commercial | no | small | **rejected**, licence incompatible |

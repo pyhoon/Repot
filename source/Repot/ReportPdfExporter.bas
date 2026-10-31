@@ -4,14 +4,15 @@ ModulesStructureVersion=1
 Type=Class
 Version=10.7
 @EndOfDesignText@
-'PDF exporter for B4J using Apache PDFBox 2.0. Built on the render
+'PDF exporter for B4J using Apache PDFBox 3.0. Built on the render
 'document; it never re-measures or re-evaluates expressions.
 
 Sub Class_Globals
 	Public Diagnostics As ReportDiagnostics
+	Public SourceDir As String
 	Private mDoc As ReportRenderDocument
 	Private mOutPath As String
-	Private mJavaDoc As JavaObject
+	Private mJavaDoc As Object
 	Private mPageHeight As Double
 End Sub
 
@@ -22,6 +23,7 @@ Public Sub Initialize (Diags As ReportDiagnostics)
 		fresh.Initialize
 		Diagnostics = fresh
 	End If
+	SourceDir = ""
 End Sub
 
 Public Sub Export (Doc As ReportRenderDocument, OutputPath As String) As Boolean
@@ -36,9 +38,8 @@ Public Sub Export (Doc As ReportRenderDocument, OutputPath As String) As Boolean
 		For i = 0 To Doc.PageCount - 1
 			Dim page As ReportRenderPage = Doc.PageAt(i + 1)
 			mPageHeight = page.Height
-			Dim jpage As JavaObject = jo.RunMethod("addPage", Array(mJavaDoc, page.Width, page.Height))
-			Dim cs As JavaObject = jo.RunMethod("beginContent", Array(mJavaDoc, jpage))
-			' draw ops
+			Dim jpage As Object = jo.RunMethod("addPage", Array(mJavaDoc, page.Width, page.Height))
+			Dim cs As Object = jo.RunMethod("beginContent", Array(mJavaDoc, jpage))
 			Dim k As Int
 			For k = 0 To page.Ops.Size - 1
 				Dim op As ReportDrawOp = page.Ops.Get(k)
@@ -59,15 +60,15 @@ Public Sub Export (Doc As ReportRenderDocument, OutputPath As String) As Boolean
 	End Try
 End Sub
 
-Private Sub DrawOp (jo As JavaObject, cs As JavaObject, op As ReportDrawOp)
+Private Sub DrawOp (jo As JavaObject, cs As Object, op As ReportDrawOp)
 	Select Case op.OpType
 		Case "text"
-			Dim font As JavaObject = jo.RunMethod("resolveFont", Array(op.FontName, op.Bold, op.Italic))
+			Dim font As Object = jo.RunMethod("resolveFont", Array(op.FontName, op.Bold, op.Italic))
 			Dim pdfBaseline As Double = mPageHeight - op.Y - op.Baseline
 			jo.RunMethod("drawText", Array(cs, font, op.FontSize, op.X, pdfBaseline, op.Text, op.Colour))
 		Case "image"
 			Dim pdfY As Double = mPageHeight - op.Y - op.Height
-			jo.RunMethod("drawImage", Array(cs, mJavaDoc, op.ResourcePath, op.X, pdfY, op.Width, op.Height, op.Fit))
+			jo.RunMethod("drawImage", Array(cs, mJavaDoc, op.ResourcePath, op.X, pdfY, op.Width, op.Height, op.Fit, SourceDir))
 		Case "line"
 			Dim y1 As Double = mPageHeight - op.Y
 			Dim y2 As Double = mPageHeight - op.Y2
@@ -102,7 +103,6 @@ import org.apache.pdfbox.pdmodel.*;
 import org.apache.pdfbox.pdmodel.common.*;
 import org.apache.pdfbox.pdmodel.font.*;
 import org.apache.pdfbox.pdmodel.graphics.image.*;
-import org.apache.pdfbox.util.*;
 import org.apache.pdfbox.text.*;
 import java.io.*;
 
@@ -133,14 +133,14 @@ public static void close(Object doc) throws Exception {
 }
 
 public static int pageCount(String path) throws Exception {
-    PDDocument d = PDDocument.load(new File(path));
+    PDDocument d = org.apache.pdfbox.Loader.loadPDF(new File(path));
     int n = d.getNumberOfPages();
     d.close();
     return n;
 }
 
 public static String extractText(String path) throws Exception {
-    PDDocument d = PDDocument.load(new File(path));
+    PDDocument d = org.apache.pdfbox.Loader.loadPDF(new File(path));
     PDFTextStripper stripper = new PDFTextStripper();
     String t = stripper.getText(d);
     d.close();
@@ -151,22 +151,24 @@ public static Object resolveFont(String family, boolean bold, boolean italic) {
     String f = family == null ? "" : family.toLowerCase();
     boolean serif = f.contains("serif") || f.contains("times");
     boolean mono = f.contains("mono") || f.contains("courier");
+    org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName name;
     if (serif) {
-        if (bold && italic) return PDType1Font.TIMES_BOLD_ITALIC;
-        if (bold) return PDType1Font.TIMES_BOLD;
-        if (italic) return PDType1Font.TIMES_ITALIC;
-        return PDType1Font.TIMES_ROMAN;
+        if (bold && italic) name = org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName.TIMES_BOLD_ITALIC;
+        else if (bold) name = org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName.TIMES_BOLD;
+        else if (italic) name = org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName.TIMES_ITALIC;
+        else name = org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName.TIMES_ROMAN;
+    } else if (mono) {
+        if (bold && italic) name = org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName.COURIER_BOLD_OBLIQUE;
+        else if (bold) name = org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName.COURIER_BOLD;
+        else if (italic) name = org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName.COURIER_OBLIQUE;
+        else name = org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName.COURIER;
+    } else {
+        if (bold && italic) name = org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName.HELVETICA_BOLD_OBLIQUE;
+        else if (bold) name = org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName.HELVETICA_BOLD;
+        else if (italic) name = org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName.HELVETICA_OBLIQUE;
+        else name = org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName.HELVETICA;
     }
-    if (mono) {
-        if (bold && italic) return PDType1Font.COURIER_BOLD_OBLIQUE;
-        if (bold) return PDType1Font.COURIER_BOLD;
-        if (italic) return PDType1Font.COURIER_OBLIQUE;
-        return PDType1Font.COURIER;
-    }
-    if (bold && italic) return PDType1Font.HELVETICA_BOLD_OBLIQUE;
-    if (bold) return PDType1Font.HELVETICA_BOLD;
-    if (italic) return PDType1Font.HELVETICA_OBLIQUE;
-    return PDType1Font.HELVETICA;
+    return new org.apache.pdfbox.pdmodel.font.PDType1Font(name);
 }
 
 public static void drawText(Object cs, Object font, double size, double x, double y, String text, String colour) throws Exception {
@@ -189,7 +191,7 @@ public static void drawLine(Object cs, double x1, double y1, double x2, double y
 public static void drawRect(Object cs, double x, double y, double w, double h, double lw, String colour, String fill, double radius) throws Exception {
     PDPageContentStream s = (PDPageContentStream)cs;
     if (fill != null && fill.length() > 0) {
-        // simple fill
+        // fill not implemented in v1
     }
     if (lw > 0) {
         s.setLineWidth((float)lw);
@@ -205,10 +207,19 @@ public static void clip(Object cs, double x, double y, double w, double h) throw
 }
 
 public static void restore(Object cs) throws Exception {
-    // PDPageContentStream has no separate restore in 2.0; gstate restore via close? no-op here
+    // no-op in 3.0 stream API
 }
 
-public static void drawImage(Object cs, Object doc, String resourcePath, double x, double y, double w, double h, String fit) throws Exception {
-    // skip images in v1 (resource resolution not wired); no-op
+public static void drawImage(Object cs, Object doc, String resourcePath, double x, double y, double w, double h, String fit, String sourceDir) throws Exception {
+    if (resourcePath == null || resourcePath.length() == 0) return;
+    String path = resourcePath;
+    if (sourceDir != null && sourceDir.length() > 0) {
+        path = sourceDir + "/" + resourcePath;
+    }
+    java.io.File f = new java.io.File(path);
+    if (!f.exists()) return;
+    PDImageXObject img = PDImageXObject.createFromFile(path, (PDDocument)doc);
+    PDPageContentStream s = (PDPageContentStream)cs;
+    s.drawImage(img, (float)x, (float)y, (float)w, (float)h);
 }
 #End If

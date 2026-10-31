@@ -657,6 +657,7 @@ Private Sub TestPdfExport
 	Dim outPath As String = File.Combine(File.DirApp, "test-invoice.pdf")
 	Dim pdf As ReportPdfExporter
 	pdf.Initialize(diags)
+	pdf.SourceDir = def.SourceDir
 	Dim ok As Boolean = pdf.Export(doc, outPath)
 	Check(ok, "invoice pdf exports successfully")
 	Check(File.Exists(File.DirApp, "test-invoice.pdf"), "invoice pdf file exists")
@@ -702,6 +703,7 @@ Private Sub TestPdfExport
 	Dim loutPath As String = File.Combine(File.DirApp, "test-listing.pdf")
 	Dim lpdf As ReportPdfExporter
 	lpdf.Initialize(ldiags)
+	lpdf.SourceDir = ldef.SourceDir
 	Dim lok As Boolean = lpdf.Export(ldoc, loutPath)
 	Check(lok, "listing pdf exports successfully")
 	If File.Exists(File.DirApp, "test-listing.pdf") Then
