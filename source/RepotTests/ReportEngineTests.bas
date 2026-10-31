@@ -25,6 +25,7 @@ Public Sub Run (FixturesDir As String)
 	TestMeasurement
 	TestBandLayout
 	TestPagination
+	TestGoldens
 	TestFixturesLoadAndRoundTrip
 	TestValidationFailures
 	TestExpressionScanner
@@ -563,6 +564,60 @@ Private Sub TestPagination
 		If hasHeader = False Then allHaveHeader = False
 	Next
 	Check(allHaveHeader, "every listing page repeats the page header")
+End Sub
+'--------------------------------------------------------------- goldens
+
+Private Sub TestGoldens
+	Dim names() As String = Array As String("invoice-basic", "listing-multipage")
+	For Each name As String In names
+		Dim dir As String = File.Combine(mFixtures, name)
+		Dim loader As ReportTemplateLoader
+		loader.Initialize
+		Dim def As ReportDefinition = loader.LoadFromFile(dir, "template.b4xr")
+		Check(loader.Diagnostics.HasErrors = False, name & " loads for golden")
+
+		Dim binder As ReportDataBinder
+		binder.Initialize(def)
+		Dim params As Map = LoadJsonMap(dir, "params.json")
+		For Each k As String In params.Keys
+			binder.SetParameter(k, params.Get(k))
+		Next
+		Dim data As Map = LoadJsonMap(dir, "data.json")
+		For Each dname As String In data.Keys
+			Dim o As Object = data.Get(dname)
+			If o Is List Then
+				binder.SetDataSource(dname, o)
+			Else If o Is Map Then
+				binder.SetDataSourceSingle(dname, o)
+			End If
+		Next
+		Check(binder.Validate, name & " binds for golden")
+
+		Dim diags As ReportDiagnostics
+		diags.Initialize
+		Dim measure As ReportB4JMeasure
+		measure.Initialize(diags)
+		Dim pag As ReportPaginator
+		pag.Initialize(def, binder, measure, diags)
+		Dim doc As ReportRenderDocument = pag.Render
+		Dim json As String = ReportRenderJsonWriter.ToJson(doc)
+
+		Dim expectedDir As String = File.Combine(dir, "expected")
+		Dim goldenPath As String = File.Combine(expectedDir, "layout.json")
+		If File.Exists(expectedDir, "layout.json") Then
+			Dim existing As String = File.ReadString(expectedDir, "layout.json")
+			Check(existing = json, name & " golden matches")
+		Else
+			File.MakeDir(dir, "expected")
+			File.WriteString(expectedDir, "layout.json", json)
+			Check(True, name & " golden written")
+		End If
+
+		' determinism: second render is identical
+		Dim doc2 As ReportRenderDocument = pag.Render
+		Dim json2 As String = ReportRenderJsonWriter.ToJson(doc2)
+		Check(json = json2, name & " render is deterministic")
+	Next
 End Sub
 '--------------------------------------------------------------- fixtures
 

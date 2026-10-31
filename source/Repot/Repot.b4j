@@ -40,9 +40,10 @@ Module33=ReportTextStyle
 Module34=ReportUnits
 Module35=ReportValidator
 Module36=ReportVersion
+Module37=ReportRenderJsonWriter
 NumberOfFiles=0
 NumberOfLibraries=3
-NumberOfModules=36
+NumberOfModules=37
 Version=10.7
 @EndOfDesignText@
 #Region Project Attributes
