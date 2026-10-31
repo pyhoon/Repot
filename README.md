@@ -8,11 +8,11 @@ by the host application into paginated documents and structured exports.
 The same template is intended to work from B4J desktop, B4J server, and
 B4A, and to render to HTML for browsers.
 
-> **Project status: pre-M0.**
+> **Project status: M0 in progress.**
 >
-> This repository currently contains design documentation only. There is
-> no engine code yet. Every capability described here is planned and
-> must not be read as implemented.
+> This repository contains design documentation, the fixture set, and a
+> B4J fixture checker. There is no engine yet. Every capability described
+> here is planned and must not be read as implemented.
 
 ## Why this exists
 
@@ -145,14 +145,18 @@ B4XReport/
 ├── CONTRIBUTING.md              Contribution terms, review and support policy
 ├── LICENSE                      MIT
 ├── docs/                        Design documentation
-│   └── decisions/               Architecture decision records
-├── source/                      B4X library projects (B4J first)
+│   ├── decisions/               Architecture decision records
+│   └── b4x-notes.md             Verified B4X API facts
+├── source/
+│   └── B4XReportTests/          Fixture checker (B4J console project)
 ├── demo/                        Minimal B4XPages demos for each platform
-└── fixtures/                    Templates, data, and expected layout output
+├── fixtures/                    Templates, data and notes; goldens from M3
+└── tools/                       Developer scripts (fixture runner)
 ```
 
-Directories are created as milestones land; `docs/` is the only part
-that is populated today.
+The fixture checker is the only working code today. It validates the
+templates in `fixtures/` against the draft schema; it does not render
+anything yet.
 
 The engine ships as one `.b4xlib` containing all public modules, plus
 optional jar dependencies where a format needs them. Exporters are
@@ -172,6 +176,7 @@ optional boundary is the jar dependency, not the B4X module. See
 | [docs/compatibility.md](docs/compatibility.md) | Platform matrix and fidelity tolerances |
 | [docs/dependencies.md](docs/dependencies.md) | Dependency audit and licensing decisions |
 | [docs/testing.md](docs/testing.md) | Fixtures, golden data, headless CI |
+| [docs/b4x-notes.md](docs/b4x-notes.md) | Verified B4X API facts and gotchas |
 | [docs/prior-art.md](docs/prior-art.md) | Existing B4X reporting tools and lessons |
 | [docs/decisions/](docs/decisions/) | Recorded architecture decisions |
 

@@ -5,7 +5,7 @@
 **Ecosystem:** B4X (B4J first, B4A second)\
 **Template format:** Versioned JSON, `.b4xr` extension\
 **License:** MIT, all components\
-**Current stage:** pre-M0 (documentation only)
+**Current stage:** M0 in progress (docs, fixtures, verification harness)
 
 ---
 
@@ -195,11 +195,13 @@ Strategy, fixture layout, and the pixel-diff prohibition are in
 - Export fixtures check PDF page counts and extracted text, HTML
   structure, CSV quoting, JSON round-trip, XML well-formedness, and
   office files opened by a real parser.
-- Headless builds use `B4JBuilder.exe -Task=Build` (and
-  `-Task=BuildLibrary`), which exits non-zero on failure and is suitable
-  for a CI runner. Verify option names against the installed version.
-- A B4J console harness runs fixtures and writes goldens so CI does not
-  need the IDE.
+- Headless builds use `B4JBuilder.exe -Task=Build`, verified on 2026-10-31
+  with B4J 10.7 and Java 19. It exits non-zero on failure and is suitable
+  for a CI runner. Exact output behaviour is recorded in
+  [b4x-notes.md](docs/b4x-notes.md).
+- `source/B4XReportTests` lints the fixtures against the draft schema and
+  is driven by `tools/run-fixtures.ps1`, which maps the result file to a
+  process exit code. Layout goldens are added in M3.
 
 ## 10. Packaging and distribution
 
@@ -306,6 +308,24 @@ M0 is documentation, definition, and de-risking. No engine code.
 8. Present the fixture-driven schema outline for review before M1.
 
 Begin M1 only after the M0 review.
+
+### M0 status (2026-10-31)
+
+| Task | Status |
+|------|--------|
+| Fixture set: three templates, data, parameters, notes | done |
+| Fixture checker harness in `source/B4XReportTests` | done, 58 checks passing |
+| Negative test of the checker (injected faults) | done, all five faults reported |
+| Headless build verification (B4J 10.7 / Java 19) | done, exit `0`, jar in `Objects\` |
+| Dependency audit (`docs/dependencies.md`) | draft |
+| Adapter and render-document contracts (`docs/architecture.md`) | draft |
+| Project name and package prefix | open |
+| Fixture-driven schema review | open |
+
+The schema change that came out of writing the fixtures: aggregates are
+document-unique and referenced bare, and groups may declare their own
+aggregates. See `fixtures/statement-grouped` and
+`docs/template-format.md` §4.4.
 
 ---
 

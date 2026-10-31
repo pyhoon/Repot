@@ -1,0 +1,11 @@
+# B4J build output
+**/Objects/
+*.class
+
+# OS noise
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Test run output
+fixture-check.txt

@@ -62,12 +62,12 @@ fixtures/
 │   ├── template.b4xr
 │   ├── data.json
 │   ├── params.json
-│   ├── expected/layout.json
-│   ├── expected/document.txt      extracted PDF text
-│   └── notes.md                   what this fixture must prove
+│   ├── logo.png
+│   ├── notes.md                   what this fixture must prove
+│   └── expected/                  goldens, generated in M3
 ├── listing-multipage/
 ├── statement-grouped/
-└── _fonts/                        redistributable test fonts
+└── _fonts/                        added with the first PDF golden (M3)
 ```
 
 Every fixture has a `notes.md` listing the behaviours it exists to
@@ -82,6 +82,39 @@ The first three fixtures are defined in M0, before the schema is frozen:
 3. **statement-grouped** — group header, per-group subtotal, grand total,
    group header repeated after a page break. Defined in M0 as a design
    input; it becomes an active gate when grouping ships in v0.2.
+
+### The fixture checker (M0)
+
+`source/B4XReportTests` is a B4J console project that lints every fixture
+against the draft schema. It checks:
+
+- required files, parseable JSON, `schemaVersion`;
+- page size, orientation and margins;
+- unique section and element IDs, allowed section and element types;
+- exactly one of `bounds` or `cell` per element, four numeric bounds, grid
+  columns not exceeded;
+- every referenced font, style, dataset, group and aggregate exists;
+- aggregate names are document-unique and aggregate fields exist;
+- braced expressions resolve, with literal text outside braces ignored;
+- image resources exist inside the fixture folder;
+- every declared dataset is present in `data.json` with the declared
+  fields and the right shape (array vs object);
+- every required parameter is present in `params.json`.
+
+It is a schema lint, not a renderer. It proves the fixtures and the schema
+agree; it does not prove layout. Geometry goldens arrive in M3.
+
+Run it with:
+
+```powershell
+.\tools\run-fixtures.ps1            # build + check + exit code
+.\tools\run-fixtures.ps1 -NoBuild   # reuse the existing jar
+```
+
+The checker was itself validated in M0 by injecting faults into a copy of
+`invoice-basic` (bad style reference, unknown aggregate, three-number
+bounds, missing image, renamed data field) and confirming it reported all
+five.
 
 ## 4. Determinism harness
 
@@ -98,31 +131,38 @@ Running the same fixture twice must produce byte-identical
 
 ## 5. Headless build and CI
 
-B4J ships a command-line builder:
+B4J ships a command-line builder. Verified on 2026-10-31 with B4J 10.7 and
+Java 19:
 
 ```text
-B4JBuilder.exe -Task=Build -BaseFolder <project> [-Project <file.b4j>] [-Configuration Default,b4j.example]
+cd <project folder>
+"C:\Program Files\B4X\B4J\B4JBuilder.exe" -Task=Build
 ```
 
-Behaviour to verify and record locally:
+- Exit code `0` on success, `1` on failure.
+- Jar written to `Objects\<ProjectName>.jar`.
+- Runs without the IDE and without a display.
+- Library builds are expected to use `-Task=BuildLibrary`; not yet
+  verified, so the engine build will confirm it in M1.
 
-- exit code `0` on success, `1` on failure,
-- output jar location under `Objects\`,
-- whether `-NoClean` is needed for incremental builds,
-- whether library builds use `-Task=BuildLibrary`.
+`tools/run-fixtures.ps1` wraps the whole loop: build, run the checker with
+the fixture path, read `Objects\fixture-check.txt`, and exit `0` only when
+the summary line says `errors=0`. The wrapper exists because a B4J console
+app cannot set a process exit code (see [b4x-notes.md](b4x-notes.md)).
 
 CI shape:
 
 ```text
-1. B4JBuilder -Task=Build   (test harness project)
-2. java -jar Objects\B4XReportTests.jar --fixtures ..\fixtures --golden
-3. compare golden JSON; fail on any diff
-4. run verifier scripts for DOCX/XLSX when those exist
-5. publish the diff as an artifact
+1. tools/run-fixtures.ps1                     # schema lint, must exit 0
+2. B4JBuilder -Task=Build on the engine project
+3. java -jar <harness>.jar <fixtures> --golden  # from M3
+4. compare layout JSON; fail on any diff
+5. run verifier scripts for DOCX/XLSX when those exist
+6. publish the diff as an artifact
 ```
 
 The harness is a B4J console application; it does not need the IDE. Tests
-are plain `Assert` subs and a small runner, so the project does not need
+are plain assertion subs and a small runner, so the project does not need
 JUnit or any test framework.
 
 Windows-only CI is acceptable and documented. B4A builds need the Android

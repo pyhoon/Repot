@@ -146,8 +146,8 @@ change as fixtures are added.
       "keepTogether": true,
       "elements": [
         { "type": "text", "id": "lbl-total", "bounds": [300, 6, 100, 16], "style": "total", "text": "Total" },
-        { "type": "field", "id": "fld-total", "bounds": [410, 6, 100, 16], "style": "total", "value": "{Items.NetTotal}" },
-        { "type": "text", "id": "lbl-lines", "bounds": [0, 6, 200, 16], "style": "label", "value": "Items: {Items.LineCount}" }
+        { "type": "field", "id": "fld-total", "bounds": [410, 6, 100, 16], "style": "total", "value": "{NetTotal}" },
+        { "type": "field", "id": "lbl-lines", "bounds": [0, 6, 200, 16], "style": "label", "value": "Items: {LineCount}" }
       ]
     },
     {
@@ -209,6 +209,18 @@ parameters fail the build with a diagnostic.
 A `single` dataset has exactly one record. `Customer.Name` is valid
 regardless of the current section.
 
+Aggregates are declared with `name`, `function` (`sum`, `count`, `min`,
+`max`, `avg`) and, for everything except `count`, a `field`. Scope is
+determined by where the aggregate is declared:
+
+- declared on a **dataset** → report scope, accumulates over the whole run;
+- declared on a **group** → group scope, resets when the group key changes.
+
+**Aggregate names are unique across the document** and are referenced bare
+in expressions: `{NetTotal}`, not `{Items.NetTotal}`. Uniqueness is what
+removes the need for scope syntax, including when groups are nested. A
+duplicate name is a validation error, and the fixtures enforce it.
+
 The engine does not populate datasets. The host application calls
 `SetDataSource("Items", list)`; a dataset declared in the template but
 never supplied is an error.
@@ -222,13 +234,19 @@ never supplied is an error.
     "dataSet": "Items",
     "key": "{CustomerCode}",
     "sort": [{ "field": "CustomerCode", "direction": "ascending" }],
-    "repeatHeader": true
+    "repeatHeader": true,
+    "aggregates": [
+      { "name": "CustomerTotal", "function": "sum", "field": "Amount" }
+    ]
   }
 ]
 ```
 
 Groups are declared once and referenced by section `group` properties in
 v0.2. The declaration order defines nesting, outermost first.
+`repeatHeader` re-emits the group header after a page break inside the
+group. Aggregates declared on a group reset when its key changes; their
+names are document-unique like every other aggregate.
 
 ### 4.6 `sections`
 
@@ -274,13 +292,14 @@ Braced expressions are the only dynamic construct:
 {Description}                 resolves against the current section's dataset
 {Quantity} * {UnitPrice}
 {if({Amount} > 1000, "Review", "")}
-{Items.NetTotal}              aggregate reference
+{NetTotal}                    aggregate reference, document-unique name
 {page.number} {page.count}
 ```
 
-Resolution order for a bare name: section dataset field, then parameters,
-then registered single datasets, then functions. Ambiguity is an error,
-not a guess.
+Text outside braces is literal and is not evaluated. Resolution order for
+a bare name inside braces: aggregate, then section dataset field, then
+parameters, then functions. A dotted name is `Dataset.Field` or
+`Dataset.Aggregate`. Ambiguity is an error, not a guess.
 
 Operators: `+ - * /`, comparison, `and or not`, `&` for concatenation,
 parentheses, and `if(cond, a, b)`. Functions for 1.0: `len`, `upper`,
@@ -299,9 +318,16 @@ implementation.
 5. PageHeader and PageFooter do not use `overflow: grow`.
 6. Resources resolve inside the template directory.
 7. No expression may reference a field not declared by its dataset.
+8. Aggregate names are unique across the document, and each aggregate's
+   `field` exists in the dataset it aggregates.
+9. Exactly one of `bounds` or `cell` is present on each element, and a
+   `cell` must fit within the declared grid columns.
+10. Sections that are neither `Detail` nor group sections have no
+    `dataSet` property.
 
 Diagnostics carry the element id or JSON pointer, so a designer can
-highlight the problem.
+highlight the problem. The M0 fixture checker enforces rules 1-9; rule 10
+is enforced with the engine.
 
 ## 6. Versioning and migration
 
@@ -333,8 +359,15 @@ These are settled with fixtures during M0/M1, not by discussion:
 2. Is `cell` positioning actually used by the designer, or should the
    schema store points and let the editor snap? Both are supported now;
    one may be removed.
-3. Do totals need a second aggregate scope (page-level subtotals)?
+3. Do any fixtures need a page-scope aggregate (for example, a page
+   subtotal)? Report and group scope are already specified; page scope is
+   not, and no fixture requires it yet.
 4. Does the listing fixture require repeating the last detail line's
    description on continuation pages?
+
+Answered during M0: aggregates are document-unique and referenced bare,
+and groups may declare their own aggregates. This removed the need for
+scope syntax in expressions and is reflected in
+`fixtures/statement-grouped`.
 
 Answers go into ADRs. Do not extend this schema otherwise.
