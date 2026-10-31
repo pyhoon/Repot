@@ -42,9 +42,10 @@ Module35=ReportEngineTests
 Module36=|relative|..\Repot\ReportImage
 Module37=|relative|..\Repot\ReportPaginator
 Module38=|relative|..\Repot\ReportRenderJsonWriter
+Module39=|relative|..\Repot\ReportPdfExporter
 NumberOfFiles=0
 NumberOfLibraries=3
-NumberOfModules=38
+NumberOfModules=39
 Version=10.7
 @EndOfDesignText@
 'Repot fixture checker and engine unit-test harness.
@@ -62,6 +63,7 @@ Version=10.7
 'errors=0. See docs/testing.md.
 
 #Region Project Attributes
+	#AdditionalJar: C:\B4X\Additional\B4J\pdfbox-app-2.0.24.jar
 	#CommandLineArgs:
 	#MergeLibraries: True
 #End Region

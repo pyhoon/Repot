@@ -41,12 +41,14 @@ Module34=ReportUnits
 Module35=ReportValidator
 Module36=ReportVersion
 Module37=ReportRenderJsonWriter
+Module38=ReportPdfExporter
 NumberOfFiles=0
 NumberOfLibraries=3
-NumberOfModules=37
+NumberOfModules=38
 Version=10.7
 @EndOfDesignText@
 #Region Project Attributes
+	#AdditionalJar: C:\B4X\Additional\B4J\pdfbox-app-2.0.24.jar
 	#CommandLineArgs:
 	#MergeLibraries: True
 #End Region

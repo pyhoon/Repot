@@ -26,6 +26,7 @@ Public Sub Run (FixturesDir As String)
 	TestBandLayout
 	TestPagination
 	TestGoldens
+	TestPdfExport
 	TestFixturesLoadAndRoundTrip
 	TestValidationFailures
 	TestExpressionScanner
@@ -618,6 +619,94 @@ Private Sub TestGoldens
 		Dim json2 As String = ReportRenderJsonWriter.ToJson(doc2)
 		Check(json = json2, name & " render is deterministic")
 	Next
+End Sub
+'--------------------------------------------------------------- pdf export
+
+Private Sub TestPdfExport
+	Dim invDir As String = File.Combine(mFixtures, "invoice-basic")
+	Dim loader As ReportTemplateLoader
+	loader.Initialize
+	Dim def As ReportDefinition = loader.LoadFromFile(invDir, "template.b4xr")
+	Check(loader.Diagnostics.HasErrors = False, "invoice loads for pdf")
+
+	Dim binder As ReportDataBinder
+	binder.Initialize(def)
+	Dim params As Map = LoadJsonMap(invDir, "params.json")
+	For Each k As String In params.Keys
+		binder.SetParameter(k, params.Get(k))
+	Next
+	Dim data As Map = LoadJsonMap(invDir, "data.json")
+	For Each name As String In data.Keys
+		Dim o As Object = data.Get(name)
+		If o Is List Then
+			binder.SetDataSource(name, o)
+		Else If o Is Map Then
+			binder.SetDataSourceSingle(name, o)
+		End If
+	Next
+	Check(binder.Validate, "invoice binds for pdf")
+
+	Dim diags As ReportDiagnostics
+	diags.Initialize
+	Dim measure As ReportB4JMeasure
+	measure.Initialize(diags)
+	Dim pag As ReportPaginator
+	pag.Initialize(def, binder, measure, diags)
+	Dim doc As ReportRenderDocument = pag.Render
+
+	Dim outPath As String = File.Combine(File.DirApp, "test-invoice.pdf")
+	Dim pdf As ReportPdfExporter
+	pdf.Initialize(diags)
+	Dim ok As Boolean = pdf.Export(doc, outPath)
+	Check(ok, "invoice pdf exports successfully")
+	Check(File.Exists(File.DirApp, "test-invoice.pdf"), "invoice pdf file exists")
+	If File.Exists(File.DirApp, "test-invoice.pdf") Then
+		Check(pdf.PageCount(outPath) = 1, "invoice pdf has one page")
+		Dim txt As String = pdf.ExtractText(outPath)
+		Check(txt.IndexOf("INVOICE") >= 0, "invoice pdf contains INVOICE")
+		Check(txt.IndexOf("Page 1 of 1") >= 0, "invoice pdf contains page number")
+	End If
+
+	' listing
+	Dim listDir As String = File.Combine(mFixtures, "listing-multipage")
+	Dim lloader As ReportTemplateLoader
+	lloader.Initialize
+	Dim ldef As ReportDefinition = lloader.LoadFromFile(listDir, "template.b4xr")
+	Check(lloader.Diagnostics.HasErrors = False, "listing loads for pdf")
+
+	Dim lbinder As ReportDataBinder
+	lbinder.Initialize(ldef)
+	Dim ldata As Map = LoadJsonMap(listDir, "data.json")
+	For Each name As String In ldata.Keys
+		Dim lo As Object = ldata.Get(name)
+		If lo Is List Then
+			lbinder.SetDataSource(name, lo)
+		Else If lo Is Map Then
+			lbinder.SetDataSourceSingle(name, lo)
+		End If
+	Next
+	Dim lparams As Map = LoadJsonMap(listDir, "params.json")
+	For Each k As String In lparams.Keys
+		lbinder.SetParameter(k, lparams.Get(k))
+	Next
+	Check(lbinder.Validate, "listing binds for pdf")
+
+	Dim ldiags As ReportDiagnostics
+	ldiags.Initialize
+	Dim lmeasure As ReportB4JMeasure
+	lmeasure.Initialize(ldiags)
+	Dim lpag As ReportPaginator
+	lpag.Initialize(ldef, lbinder, lmeasure, ldiags)
+	Dim ldoc As ReportRenderDocument = lpag.Render
+
+	Dim loutPath As String = File.Combine(File.DirApp, "test-listing.pdf")
+	Dim lpdf As ReportPdfExporter
+	lpdf.Initialize(ldiags)
+	Dim lok As Boolean = lpdf.Export(ldoc, loutPath)
+	Check(lok, "listing pdf exports successfully")
+	If File.Exists(File.DirApp, "test-listing.pdf") Then
+		Check(lpdf.PageCount(loutPath) = ldoc.PageCount, "listing pdf page count matches layout")
+	End If
 End Sub
 '--------------------------------------------------------------- fixtures
 

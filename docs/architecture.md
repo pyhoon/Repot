@@ -265,3 +265,24 @@ it; their jar dependencies are what applications include or omit. See
   translated label text is template data).
 - RTL and complex script shaping in 1.0.
 - Tagged/accessible PDF in 1.0.
+
+### 4.4 Exporter canvas
+
+The render document is consumed by an exporter through a small canvas
+interface. Layout never calls it; exporters do. The B4J implementation
+is ReportPdfExporter (PDFBox 2.0); an HTML exporter follows the same
+interface.
+
+\\\b
+Sub DrawText (X As Double, Y As Double, W As Double, H As Double, Baseline As Double, Text As String, FontName As String, FontSize As Double, Bold As Boolean, Italic As Boolean, Underline As Boolean, Colour As String, Align As String)
+Sub DrawImage (X As Double, Y As Double, W As Double, H As Double, ResourcePath As String, PixelWidth As Int, PixelHeight As Int, Dpi As Double, Fit As String, Handle As Object)
+Sub DrawLine (X1 As Double, Y1 As Double, X2 As Double, Y2 As Double, LineWidth As Double, Colour As String, Dash As String)
+Sub DrawRect (X As Double, Y As Double, W As Double, H As Double, LineWidth As Double, StrokeColour As String, FillColour As String, Radius As Double)
+Sub Clip (X As Double, Y As Double, W As Double, H As Double)
+Sub Restore
+Sub DrawLink (X As Double, Y As Double, W As Double, H As Double, Url As String, AnchorName As String)
+\\\
+
+Coordinates are absolute page points in the document's top-down space;
+the backend converts to its own origin. Exporters must not re-measure or
+re-resolve expressions. PDF targets version 1.7 by default.
