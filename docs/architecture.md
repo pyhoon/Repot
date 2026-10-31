@@ -1,7 +1,9 @@
 # Architecture
 
-Status: draft for M0 review. This document defines responsibilities and
-contracts. It does not describe implemented code.
+Status: draft for M0 review. The model, loader, validator, canonical writer
+and data binder described in the template/data layers are implemented in
+`source/Repot`. Adapter contracts, layout and the render document are not
+implemented yet; the signatures below remain proposals.
 
 ## 1. Pipeline
 
@@ -164,7 +166,8 @@ document generated last year.
 ## 7. Error model
 
 - Parsing and validation produce structured diagnostics with a stable
-  code, a JSON pointer or element ID, a message, and severity.
+  code, a JSON pointer or element ID, a message, and severity. The
+  registry is [errors.md](errors.md).
 - Build fails as a whole or not at all. Never emit a partially correct
   financial document.
 - Missing fields resolve to null, not to an error, unless the field is

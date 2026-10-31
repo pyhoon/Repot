@@ -5,6 +5,10 @@ frozen only after the fixture set in `fixtures/` renders correctly
 through the real engine. See
 [decisions/0005-template-format.md](decisions/0005-template-format.md).
 
+Implementation note: the 0.1 loader, validator, canonical writer and
+data binder exist in `source/Repot`. Layout and exporters do not exist
+yet, so this remains a draft.
+
 ## 1. Conventions
 
 - UTF-8 JSON, extension `.b4xr`, no BOM, LF or CRLF both accepted.
@@ -267,8 +271,10 @@ groups resolved by declaration order. This keeps hand-edited files stable.
 
 ### 4.7 Elements
 
-All elements share `id`, `bounds` **or** `cell`, `style`, `visible`, and
-`z` (optional integer; document order wins on ties).
+All elements share `id`, `bounds` **or** `cell`, `style`, `align`,
+`valign`, `visible`, and `z` (optional integer; document order wins on
+ties). `align` and `valign` on an element override the style for that
+element only.
 
 | Type | Additional properties |
 |------|----------------------|
@@ -326,8 +332,9 @@ implementation.
     `dataSet` property.
 
 Diagnostics carry the element id or JSON pointer, so a designer can
-highlight the problem. The M0 fixture checker enforces rules 1-9; rule 10
-is enforced with the engine.
+highlight the problem. The fixture checker enforces rules 1-9; the M1
+validator in `source/Repot` additionally enforces rule 10 and reports
+the full diagnostic set described in [errors.md](errors.md).
 
 ## 6. Versioning and migration
 

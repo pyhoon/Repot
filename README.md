@@ -8,11 +8,13 @@ by the host application into paginated documents and structured exports.
 The same template is intended to work from B4J desktop, B4J server, and
 B4A, and to render to HTML for browsers.
 
-> **Project status: M0 in progress.**
+> **Project status: M1 in progress (core model).**
 >
-> This repository contains design documentation, the fixture set, and a
-> B4J fixture checker. There is no engine yet. Every capability described
-> here is planned and must not be read as implemented.
+> The repository contains design documentation, the fixture set, a B4J
+> fixture checker, and the first engine modules: template model, `.b4xr`
+> loader, canonical writer, validation, dataset/parameter binding, and
+> unit tests. There is **no renderer yet**; layout, PDF, HTML and data
+> exporters are planned and must not be read as implemented.
 
 ## Why this exists
 
@@ -148,15 +150,18 @@ Repot/
 │   ├── decisions/               Architecture decision records
 │   └── b4x-notes.md             Verified B4X API facts
 ├── source/
-│   └── RepotTests/          Fixture checker (B4J console project)
+│   ├── Repot/                   Engine modules (model, loader, validator, binder)
+│   └── RepotTests/              Fixture checker and engine unit tests
 ├── demo/                        Minimal B4XPages demos for each platform
 ├── fixtures/                    Templates, data and notes; goldens from M3
 └── tools/                       Developer scripts (fixture runner)
 ```
 
-The fixture checker is the only working code today. It validates the
-templates in `fixtures/` against the draft schema; it does not render
-anything yet.
+The fixture checker and engine unit tests share one console project. The
+engine modules live in `source/Repot` and are compiled into the test
+project through relative module references. They load and validate the
+fixtures, round-trip them through canonical JSON, and bind the fixture
+data. Nothing renders a page yet.
 
 The engine ships as one `.b4xlib` containing all public modules, plus
 optional jar dependencies where a format needs them. Exporters are
@@ -175,6 +180,7 @@ optional boundary is the jar dependency, not the B4X module. See
 | [docs/api-design.md](docs/api-design.md) | Public API shape and invariants |
 | [docs/compatibility.md](docs/compatibility.md) | Platform matrix and fidelity tolerances |
 | [docs/dependencies.md](docs/dependencies.md) | Dependency audit and licensing decisions |
+| [docs/errors.md](docs/errors.md) | Stable diagnostic codes |
 | [docs/testing.md](docs/testing.md) | Fixtures, golden data, headless CI |
 | [docs/b4x-notes.md](docs/b4x-notes.md) | Verified B4X API facts and gotchas |
 | [docs/prior-art.md](docs/prior-art.md) | Existing B4X reporting tools and lessons |

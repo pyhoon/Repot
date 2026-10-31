@@ -3,17 +3,42 @@ Build1=Default,b4j.example
 Group=Default Group
 Library1=jcore
 Library2=json
+Module1=RepotEngineTests
+Module2=|relative|..\Repot\RepotUnits
+Module3=|relative|..\Repot\RepotJsonUtil
+Module4=|relative|..\Repot\RepotExpressionRefs
+Module5=|relative|..\Repot\RepotDiagnostic
+Module6=|relative|..\Repot\RepotDiagnostics
+Module7=|relative|..\Repot\RepotPageSetup
+Module8=|relative|..\Repot\RepotFontDef
+Module9=|relative|..\Repot\RepotStyle
+Module10=|relative|..\Repot\RepotParameterDef
+Module11=|relative|..\Repot\RepotFieldDef
+Module12=|relative|..\Repot\RepotAggregateDef
+Module13=|relative|..\Repot\RepotDataSetDef
+Module14=|relative|..\Repot\RepotSortDef
+Module15=|relative|..\Repot\RepotGroupDef
+Module16=|relative|..\Repot\RepotElement
+Module17=|relative|..\Repot\RepotSection
+Module18=|relative|..\Repot\RepotDefinition
+Module19=|relative|..\Repot\RepotTemplateLoader
+Module20=|relative|..\Repot\RepotValidator
+Module21=|relative|..\Repot\RepotJsonWriter
+Module22=|relative|..\Repot\RepotDataSet
+Module23=|relative|..\Repot\RepotDataBinder
+Module24=|relative|..\Repot\RepotVersion
 NumberOfFiles=0
 NumberOfLibraries=2
-NumberOfModules=0
+NumberOfModules=24
 Version=10.7
 @EndOfDesignText@
-'Repot fixture checker.
+'Repot fixture checker and engine unit-test harness.
 '
 'Validates the templates and data in fixtures/ against the draft schema
-'described in docs/template-format.md. This is deliberately NOT a renderer:
-'it lints the fixtures so the schema and the fixtures cannot drift before
-'the engine exists.
+'described in docs/template-format.md, then runs the M1 engine tests
+'(loading, validation, canonical round-trip and binding). This is
+'deliberately NOT a renderer: it keeps the fixtures, schema, loader and
+'binder honest before layout exists.
 '
 'Usage:
 '  java -jar RepotTests.jar <fixtures folder> [output folder]
@@ -103,6 +128,24 @@ Sub AppStart (Args() As String)
 				summary.Append("  warning: ").Append(w).Append(CRLF)
 			Next
 		End If
+	Next
+
+	Dim engine As RepotEngineTests
+	engine.Initialize
+	engine.Run(root)
+	totalChecks = totalChecks + engine.Checks
+	totalErrors = totalErrors + engine.Failures.Size
+	Dim engineLine As String
+	If engine.Failures.Size = 0 Then
+		engineLine = "PASS engine (" & engine.Checks & " checks)"
+	Else
+		engineLine = "FAIL engine (" & engine.Checks & " checks, " & engine.Failures.Size & " failures)"
+	End If
+	Log(engineLine)
+	summary.Append(engineLine).Append(CRLF)
+	For Each f As String In engine.Failures
+		Log("  engine: " & f)
+		summary.Append("  engine: ").Append(f).Append(CRLF)
 	Next
 
 	Dim result As String = "fixtures=" & tested & " checks=" & totalChecks & " errors=" & totalErrors

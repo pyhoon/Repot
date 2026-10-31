@@ -35,8 +35,46 @@ cd <project folder>
   Java line, which is enough to fix most mistakes without opening the IDE.
 - `-BaseFolder`, `-Project`, `-Configuration`, `-Output`, `-NoClean`,
   `-Obfuscate`, `-ShowWarnings`, and `-Task=BuildLibrary` are advertised
-  by the builder, but only `-Task=Build` inside the project folder is
-  verified here. Verify before relying on the others.
+  by the builder. `-Task=BuildLibrary` is now verified separately above.
+  The other switches are unverified; verify before relying on them.
+
+## Building a library without the IDE
+
+`-Task=BuildLibrary` is verified on the engine project with B4J 10.7 and
+Java 19:
+
+```text
+cd <project folder>
+"C:\Program Files\B4X\B4J\B4JBuilder.exe" -Task=BuildLibrary
+```
+
+- Requires `#LibraryName:` in the project file. Without it the builder
+  exits `1` with `#LibraryName attribute must be set`.
+- `#LibraryVersion:` must be a numeric value such as `0.10`; `0.1.0` is
+  rejected as a format error.
+- Exit code `0` on success.
+- Writes `<LibraryName>.jar` and `<LibraryName>.xml` to the B4J
+  Additional folder (`%Additional%\B4J`, here `C:\B4X\Additional\B4J`),
+  not to the project and not as a `.b4xlib`. Package the `.b4xlib`
+  separately.
+- `-Output` did not change where the library files were written in this
+  verification.
+
+## Modules and relative references
+
+- A module file is a `.bas` file next to the project file, listed as
+  `ModuleN=Name`.
+- `ModuleN=|relative|..\OtherProject\ModuleName` works and is how
+  `source/RepotTests` compiles the engine modules without copying them.
+- Class modules require `Sub Class_Globals ... End Sub` before their
+  fields.
+- Code modules require `Sub Process_Globals ... End Sub` before their
+  fields. A `Type=Code` module with no globals still needs an empty
+  `Process_Globals`.
+- `Private Const` and `Public Const` belong inside the relevant globals
+  block.
+- A console project needs `#MergeLibraries: True` to run its jar without
+  an external `libs` folder. `BuildLibrary` ignores the setting.
 
 ## Console application shape
 
@@ -126,6 +164,27 @@ verified section:
 - Anything Android-specific: `WebView` printing, `PrintDocumentAdapter`,
   `PdfDocument`, minimum API level.
 - `ExitApplication` semantics in a console app.
+
+## Language gotchas found in M1
+
+- **`Map.Keys` is not a `List` for assignment purposes.** Iterating it
+  with `For Each k As String In m.Keys` works. `Dim keys As List =
+  m.Keys` compiles but fails at runtime with
+  `ClassCastException: Map$IterableMap cannot be cast to List`. Copy the
+  keys into a new `List` when sorting is needed.
+- **`Quote` is a reserved word.** It cannot be a sub, variable, or
+  parameter name. `RepotJsonUtil.JsonQuote` is used instead.
+- **`Return Not X` is a syntax error.** Use
+  `If X Then Return False` / `Return True`.
+- **`Function` is not a B4X keyword.** All subs return with `Sub ... As
+  Type` and end with `End Sub`.
+- `String.Replace(Search, Replacement)` works and was used by the M1
+  negative tests.
+- `Floor`, `Round`, `Abs`, `Asc`, and `Chr` are available. `Round` can be
+  assigned to an integer or long target.
+- `Dim d As Long = Round(value)` compiles and runs.
+- `Private Const` must be inside `Class_Globals` for a class module; it
+  cannot sit loose between subs.
 
 ## Why this file exists
 

@@ -1,7 +1,8 @@
 # API Design
 
-Status: proposal for M0 review. Names and signatures are illustrative and
-will be frozen in M1.
+Status: proposal. The underlying definition model, loader, validator and
+data binder exist in M1, but the public facade and exporters below are not
+implemented and their names are not yet frozen.
 
 ## 1. Principles
 

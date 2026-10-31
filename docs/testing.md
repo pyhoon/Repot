@@ -83,10 +83,17 @@ The first three fixtures are defined in M0, before the schema is frozen:
    group header repeated after a page break. Defined in M0 as a design
    input; it becomes an active gate when grouping ships in v0.2.
 
-### The fixture checker (M0)
+### The headless harness (M0–M1)
 
-`source/RepotTests` is a B4J console project that lints every fixture
-against the draft schema. It checks:
+`source/RepotTests` is a B4J console project with two jobs:
+
+1. **Fixture lint.** It validates every fixture against the draft schema.
+2. **Engine unit tests.** It compiles the engine modules from
+   `source/Repot` through relative module references and runs the M1
+   tests: units, loading, validation, canonical round-trip, expression
+   reference scanning and dataset/parameter binding.
+
+The fixture lint checks:
 
 - required files, parseable JSON, `schemaVersion`;
 - page size, orientation and margins;
@@ -104,17 +111,29 @@ against the draft schema. It checks:
 It is a schema lint, not a renderer. It proves the fixtures and the schema
 agree; it does not prove layout. Geometry goldens arrive in M3.
 
-Run it with:
+The engine tests use the same fixtures as real input. They load each
+template, assert model values and diagnostics, save it to canonical JSON,
+reload it, save again, and require the two saves to be identical. They
+also check that two loads of the same file produce the same output.
+
+Run both with:
 
 ```powershell
 .\tools\run-fixtures.ps1            # build + check + exit code
 .\tools\run-fixtures.ps1 -NoBuild   # reuse the existing jar
 ```
 
-The checker was itself validated in M0 by injecting faults into a copy of
-`invoice-basic` (bad style reference, unknown aggregate, three-number
-bounds, missing image, renamed data field) and confirming it reported all
-five.
+The wrapper treats a non-zero Java exit code as failure and removes the
+previous result file before a run, so a stale `errors=0` cannot hide a
+crash.
+
+The fixture checker was itself validated in M0 by injecting faults into a
+copy of `invoice-basic` (bad style reference, unknown aggregate,
+three-number bounds, missing image, renamed data field) and confirming it
+reported all five. M1 adds negative tests for unknown styles, malformed
+bounds, duplicate aggregates, unknown expression identifiers, missing
+datasets, unknown section types, unbalanced expressions and unknown
+parameters.
 
 ## 4. Determinism harness
 
@@ -142,8 +161,11 @@ cd <project folder>
 - Exit code `0` on success, `1` on failure.
 - Jar written to `Objects\<ProjectName>.jar`.
 - Runs without the IDE and without a display.
-- Library builds are expected to use `-Task=BuildLibrary`; not yet
-  verified, so the engine build will confirm it in M1.
+- `-Task=BuildLibrary` is verified for the engine project: it needs
+  `#LibraryName` in the project file and writes `Repot.jar` and
+  `Repot.xml` to the B4J Additional folder (`%Additional%\B4J` on this
+  machine), not to the project. Creating the `.b4xlib` is a packaging
+  step, not a builder task.
 
 `tools/run-fixtures.ps1` wraps the whole loop: build, run the checker with
 the fixture path, read `Objects\fixture-check.txt`, and exit `0` only when
@@ -153,12 +175,13 @@ app cannot set a process exit code (see [b4x-notes.md](b4x-notes.md)).
 CI shape:
 
 ```text
-1. tools/run-fixtures.ps1                     # schema lint, must exit 0
+1. tools/run-fixtures.ps1                     # schema lint + engine tests, must exit 0
 2. B4JBuilder -Task=Build on the engine project
-3. java -jar <harness>.jar <fixtures> --golden  # from M3
-4. compare layout JSON; fail on any diff
-5. run verifier scripts for DOCX/XLSX when those exist
-6. publish the diff as an artifact
+3. B4JBuilder -Task=BuildLibrary on the engine project (packaging check)
+4. java -jar <harness>.jar <fixtures> --golden  # from M3
+5. compare layout JSON; fail on any diff
+6. run verifier scripts for DOCX/XLSX when those exist
+7. publish the diff as an artifact
 ```
 
 The harness is a B4J console application; it does not need the IDE. Tests

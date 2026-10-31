@@ -5,7 +5,7 @@
 **Ecosystem:** B4X (B4J first, B4A second)\
 **Template format:** Versioned JSON, `.b4xr` extension\
 **License:** MIT, all components\
-**Current stage:** M0 in progress (docs, fixtures, verification harness)
+**Current stage:** M1 in progress (core model, loader, validation, binding)
 
 ---
 
@@ -315,10 +315,10 @@ Begin M1 only after the M0 review.
 | Task | Status |
 |------|--------|
 | Fixture set: three templates, data, parameters, notes | done |
-| Fixture checker harness in `source/RepotTests` | done, 58 checks passing |
+| Fixture checker harness in `source/RepotTests` | done, 58 fixture checks passing |
 | Negative test of the checker (injected faults) | done, all five faults reported |
-| Headless build verification (B4J 10.7 / Java 19) | done, exit `0`, jar in `Objects\` |
-| Dependency audit (`docs/dependencies.md`) | draft |
+| Headless build verification (B4J 10.7 / Java 19) | done, `-Task=Build` and `-Task=BuildLibrary` both exit `0` |
+| Dependency audit (`docs/dependencies.md`) | draft; PDF and office jars still unverified |
 | Adapter and render-document contracts (`docs/architecture.md`) | draft |
 | Project name and package prefix | done: Repot (ADR 0007) |
 | Fixture-driven schema review | open |
@@ -327,6 +327,58 @@ The schema change that came out of writing the fixtures: aggregates are
 document-unique and referenced bare, and groups may declare their own
 aggregates. See `fixtures/statement-grouped` and
 `docs/template-format.md` §4.4.
+
+### M1 status — core model (partial, 2026-10-31)
+
+Implemented in `source/Repot` and exercised from `source/RepotTests`:
+
+| Deliverable | Status |
+|-------------|--------|
+| Definition model: page, fonts, styles, parameters, datasets, groups, sections, elements | done |
+| Unit conversion (pt/mm/cm/in, px with explicit DPI) and invariant number formatting | done |
+| `.b4xr` loader with structured diagnostics and unknown-property warnings | done |
+| Semantic validation: references, uniqueness, section rules, aggregates, resources | done |
+| Expression reference scanner and identifier resolution (not evaluation) | done, parser/evaluator in M6 |
+| Canonical JSON writer and load → save → reload round-trip | done |
+| Dataset and parameter binding with typed-value checks | done |
+| Engine unit tests in the headless harness | done, 108 checks |
+| Adapter contracts and render document | not started |
+| Layout, pagination, exporters | not started |
+
+The whole harness currently reports 166 checks and zero errors:
+
+```text
+PASS invoice-basic (19 checks, 0 errors, 0 warnings)
+PASS listing-multipage (17 checks, 0 errors, 0 warnings)
+PASS statement-grouped (22 checks, 0 errors, 0 warnings)
+PASS engine (108 checks)
+fixtures=3 checks=166 errors=0
+```
+
+Build commands verified:
+
+```text
+cd source\Repot
+B4JBuilder.exe -Task=Build          # console jar, exit 0
+B4JBuilder.exe -Task=BuildLibrary   # Repot.jar + Repot.xml in %Additional%\B4J
+```
+
+Known M1 limitations:
+
+- The M0 schema review is still open. The non-visual core was started
+  first because it is fixture-driven and does not freeze the schema;
+  layout must not start until the review is closed.
+- `BuildLibrary` writes a jar and XML metadata to the B4J Additional
+  folder; the `.b4xlib` packaging step is still M9 work.
+- Expression validation is lexical. There is no parser, evaluator, or
+  aggregate engine yet.
+- `date` and `datetime` values are carried as supplied (string or ticks);
+  conversion and formatting arrive with the expression and formatting
+  work.
+- Element-level `align` and `valign` were added because the fixtures use
+  them; the schema draft is updated to match.
+- The M0 schema review and the adapter/render-document contracts remain
+  open, so M1 is deliberately scoped to the non-visual core.
 
 ---
 

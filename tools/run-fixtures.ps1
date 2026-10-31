@@ -74,16 +74,21 @@ else {
 }
 
 $objects = Join-Path $project 'Objects'
+$resultFile = Join-Path $objects 'fixture-check.txt'
+Remove-Item $resultFile -ErrorAction SilentlyContinue
 Push-Location $objects
 try {
     $output = & $java -jar 'RepotTests.jar' $Fixtures $objects 2>&1 | Out-String
+    $javaCode = $LASTEXITCODE
 }
 finally {
     Pop-Location
 }
 Write-Host $output
+if ($javaCode -ne 0) {
+    throw "Fixture checker exited with code $javaCode"
+}
 
-$resultFile = Join-Path $objects 'fixture-check.txt'
 if (-not (Test-Path $resultFile)) {
     throw "The checker did not write $resultFile"
 }

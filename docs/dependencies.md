@@ -15,10 +15,15 @@ write code that assumes it.
 
 | Item | Version | Notes | Status |
 |------|---------|-------|--------|
-| B4J | author's installed IDE version (record exact build) | Development target | required |
+| B4J | 10.7 (`B4J.exe` 10.7.0.0) | Development target | verified locally |
 | B4A | author's installed IDE version (record exact build) | v1.1 target | required later |
-| `B4JBuilder.exe` | ships with B4J | Headless build: `-Task=Build`, `-Task=BuildLibrary`, `-BaseFolder`, `-Project`, `-Configuration`, `-Output`, `-NoClean`, `-Obfuscate`; exit code 0 on success | verified by forum report; verify locally |
+| `B4JBuilder.exe` | reports `B4JBuilder v10.70` | Headless build: `-Task=Build`, `-Task=BuildLibrary`, `-BaseFolder`, `-Project`, `-Configuration`, `-Output`, `-NoClean`, `-Obfuscate`; exit code 0 on success | verified locally |
 | `B4ABuilder.exe` | ships with B4A | Android build, needs SDK | verify |
+
+`-Task=BuildLibrary` requires `#LibraryName` in the project file. It writes
+the library jar and XML metadata to the B4J Additional folder
+(`%Additional%\B4J`), not to `Objects\` and not as a `.b4xlib`. Packaging
+the published `.b4xlib` is a separate step (M9).
 
 No CI service is required. A local or self-hosted Windows runner is
 enough because B4JBuilder is Windows-only.

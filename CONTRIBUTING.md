@@ -70,12 +70,14 @@ The engine is developed in B4J. Headless builds use the official
 command-line builder:
 
 ```text
-B4JBuilder.exe -Task=Build -BaseFolder <project folder>
+cd <project folder>
+B4JBuilder.exe -Task=Build
 ```
 
 Record the exact command in the pull request and confirm the exit code.
-See `docs/testing.md` for the fixture harness and what a valid golden
-change looks like.
+The engine project also builds with `-Task=BuildLibrary`. See
+`docs/testing.md` for the fixture harness and what a valid golden change
+looks like.
 
 ## Review and support
 

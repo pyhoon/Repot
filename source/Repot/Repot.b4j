@@ -1,0 +1,53 @@
+AppType=StandardJava
+Build1=Default,b4j.example
+Group=Default Group
+Library1=jcore
+Library2=json
+Module1=RepotUnits
+Module2=RepotJsonUtil
+Module3=RepotExpressionRefs
+Module4=RepotDiagnostic
+Module5=RepotDiagnostics
+Module6=RepotPageSetup
+Module7=RepotFontDef
+Module8=RepotStyle
+Module9=RepotParameterDef
+Module10=RepotFieldDef
+Module11=RepotAggregateDef
+Module12=RepotDataSetDef
+Module13=RepotSortDef
+Module14=RepotGroupDef
+Module15=RepotElement
+Module16=RepotSection
+Module17=RepotDefinition
+Module18=RepotTemplateLoader
+Module19=RepotValidator
+Module20=RepotJsonWriter
+Module21=RepotDataSet
+Module22=RepotDataBinder
+Module23=RepotVersion
+NumberOfFiles=0
+NumberOfLibraries=2
+NumberOfModules=23
+Version=10.7
+@EndOfDesignText@
+#Region Project Attributes
+	#CommandLineArgs:
+	#MergeLibraries: True
+#End Region
+#Region Project Copyright
+#LibraryName: Repot
+#LibraryAuthor: Repot contributors
+#LibraryVersion: 0.10
+'This project builds the engine library. It also runs as a small console
+'smoke test so the command-line build proves the modules link.
+#End Region
+
+Sub Process_Globals
+
+End Sub
+
+Sub AppStart (Args() As String)
+	Dim u As Double = RepotUnits.ParseLength("12mm", 0)
+	Log("Repot " & RepotVersion.LibraryVersion & " loaded; 12mm = " & RepotUnits.FormatNumber(u, 4) & " pt")
+End Sub
