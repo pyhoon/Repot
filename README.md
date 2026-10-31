@@ -8,7 +8,7 @@ by the host application into paginated documents and structured exports.
 The same template is intended to work from B4J desktop, B4J server, and
 B4A, and to render to HTML for browsers.
 
-> **Project status: M0 complete, M1 complete, M2 complete (layout).**
+> **Project status: M0–M5 and M7 complete; M6 next.**
 >
 > The repository contains design documentation, the fixture set with layout
 > goldens, a B4J fixture checker, and the engine modules: template model,

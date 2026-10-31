@@ -5,7 +5,7 @@
 **Ecosystem:** B4X (B4J first, B4A second)\
 **Template format:** Versioned JSON, `.b4xr` extension\
 **License:** MIT, all components\
-**Current stage:** M2 complete, M3 in progress (PDF exporter)
+**Current stage:** M2–M5 and M7 complete; M6 (expressions, grouping, aggregates) next
 
 ---
 
@@ -159,11 +159,11 @@ per week. They are planning ranges, not commitments.
 | M0 | Docs, ADRs, fixture definition, dependency audit, interface contracts | 1 week |
 | M1 | Core model, JSON load/save, validation, datasets, parameters | 2 weeks |
 | M2 | Layout: bands, grid snapping, measurement adapter, push-down, pagination | 3–4 weeks |
-| M3 | PDF export, two-pass page numbering, layout goldens | 2–3 weeks |
-| M4 | HTML export, fixed-layout mode, preview path | 1–2 weeks |
-| M5 | CSV and JSON exporters | 1 week |
-| M6 | Expressions, grouping, aggregates, conditional rules | 2–3 weeks |
-| M7 | DOCX export | 2 weeks |
+| M3 | PDF export, two-pass page numbering, layout goldens | done |
+| M4 | HTML export, fixed-layout mode, preview path | done |
+| M5 | CSV, JSON and XML exporters | done |
+| M6 | Expressions, grouping, aggregates, conditional rules | next |
+| M7 | DOCX and XLSX export | done |
 | M8 | B4A adapter, HTML print path, cross-platform comparison | 2–3 weeks |
 | M9 | Examples, docs, packaging, CI hardening, release | 1–2 weeks |
 
