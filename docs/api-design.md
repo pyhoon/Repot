@@ -25,7 +25,7 @@ implemented and their names are not yet frozen.
 ```vb
 Dim Report As Repot
 Report.Initialize
-Report.LoadTemplate(File.DirAssets, "Invoice.b4xr")
+Report.LoadTemplate(File.DirAssets, "Invoice.repot")
 Report.SetDataSource("Items", LineItems)          ' List
 Report.SetDataSourceSingle("Customer", Customer)  ' Map
 Report.SetParameter("InvoiceNumber", "INV-1042")
@@ -158,7 +158,7 @@ Report.SetDefinition(Def)
 ```
 
 The builder writes the same structures as the loader. Serialising a
-programmatically built report to `.b4xr` must round-trip through the
+programmatically built report to `.repot` must round-trip through the
 loader, and that round-trip is a test.
 
 ## 7. Adapters and initialisation

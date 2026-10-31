@@ -8,7 +8,7 @@ implemented; layout and exporters are not implemented yet.
 ## 1. Pipeline
 
 ```text
-          .b4xr            host data         parameters
+          .repot            host data         parameters
              │                  │                  │
              ▼                  ▼                  ▼
      ┌───────────────────────────────────────────────────┐
@@ -37,7 +37,7 @@ never inherit a row cursor.
 
 | Layer | Responsibility | May depend on |
 |-------|----------------|---------------|
-| Template | Parse, validate, version, serialise `.b4xr`; hold the definition model | nothing platform-specific |
+| Template | Parse, validate, version, serialise `.repot`; hold the definition model | nothing platform-specific |
 | Data | Dataset registration, field resolution, parameters, typed values | template model |
 | Processing | Sorting, grouping, aggregates, running totals, visibility, expression evaluation | data, template |
 | Layout | Measurement, band arrangement, push-down, pagination | processing, adapters |

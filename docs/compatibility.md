@@ -11,7 +11,7 @@ and what is explicitly best-effort. It is the contract behind the phrase
 
 | Capability | B4J desktop | B4J server | B4A | Browser |
 |------------|-------------|------------|-----|---------|
-| Parse and validate `.b4xr` | 0.1 | 0.1 | 1.0 | -- |
+| Parse and validate `.repot` | 0.1 | 0.1 | 1.0 | -- |
 | Data binding, expressions, grouping | 0.1 / 0.2 | 0.1 / 0.2 | 1.0 | -- |
 | Layout and pagination | 0.1 | 0.1 | 1.0 | -- |
 | PDF export | 0.1 | 0.1 | 1.0 (print path) | -- |
@@ -121,7 +121,7 @@ cross-platform and then fail on Android's toolchain.
   adapter is implemented.
 - Java: the version shipped with the B4X toolchain, recorded when the PDF
   adapter is added. No assumption about newer JDK features.
-- Schema: the library declares which `.b4xr` schema versions it accepts.
+- Schema: the library declares which `.repot` schema versions it accepts.
 
 ## 7. What "supported" means
 

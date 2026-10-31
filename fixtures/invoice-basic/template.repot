@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "0.1",
+  "id": "invoice.standard",
+  "name": "Standard invoice",
+  "description": "One-page invoice with logo, line items and totals.",
+  "page": {
+    "size": "A4",
+    "orientation": "portrait",
+    "margins": { "top": "12mm", "right": "15mm", "bottom": "18mm", "left": "15mm" }
+  },
+  "fonts": {
+    "body": { "family": ["DejaVu Sans", "Arial", "sans-serif"], "size": 9 }
+  },
+  "styles": {
+    "title": { "font": "body", "size": 18, "bold": true },
+    "label": { "font": "body", "colour": "#555555" },
+    "cell": { "font": "body", "valign": "middle", "overflow": "grow" },
+    "cellRight": { "font": "body", "align": "right", "valign": "middle", "overflow": "grow" },
+    "money": {
+      "font": "body",
+      "align": "right",
+      "valign": "middle",
+      "overflow": "grow",
+      "format": { "type": "number", "decimals": 2, "grouping": true }
+    },
+    "total": { "font": "body", "size": 11, "bold": true, "align": "right" }
+  },
+  "parameters": [
+    { "name": "InvoiceNumber", "type": "string", "required": true },
+    { "name": "IssuedOn", "type": "datetime", "required": true }
+  ],
+  "dataSets": [
+    {
+      "name": "Customer",
+      "kind": "single",
+      "fields": [
+        { "name": "Name", "type": "string" },
+        { "name": "Address", "type": "string" }
+      ]
+    },
+    {
+      "name": "Items",
+      "kind": "rows",
+      "fields": [
+        { "name": "Description", "type": "string" },
+        { "name": "Quantity", "type": "decimal" },
+        { "name": "UnitPrice", "type": "decimal" },
+        { "name": "Amount", "type": "decimal" }
+      ],
+      "aggregates": [
+        { "name": "NetTotal", "function": "sum", "field": "Amount" },
+        { "name": "LineCount", "function": "count" }
+      ]
+    }
+  ],
+  "sections": [
+    {
+      "type": "ReportHeader",
+      "id": "report-header",
+      "height": 90,
+      "elements": [
+        {
+          "type": "image",
+          "id": "logo",
+          "bounds": [0, 0, 130, 48],
+          "resource": "logo.png",
+          "fit": "contain"
+        },
+        { "type": "text", "id": "title", "bounds": [340, 0, 170, 26], "style": "title", "text": "INVOICE" },
+        { "type": "text", "id": "lbl-invoice-no", "bounds": [340, 30, 70, 14], "style": "label", "text": "Number" },
+        { "type": "field", "id": "fld-invoice-no", "bounds": [415, 30, 95, 14], "style": "cellRight", "value": "{param.InvoiceNumber}" },
+        { "type": "text", "id": "lbl-issued", "bounds": [340, 46, 70, 14], "style": "label", "text": "Issued" },
+        {
+          "type": "field",
+          "id": "fld-issued",
+          "bounds": [415, 46, 95, 14],
+          "style": "cellRight",
+          "value": "{param.IssuedOn}",
+          "format": { "type": "date", "pattern": "yyyy-MM-dd" }
+        }
+      ]
+    },
+    {
+      "type": "PageHeader",
+      "id": "page-header",
+      "height": 20,
+      "elements": [
+        { "type": "text", "id": "col-desc", "bounds": [0, 0, 240, 14], "style": "label", "text": "Description" },
+        { "type": "text", "id": "col-qty", "bounds": [250, 0, 44, 14], "style": "label", "text": "Qty", "align": "right" },
+        { "type": "text", "id": "col-price", "bounds": [300, 0, 100, 14], "style": "label", "text": "Unit price", "align": "right" },
+        { "type": "text", "id": "col-amount", "bounds": [410, 0, 100, 14], "style": "label", "text": "Amount", "align": "right" },
+        { "type": "line", "id": "header-rule", "bounds": [0, 17, 510, 0], "colour": "#999999", "width": 0.5 }
+      ]
+    },
+    {
+      "type": "Detail",
+      "id": "detail",
+      "dataSet": "Items",
+      "height": 16,
+      "elements": [
+        { "type": "field", "id": "cell-desc", "bounds": [0, 0, 240, 16], "style": "cell", "value": "{Description}" },
+        { "type": "field", "id": "cell-qty", "bounds": [250, 0, 44, 16], "style": "cellRight", "value": "{Quantity}" },
+        { "type": "field", "id": "cell-price", "bounds": [300, 0, 100, 16], "style": "money", "value": "{UnitPrice}" },
+        { "type": "field", "id": "cell-amount", "bounds": [410, 0, 100, 16], "style": "money", "value": "{Amount}" }
+      ]
+    },
+    {
+      "type": "ReportFooter",
+      "id": "report-footer",
+      "height": 40,
+      "keepTogether": true,
+      "elements": [
+        { "type": "field", "id": "lbl-lines", "bounds": [0, 6, 240, 16], "style": "label", "value": "Items: {LineCount}" },
+        { "type": "text", "id": "lbl-total", "bounds": [300, 6, 100, 16], "style": "total", "text": "Total" },
+        { "type": "field", "id": "fld-total", "bounds": [410, 6, 100, 16], "style": "total", "value": "{NetTotal}" }
+      ]
+    },
+    {
+      "type": "PageFooter",
+      "id": "page-footer",
+      "height": 24,
+      "elements": [
+        { "type": "field", "id": "page-no", "bounds": [0, 8, 200, 12], "style": "label", "value": "Page {page.number} of {page.count}" },
+        { "type": "field", "id": "customer", "bounds": [310, 8, 200, 12], "style": "label", "align": "right", "value": "{Customer.Name}" }
+      ]
+    }
+  ]
+}

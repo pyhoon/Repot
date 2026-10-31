@@ -1,4 +1,4 @@
-# ADR 0005 — Own `.b4xr` JSON format, schema frozen last
+# ADR 0005 — Own `.repot` JSON format, schema frozen last
 
 - Status: accepted
 - Date: 2026-10-31
@@ -9,7 +9,7 @@ The template format is the project's real compatibility contract. It must
 be portable, diffable, tool-friendly, and stable enough that a designer
 can be built on it. Options:
 
-- **Own JSON format (`.b4xr`).** Full control, readable diffs, easy for
+- **Own JSON format (`.repot`).** Full control, readable diffs, easy for
   tooling and language models, no licence entanglement. Cost: we define
   and maintain everything, and there is no existing designer.
 - **Adopt a JRXML subset.** JasperReports already has a free visual
@@ -27,7 +27,7 @@ in guesses, and every field costs migrations later.
 
 ## Decision
 
-Use a JSON format with the `.b4xr` extension, owned by this project.
+Use a JSON format with the `.repot` extension, owned by this project.
 Freeze the schema **last**, driven by the fixture set: three real reports
 first, schema second. Expressions are braced and evaluated by a small
 hand-written grammar. Templates never contain SQL, script, or executable

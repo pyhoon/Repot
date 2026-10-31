@@ -5,7 +5,7 @@
 
 ## Context
 
-The draft `.b4xr` schema was written before any template rendered. Three
+The draft `.repot` schema was written before any template rendered. Three
 fixtures — an invoice, a multi-page listing, and a grouped statement —
 then exercised it. They exposed ambiguities that would otherwise be
 resolved differently by the loader, layout, and each exporter.

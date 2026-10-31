@@ -1,4 +1,4 @@
-# Template Format (`.b4xr`)
+# Template Format (`.repot`)
 
 Status: **draft v0.1, not stable.** This schema will change. It is
 frozen only after the fixture set in `fixtures/` renders correctly
@@ -14,7 +14,7 @@ review that closes M0 was signed off on 2026-10-31; see
 
 ## 1. Conventions
 
-- UTF-8 JSON, extension `.b4xr`, no BOM, LF or CRLF both accepted.
+- UTF-8 JSON, extension `.repot`, no BOM, LF or CRLF both accepted.
 - `schemaVersion` is a string and is required.
 - Units are points unless a property says otherwise. `mm`, `in`, and `px`
   are accepted as suffixed strings and converted at load time.

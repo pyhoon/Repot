@@ -4,7 +4,7 @@ ModulesStructureVersion=1
 Type=Class
 Version=10.7
 @EndOfDesignText@
-'Loads a .b4xr JSON template into ReportDefinition and validates it.
+'Loads a .repot JSON template into ReportDefinition and validates it.
 '
 'The loader converts units once, normalises defaults and reports structured
 'diagnostics. It never executes template content.

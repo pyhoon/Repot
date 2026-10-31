@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "0.1",
+  "id": "listing.sales",
+  "name": "Sales listing",
+  "description": "Multi-page sales listing using grid positioning and page numbering.",
+  "page": {
+    "size": "A4",
+    "orientation": "portrait",
+    "margins": { "top": "12mm", "right": "15mm", "bottom": "18mm", "left": "15mm" },
+    "grid": { "columns": 24, "cellHeight": 16 }
+  },
+  "fonts": {
+    "body": { "family": ["DejaVu Sans", "Arial", "sans-serif"], "size": 9 }
+  },
+  "styles": {
+    "title": { "font": "body", "size": 16, "bold": true },
+    "label": { "font": "body", "colour": "#555555" },
+    "cell": { "font": "body", "valign": "middle", "overflow": "grow" },
+    "cellRight": { "font": "body", "align": "right", "valign": "middle", "overflow": "grow" },
+    "money": {
+      "font": "body",
+      "align": "right",
+      "valign": "middle",
+      "overflow": "grow",
+      "format": { "type": "number", "decimals": 2, "grouping": true }
+    },
+    "total": { "font": "body", "size": 11, "bold": true, "align": "right" }
+  },
+  "parameters": [
+    { "name": "ReportTitle", "type": "string", "required": true },
+    { "name": "PeriodStart", "type": "string", "required": false },
+    { "name": "PeriodEnd", "type": "string", "required": false }
+  ],
+  "dataSets": [
+    {
+      "name": "Sales",
+      "kind": "rows",
+      "fields": [
+        { "name": "Region", "type": "string" },
+        { "name": "Salesperson", "type": "string" },
+        { "name": "Item", "type": "string" },
+        { "name": "Quantity", "type": "integer" },
+        { "name": "Amount", "type": "decimal" }
+      ],
+      "aggregates": [
+        { "name": "TotalAmount", "function": "sum", "field": "Amount" },
+        { "name": "RowCount", "function": "count" }
+      ]
+    }
+  ],
+  "sections": [
+    {
+      "type": "ReportHeader",
+      "id": "report-header",
+      "height": 56,
+      "elements": [
+        { "type": "field", "id": "title", "bounds": [0, 0, 400, 24], "style": "title", "value": "{param.ReportTitle}" },
+        {
+          "type": "field",
+          "id": "period",
+          "bounds": [0, 28, 400, 14],
+          "style": "label",
+          "value": "Period {param.PeriodStart} to {param.PeriodEnd}"
+        }
+      ]
+    },
+    {
+      "type": "PageHeader",
+      "id": "page-header",
+      "height": 20,
+      "elements": [
+        { "type": "text", "id": "hdr-region", "cell": { "col": 0, "row": 0, "colSpan": 3, "rowSpan": 1 }, "style": "label", "text": "Region" },
+        { "type": "text", "id": "hdr-sales", "cell": { "col": 3, "row": 0, "colSpan": 4, "rowSpan": 1 }, "style": "label", "text": "Salesperson" },
+        { "type": "text", "id": "hdr-item", "cell": { "col": 7, "row": 0, "colSpan": 10, "rowSpan": 1 }, "style": "label", "text": "Item" },
+        { "type": "text", "id": "hdr-qty", "cell": { "col": 17, "row": 0, "colSpan": 2, "rowSpan": 1 }, "style": "label", "text": "Qty", "align": "right" },
+        { "type": "text", "id": "hdr-amount", "cell": { "col": 19, "row": 0, "colSpan": 5, "rowSpan": 1 }, "style": "label", "text": "Amount", "align": "right" },
+        { "type": "line", "id": "header-rule", "bounds": [0, 17, 510, 0], "colour": "#999999", "width": 0.5 }
+      ]
+    },
+    {
+      "type": "Detail",
+      "id": "detail",
+      "dataSet": "Sales",
+      "height": 16,
+      "elements": [
+        { "type": "field", "id": "cell-region", "cell": { "col": 0, "row": 0, "colSpan": 3, "rowSpan": 1 }, "style": "cell", "value": "{Region}" },
+        { "type": "field", "id": "cell-sales", "cell": { "col": 3, "row": 0, "colSpan": 4, "rowSpan": 1 }, "style": "cell", "value": "{Salesperson}" },
+        { "type": "field", "id": "cell-item", "cell": { "col": 7, "row": 0, "colSpan": 10, "rowSpan": 1 }, "style": "cell", "value": "{Item}" },
+        { "type": "field", "id": "cell-qty", "cell": { "col": 17, "row": 0, "colSpan": 2, "rowSpan": 1 }, "style": "cellRight", "value": "{Quantity}" },
+        { "type": "field", "id": "cell-amount", "cell": { "col": 19, "row": 0, "colSpan": 5, "rowSpan": 1 }, "style": "money", "value": "{Amount}" }
+      ]
+    },
+    {
+      "type": "ReportFooter",
+      "id": "report-footer",
+      "height": 36,
+      "keepTogether": true,
+      "elements": [
+        { "type": "field", "id": "rowcount", "bounds": [0, 8, 240, 16], "style": "label", "value": "Rows: {RowCount}" },
+        { "type": "text", "id": "total-label", "bounds": [300, 8, 80, 16], "style": "total", "text": "Total" },
+        { "type": "field", "id": "total-value", "bounds": [380, 8, 130, 16], "style": "total", "value": "{TotalAmount}" }
+      ]
+    },
+    {
+      "type": "PageFooter",
+      "id": "page-footer",
+      "height": 24,
+      "elements": [
+        { "type": "field", "id": "page-no", "bounds": [0, 8, 200, 12], "style": "label", "value": "Page {page.number} of {page.count}" },
+        { "type": "field", "id": "footer-title", "bounds": [310, 8, 200, 12], "style": "label", "align": "right", "value": "{param.ReportTitle}" }
+      ]
+    }
+  ]
+}

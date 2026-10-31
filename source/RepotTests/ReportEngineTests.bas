@@ -472,7 +472,7 @@ Private Sub TestPagination
 
 	Dim loader As ReportTemplateLoader
 	loader.Initialize
-	Dim def As ReportDefinition = loader.LoadFromFile(invDir, "template.b4xr")
+	Dim def As ReportDefinition = loader.LoadFromFile(invDir, "template.repot")
 	Check(loader.Diagnostics.HasErrors = False, "invoice template loads: " & FirstErrors(loader.Diagnostics, 3))
 
 	Dim binder As ReportDataBinder
@@ -528,7 +528,7 @@ Private Sub TestPagination
 	Dim listDir As String = File.Combine(fixtures, "listing-multipage")
 	Dim lloader As ReportTemplateLoader
 	lloader.Initialize
-	Dim ldef As ReportDefinition = lloader.LoadFromFile(listDir, "template.b4xr")
+	Dim ldef As ReportDefinition = lloader.LoadFromFile(listDir, "template.repot")
 	Check(lloader.Diagnostics.HasErrors = False, "listing template loads")
 
 	Dim lbinder As ReportDataBinder
@@ -579,7 +579,7 @@ Private Sub TestGoldens
 		Dim dir As String = File.Combine(mFixtures, name)
 		Dim loader As ReportTemplateLoader
 		loader.Initialize
-		Dim def As ReportDefinition = loader.LoadFromFile(dir, "template.b4xr")
+		Dim def As ReportDefinition = loader.LoadFromFile(dir, "template.repot")
 		Check(loader.Diagnostics.HasErrors = False, name & " loads for golden")
 
 		Dim binder As ReportDataBinder
@@ -631,7 +631,7 @@ Private Sub TestPdfExport
 	Dim invDir As String = File.Combine(mFixtures, "invoice-basic")
 	Dim loader As ReportTemplateLoader
 	loader.Initialize
-	Dim def As ReportDefinition = loader.LoadFromFile(invDir, "template.b4xr")
+	Dim def As ReportDefinition = loader.LoadFromFile(invDir, "template.repot")
 	Check(loader.Diagnostics.HasErrors = False, "invoice loads for pdf")
 
 	Dim binder As ReportDataBinder
@@ -677,7 +677,7 @@ Private Sub TestPdfExport
 	Dim listDir As String = File.Combine(mFixtures, "listing-multipage")
 	Dim lloader As ReportTemplateLoader
 	lloader.Initialize
-	Dim ldef As ReportDefinition = lloader.LoadFromFile(listDir, "template.b4xr")
+	Dim ldef As ReportDefinition = lloader.LoadFromFile(listDir, "template.repot")
 	Check(lloader.Diagnostics.HasErrors = False, "listing loads for pdf")
 
 	Dim lbinder As ReportDataBinder
@@ -721,7 +721,7 @@ Private Sub TestHtmlExport
 	Dim invDir As String = File.Combine(mFixtures, "invoice-basic")
 	Dim loader As ReportTemplateLoader
 	loader.Initialize
-	Dim def As ReportDefinition = loader.LoadFromFile(invDir, "template.b4xr")
+	Dim def As ReportDefinition = loader.LoadFromFile(invDir, "template.repot")
 	Check(loader.Diagnostics.HasErrors = False, "invoice loads for html")
 
 	Dim binder As ReportDataBinder
@@ -768,7 +768,7 @@ Private Sub TestDataExport
 	Dim invDir As String = File.Combine(mFixtures, "invoice-basic")
 	Dim loader As ReportTemplateLoader
 	loader.Initialize
-	Dim def As ReportDefinition = loader.LoadFromFile(invDir, "template.b4xr")
+	Dim def As ReportDefinition = loader.LoadFromFile(invDir, "template.repot")
 	Check(loader.Diagnostics.HasErrors = False, "invoice loads for data export")
 
 	Dim binder As ReportDataBinder
@@ -823,7 +823,7 @@ Private Sub TestOfficeExport
 	Dim invDir As String = File.Combine(mFixtures, "invoice-basic")
 	Dim loader As ReportTemplateLoader
 	loader.Initialize
-	Dim def As ReportDefinition = loader.LoadFromFile(invDir, "template.b4xr")
+	Dim def As ReportDefinition = loader.LoadFromFile(invDir, "template.repot")
 	Check(loader.Diagnostics.HasErrors = False, "invoice loads for office export")
 
 	Dim binder As ReportDataBinder
@@ -920,7 +920,7 @@ Private Sub TestGrouping
 	Dim dir As String = File.Combine(mFixtures, "statement-grouped")
 	Dim loader As ReportTemplateLoader
 	loader.Initialize
-	Dim def As ReportDefinition = loader.LoadFromFile(dir, "template.b4xr")
+	Dim def As ReportDefinition = loader.LoadFromFile(dir, "template.repot")
 	Check(loader.Diagnostics.HasErrors = False, "statement template loads")
 
 	Dim binder As ReportDataBinder
@@ -972,7 +972,7 @@ Private Sub TestFixturesLoadAndRoundTrip
 		Dim dir As String = File.Combine(mFixtures, name)
 		Dim loader As ReportTemplateLoader
 		loader.Initialize
-		Dim def As ReportDefinition = loader.LoadFromFile(dir, "template.b4xr")
+		Dim def As ReportDefinition = loader.LoadFromFile(dir, "template.repot")
 		Check(loader.Diagnostics.HasErrors = False, name & " loads without errors: " & FirstErrors(loader.Diagnostics, 3))
 		Check(loader.Diagnostics.WarningCount = 0, name & " loads without warnings: " & FirstWarnings(loader.Diagnostics, 3))
 		Check(def.Sections.Size > 0, name & " has sections")
@@ -1002,7 +1002,7 @@ Private Sub TestFixturesLoadAndRoundTrip
 		'Loading the same input twice must produce the same canonical output.
 		Dim loader3 As ReportTemplateLoader
 		loader3.Initialize
-		Dim def3 As ReportDefinition = loader3.LoadFromFile(dir, "template.b4xr")
+		Dim def3 As ReportDefinition = loader3.LoadFromFile(dir, "template.repot")
 		Dim json3 As String = writer.ToJson(def3)
 		CheckText(json1, json3, name & " is deterministic across loads")
 	Next
@@ -1012,7 +1012,7 @@ End Sub
 
 Private Sub TestValidationFailures
 	Dim dir As String = File.Combine(mFixtures, "invoice-basic")
-	Dim good As String = File.ReadString(dir, "template.b4xr")
+	Dim good As String = File.ReadString(dir, "template.repot")
 	Dim q As String = Chr(34)
 
 	'Unknown style reference.
@@ -1098,7 +1098,7 @@ Private Sub TestDataBinder
 	Dim dir As String = File.Combine(mFixtures, "invoice-basic")
 	Dim loader As ReportTemplateLoader
 	loader.Initialize
-	Dim def As ReportDefinition = loader.LoadFromFile(dir, "template.b4xr")
+	Dim def As ReportDefinition = loader.LoadFromFile(dir, "template.repot")
 	Check(loader.Diagnostics.HasErrors = False, "invoice loads for binding")
 
 	Dim binder As ReportDataBinder
@@ -1176,7 +1176,7 @@ Private Sub TestDataBinder
 	Dim q As String = Chr(34)
 	Dim target As String = q & "name" & q & ": " & q & "InvoiceNumber" & q & ", " & q & "type" & q & ": " & q & "string" & q & ", " & q & "required" & q & ": true"
 	Dim replacement As String = target & ", " & q & "default" & q & ": " & q & "INV-0" & q
-	Dim withDefault As String = File.ReadString(dir, "template.b4xr").Replace(target, replacement)
+	Dim withDefault As String = File.ReadString(dir, "template.repot").Replace(target, replacement)
 	Dim loaderD As ReportTemplateLoader
 	loaderD.Initialize
 	Dim defD As ReportDefinition = loaderD.LoadFromString(withDefault, dir)

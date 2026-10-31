@@ -68,7 +68,7 @@ types, and whether Word/LibreOffice can open the result.
 ```text
 fixtures/
 ├── invoice-basic/
-│   ├── template.b4xr
+│   ├── template.repot
 │   ├── data.json
 │   ├── params.json
 │   ├── logo.png

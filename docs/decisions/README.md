@@ -13,7 +13,7 @@ accepted; a later ADR supersedes an earlier one.
 | [0002](0002-layout-model.md) | Banded sections with optional grid snapping | accepted | 2026-10-31 |
 | [0003](0003-pdf-backend.md) | PDF canvas interface with PDFBox backend | accepted | 2026-10-31 |
 | [0004](0004-b4a-output-strategy.md) | B4A after B4J, HTML print path | accepted | 2026-10-31 |
-| [0005](0005-template-format.md) | Own `.b4xr` JSON format, schema frozen last | accepted | 2026-10-31 |
+| [0005](0005-template-format.md) | Own `.repot` JSON format, schema frozen last | accepted | 2026-10-31 |
 | [0006](0006-packaging.md) | One `.b4xlib`, optional jars | accepted | 2026-10-31 |
 | [0007](0007-project-name.md) | Project name: Repot | accepted | 2026-10-31 |
 | [0008](0008-render-document.md) | Render document is a versioned display list | accepted | 2026-10-31 |

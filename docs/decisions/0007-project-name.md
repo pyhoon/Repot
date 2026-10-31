@@ -28,7 +28,7 @@ The project is **Repot**.
   `RepotTests`.
 - `[B4X]` is used only as a forum tag to signal the ecosystem, never as
   part of a class or file name.
-- The template extension stays `.b4xr`, because it identifies the format,
+- The template extension stays `.repot`, because it identifies the format,
   not the product.
 
 ## Consequences
