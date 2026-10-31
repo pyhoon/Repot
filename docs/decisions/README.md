@@ -15,6 +15,7 @@ accepted; a later ADR supersedes an earlier one.
 | [0004](0004-b4a-output-strategy.md) | B4A after B4J, HTML print path | accepted | 2026-10-31 |
 | [0005](0005-template-format.md) | Own `.b4xr` JSON format, schema frozen last | accepted | 2026-10-31 |
 | [0006](0006-packaging.md) | One `.b4xlib`, optional jars | accepted | 2026-10-31 |
+| [0007](0007-project-name.md) | Project name: Repot | accepted | 2026-10-31 |
 
 ## Template
 

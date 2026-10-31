@@ -22,7 +22,7 @@ will be frozen in M1.
 ## 2. The facade
 
 ```vb
-Dim Report As B4XReport
+Dim Report As Repot
 Report.Initialize
 Report.LoadTemplate(File.DirAssets, "Invoice.b4xr")
 Report.SetDataSource("Items", LineItems)          ' List
@@ -32,9 +32,9 @@ Report.SetParameterDate("IssuedOn", DateTime.Now)
 Report.SetTimestamp(Now)        ' explicit clock for date/time fields
 Report.SetLocale("en-GB")       ' explicit culture for formatting
 
-Wait For (Report.Build) Complete (Result As B4XReportResult)
+Wait For (Report.Build) Complete (Result As RepotResult)
 If Result.Success = False Then
-    For Each D As B4XReportDiagnostic In Result.Errors
+    For Each D As RepotDiagnostic In Result.Errors
         Log(D.Code & " " & D.ElementId & ": " & D.Message)
     Next
     Return
@@ -62,7 +62,7 @@ Named variants exist because B4X lacks overloads:
 
 ```vb
 Result.Success As Boolean
-Result.Errors As List              ' B4XReportDiagnostic
+Result.Errors As List              ' RepotDiagnostic
 Result.Warnings As List
 Result.PageCount As Int
 Result.RecordCount As Int
@@ -70,7 +70,7 @@ Result.DurationMs As Long
 Result.SourceVersion As String     ' schemaVersion of the template
 ```
 
-`B4XReportDiagnostic`: `Severity`, `Code`, `Message`, `ElementId`,
+`RepotDiagnostic`: `Severity`, `Code`, `Message`, `ElementId`,
 `Path` (JSON pointer), `Hint`. Codes are stable strings such as
 `E-TPL-104` and are listed in the docs as they are introduced.
 
@@ -82,7 +82,7 @@ Applications do not read it; exporters do.
 Each exporter is a class with the same shape:
 
 ```vb
-Dim Pdf As B4XReportPdf
+Dim Pdf As RepotPdf
 Pdf.Initialize(Result)
 Pdf.SetOption("title", "Invoice 1042")
 Pdf.SetOption("compress", "true")
@@ -105,9 +105,9 @@ Rules:
 - `LastError` is populated on failure; `ExportTo*` returns `False`
   instead of raising for expected failures.
 
-Planned classes: `B4XReportPdf`, `B4XReportHtml`, `B4XReportCsv`,
-`B4XReportJson`, `B4XReportXml`, `B4XReportDocx`, later
-`B4XReportXlsx`.
+Planned classes: `RepotPdf`, `RepotHtml`, `RepotCsv`,
+`RepotJson`, `RepotXml`, `RepotDocx`, later
+`RepotXlsx`.
 
 Two HTML modes are selected by option, not by class:
 
@@ -141,12 +141,12 @@ The same in-memory definition that the JSON loader produces is available
 for construction, so there is no second report model:
 
 ```vb
-Dim Def As B4XReportDefinition = Report.NewDefinition("invoice.programmatic")
+Dim Def As RepotDefinition = Report.NewDefinition("invoice.programmatic")
 Def.SetPageSize("A4", "portrait")
 Def.SetMargins(12, 15, 18, 15, "mm")
 Def.AddDataSet("Items", "Item, Quantity, Amount")
 Def.AddStyle("cell", "Arial", 9)
-Dim S As B4XReportSection = Def.AddSection("Detail", "Items")
+Dim S As RepotSection = Def.AddSection("Detail", "Items")
 S.SetHeight(16)
 S.AddField("desc", 0, 0, 240, 16, "{Description}", "cell")
 S.AddField("amt", 410, 0, 100, 16, "{Amount}", "money")
@@ -162,7 +162,7 @@ loader, and that round-trip is a test.
 Platform behaviour is injected once, at the edge:
 
 ```vb
-Dim Adapter As B4XReportB4JAdapter   ' or B4XReportB4AAdapter
+Dim Adapter As RepotB4JAdapter   ' or RepotB4AAdapter
 Adapter.Initialize
 Report.SetAdapter(Adapter)
 ```
@@ -181,7 +181,7 @@ reason to leak JavaFX into the core.
 - `Build`, `ExportToFile`, `ExportToStream`, and `ExportToString` are
   resumable subs and must be called with `Wait For`.
 - The engine does not require a UI thread. It must not touch views.
-- One `B4XReport` instance is used by one build at a time. The result may
+- One `Repot` instance is used by one build at a time. The result may
   be exported concurrently to different formats, provided each exporter
   has its own instance.
 - Cancellation is cooperative and checked between records and pages.

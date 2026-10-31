@@ -1,8 +1,8 @@
-# Contributing to B4XReport
+# Contributing to Repot
 
 ## License of contributions
 
-B4XReport is MIT-licensed, and it will stay that way. By submitting a
+Repot is MIT-licensed, and it will stay that way. By submitting a
 contribution you agree that it is licensed under the same MIT terms as the
 rest of the project.
 

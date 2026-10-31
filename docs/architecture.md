@@ -70,27 +70,27 @@ These are shapes, not final signatures. Signatures are frozen in M1.
 
 ```vb
 ' Returns the number of whole lines and the metrics needed for layout.
-Sub MeasureBlock(Text As String, Style As B4XReportTextStyle, MaxWidth As Double) As B4XReportTextMetrics
+Sub MeasureBlock(Text As String, Style As RepotTextStyle, MaxWidth As Double) As RepotTextMetrics
 ' Width of a single line without wrapping.
-Sub MeasureLine(Text As String, Style As B4XReportTextStyle) As Double
+Sub MeasureLine(Text As String, Style As RepotTextStyle) As Double
 ' Nominal line height for the style.
-Sub LineHeight(Style As B4XReportTextStyle) As Double
+Sub LineHeight(Style As RepotTextStyle) As Double
 ```
 
-`B4XReportTextMetrics` carries `LineCount`, `Width`, `Height`, and the
+`RepotTextMetrics` carries `LineCount`, `Width`, `Height`, and the
 break positions used. The engine never asks the platform "how does this
 look"; it asks for numbers and lays out deterministically from them.
 
 ### 4.2 Font resolution
 
-`Resolve(Name, Bold, Italic, SizePt) As B4XReportFont` returns an opaque
+`Resolve(Name, Bold, Italic, SizePt) As RepotFont` returns an opaque
 font handle plus a measurement identity string. Two platforms may return
 different metrics for the same logical font; that difference is contained
 here and documented as a tolerance.
 
 ### 4.3 Image loading
 
-`Load(ResourceRef) As B4XReportImage` returns pixel dimensions and an
+`Load(ResourceRef) As RepotImage` returns pixel dimensions and an
 opaque handle. Caching is the adapter's responsibility. The engine only
 needs intrinsic size and a way to hand the handle to a drawing backend.
 
@@ -169,7 +169,7 @@ document generated last year.
   financial document.
 - Missing fields resolve to null, not to an error, unless the field is
   declared required.
-- Errors surface as `B4XReportResult.Errors`, not as raw exceptions. The
+- Errors surface as `RepotResult.Errors`, not as raw exceptions. The
   public API converts platform exceptions into diagnostics at the adapter
   boundary.
 - Warnings (for example, text truncated by a fixed-height element) are

@@ -1,9 +1,9 @@
-# B4XReport
+# Repot
 
 A cross-platform reporting and document-generation engine for the B4X
 ecosystem, written in B4X and licensed MIT.
 
-B4XReport turns a portable report definition (`.b4xr`) plus data supplied
+Repot turns a portable report definition (`.b4xr`) plus data supplied
 by the host application into paginated documents and structured exports.
 The same template is intended to work from B4J desktop, B4J server, and
 B4A, and to render to HTML for browsers.
@@ -30,7 +30,7 @@ template file, one hard-coded output format, and no pagination, grouping,
 or data pipeline. The landscape is summarised in
 [docs/prior-art.md](docs/prior-art.md).
 
-B4XReport is the engine those applications keep re-implementing: banded
+Repot is the engine those applications keep re-implementing: banded
 sections, grouping and totals, deterministic pagination, a versioned
 template format, and as many output formats as a report can honestly
 support.
@@ -116,7 +116,7 @@ The intended experience is two-phase: build a report once, then export it
 to as many formats as needed without re-running layout.
 
 ```vb
-Dim Report As B4XReport
+Dim Report As Repot
 Report.Initialize
 Report.LoadTemplate(File.DirAssets, "Invoice.b4xr")
 Report.SetDataSource("Items", InvoiceItems)      ' List of Maps or custom objects
@@ -124,9 +124,9 @@ Report.SetParameter("InvoiceNumber", "INV-1042")
 Report.SetTimestamp(DateTime.Now)                ' explicit clock, no ambient time
 Report.SetLocale("en-GB")                        ' explicit formatting culture
 
-Wait For (Report.Build) Complete (Result As B4XReportResult)
+Wait For (Report.Build) Complete (Result As RepotResult)
 If Result.Success Then
-    Dim Pdf As B4XReportPdf
+    Dim Pdf As RepotPdf
     Pdf.Initialize(Result)
     Wait For (Pdf.Export(File.DirApp, "invoice.pdf")) Complete (Ok As Boolean)
 End If
@@ -139,7 +139,7 @@ JSON-only. See [docs/api-design.md](docs/api-design.md).
 ## Repository layout
 
 ```text
-B4XReport/
+Repot/
 ├── README.md
 ├── PLAN.md                      Engineering plan and milestone brief
 ├── CONTRIBUTING.md              Contribution terms, review and support policy
@@ -148,7 +148,7 @@ B4XReport/
 │   ├── decisions/               Architecture decision records
 │   └── b4x-notes.md             Verified B4X API facts
 ├── source/
-│   └── B4XReportTests/          Fixture checker (B4J console project)
+│   └── RepotTests/          Fixture checker (B4J console project)
 ├── demo/                        Minimal B4XPages demos for each platform
 ├── fixtures/                    Templates, data and notes; goldens from M3
 └── tools/                       Developer scripts (fixture runner)

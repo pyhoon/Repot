@@ -6,8 +6,8 @@
 ## Context
 
 The original plan described seven separate module projects
-(`B4XReportCore`, `B4XReportLayout`, `B4XReportPDF`, `B4XReportHTML`,
-`B4XReportCSV`, `B4XReportXML`, `B4XReportJSON`) plus platform adapters,
+(`RepotCore`, `RepotLayout`, `RepotPDF`, `RepotHTML`,
+`RepotCSV`, `RepotXML`, `RepotJSON`) plus platform adapters,
 and a rule that "a PDF-only application must not depend on spreadsheet
 libraries".
 
@@ -29,8 +29,8 @@ adapters are small projects that may ship separately where they need
 platform-specific jars.
 
 Optionality is expressed through jars and through the exporter classes
-the application chooses to call. `B4XReportPdf` requires PDFBox jars;
-`B4XReportCsv` requires nothing. Adding the library never forces a format
+the application chooses to call. `RepotPdf` requires PDFBox jars;
+`RepotCsv` requires nothing. Adding the library never forces a format
 dependency.
 
 Build with `B4JBuilder.exe -Task=BuildLibrary`; the project lives under

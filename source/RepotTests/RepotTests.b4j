@@ -8,7 +8,7 @@ NumberOfLibraries=2
 NumberOfModules=0
 Version=10.7
 @EndOfDesignText@
-'B4XReport fixture checker.
+'Repot fixture checker.
 '
 'Validates the templates and data in fixtures/ against the draft schema
 'described in docs/template-format.md. This is deliberately NOT a renderer:
@@ -16,7 +16,7 @@ Version=10.7
 'the engine exists.
 '
 'Usage:
-'  java -jar B4XReportTests.jar <fixtures folder> [output folder]
+'  java -jar RepotTests.jar <fixtures folder> [output folder]
 '
 'Writes fixture-check.txt next to the jar. CI greps the first line for
 'errors=0. See docs/testing.md.

@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Builds the B4XReport fixture checker and validates the fixtures.
+    Builds the Repot fixture checker and validates the fixtures.
 
 .DESCRIPTION
     Runs the official B4J command-line builder, then executes the checker
@@ -31,7 +31,7 @@ if (-not (Test-Path $Fixtures)) {
 }
 $Fixtures = (Resolve-Path $Fixtures).Path
 
-$project = Join-Path $repo 'source\B4XReportTests'
+$project = Join-Path $repo 'source\RepotTests'
 $builder = Join-Path $env:ProgramFiles 'B4X\B4J\B4JBuilder.exe'
 if (-not (Test-Path $builder)) {
     throw "B4JBuilder not found at $builder"
@@ -76,7 +76,7 @@ else {
 $objects = Join-Path $project 'Objects'
 Push-Location $objects
 try {
-    $output = & $java -jar 'B4XReportTests.jar' $Fixtures $objects 2>&1 | Out-String
+    $output = & $java -jar 'RepotTests.jar' $Fixtures $objects 2>&1 | Out-String
 }
 finally {
     Pop-Location

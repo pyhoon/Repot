@@ -85,7 +85,7 @@ The first three fixtures are defined in M0, before the schema is frozen:
 
 ### The fixture checker (M0)
 
-`source/B4XReportTests` is a B4J console project that lints every fixture
+`source/RepotTests` is a B4J console project that lints every fixture
 against the draft schema. It checks:
 
 - required files, parseable JSON, `schemaVersion`;

@@ -1,7 +1,7 @@
-# B4XReport — Development Plan and Coding-Agent Brief
+# Repot — Development Plan and Coding-Agent Brief
 
 **Document status:** Working plan, open-source route\
-**Project:** B4XReport\
+**Project:** Repot\
 **Ecosystem:** B4X (B4J first, B4A second)\
 **Template format:** Versioned JSON, `.b4xr` extension\
 **License:** MIT, all components\
@@ -34,6 +34,7 @@ re-litigate them during implementation.
 | 4 | B4A ships after the B4J engine, using an HTML-to-print path. No JVM PDF library on Android. | [ADR 0004](docs/decisions/0004-b4a-output-strategy.md) |
 | 5 | The `.b4xr` schema is frozen last, driven by fixtures. JRXML is not adopted. | [ADR 0005](docs/decisions/0005-template-format.md) |
 | 6 | One `.b4xlib` ships all public modules; jar dependencies are the optional boundary. | [ADR 0006](docs/decisions/0006-packaging.md) |
+| 7 | The project is named Repot; no `B4X` prefix in file or class names. | [ADR 0007](docs/decisions/0007-project-name.md) |
 
 The open-source decision has one irreversible consequence: published MIT
 code stays MIT. Therefore no feature may be reserved for a future paid
@@ -199,7 +200,7 @@ Strategy, fixture layout, and the pixel-diff prohibition are in
   with B4J 10.7 and Java 19. It exits non-zero on failure and is suitable
   for a CI runner. Exact output behaviour is recorded in
   [b4x-notes.md](docs/b4x-notes.md).
-- `source/B4XReportTests` lints the fixtures against the draft schema and
+- `source/RepotTests` lints the fixtures against the draft schema and
   is driven by `tools/run-fixtures.ps1`, which maps the result file to a
   process exit code. Layout goldens are added in M3.
 
@@ -303,7 +304,7 @@ M0 is documentation, definition, and de-risking. No engine code.
    `B4JBuilder.exe -Task=Build` on a console harness project. Record the
    exact command and the exit-code behaviour.
 7. Confirm the project name and package prefix before the first public
-   release. `B4XReport` reads as an official Anywhere Software library;
+   release. `Repot` reads as an official Anywhere Software library;
    decide deliberately and note it.
 8. Present the fixture-driven schema outline for review before M1.
 
@@ -314,12 +315,12 @@ Begin M1 only after the M0 review.
 | Task | Status |
 |------|--------|
 | Fixture set: three templates, data, parameters, notes | done |
-| Fixture checker harness in `source/B4XReportTests` | done, 58 checks passing |
+| Fixture checker harness in `source/RepotTests` | done, 58 checks passing |
 | Negative test of the checker (injected faults) | done, all five faults reported |
 | Headless build verification (B4J 10.7 / Java 19) | done, exit `0`, jar in `Objects\` |
 | Dependency audit (`docs/dependencies.md`) | draft |
 | Adapter and render-document contracts (`docs/architecture.md`) | draft |
-| Project name and package prefix | open |
+| Project name and package prefix | done: Repot (ADR 0007) |
 | Fixture-driven schema review | open |
 
 The schema change that came out of writing the fixtures: aggregates are
