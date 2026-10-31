@@ -1,4 +1,4 @@
-B4J=true
+﻿B4J=true
 Group=Model
 ModulesStructureVersion=1
 Type=Class
@@ -103,8 +103,8 @@ End Sub
 Public Sub AllAggregates As List
 	Dim l As List
 	l.Initialize
-	For Each name As String In DataSets.Keys
-		Dim ds As RepotDataSetDef = DataSets.Get(name)
+	For Each dsName As String In DataSets.Keys
+		Dim ds As RepotDataSetDef = DataSets.Get(dsName)
 		For Each a As RepotAggregateDef In ds.Aggregates
 			l.Add(a)
 		Next

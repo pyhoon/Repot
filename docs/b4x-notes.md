@@ -167,6 +167,12 @@ verified section:
 
 ## Language gotchas found in M1
 
+- **A local `For Each` variable cannot shadow a class field.** A loop
+  such as `For Each name As String In DataSets.Keys` inside a class that
+  declares `Public Name As String` produces
+  `Current declaration does not match previous one. Word: _ref` in the
+  IDE compiler. Rename the loop variable (`dsName`). B4JBuilder may not
+  report this before the IDE does.
 - **`Map.Keys` is not a `List` for assignment purposes.** Iterating it
   with `For Each k As String In m.Keys` works. `Dim keys As List =
   m.Keys` compiles but fails at runtime with
