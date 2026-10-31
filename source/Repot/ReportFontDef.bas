@@ -7,8 +7,8 @@ Version=10.7
 'Declared font family and fallback order. Nothing is embedded at load time.
 Sub Class_Globals
 	Public Name As String
-Public Family As List
-Public Size As Double
+	Public Family As List
+	Public Size As Double
 End Sub
 
 Public Sub Initialize

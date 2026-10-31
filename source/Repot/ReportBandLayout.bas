@@ -1,4 +1,4 @@
-B4J=true
+﻿B4J=true
 Group=Layout
 ModulesStructureVersion=1
 Type=Class
@@ -10,6 +10,7 @@ Version=10.7
 Sub Class_Globals
 	Public Diagnostics As ReportDiagnostics
 	Public Measure As ReportB4JMeasure
+	Public VisibleContext As ReportEvalContext
 	Private mCellWidth As Double
 	Private mCellHeight As Double
 	Private mGridReady As Boolean
@@ -51,8 +52,10 @@ Public Sub LayoutBand (Def As ReportDefinition, Section As ReportSection, Conten
 	PrepareGrid(Def.Page, ContentWidth, ContentHeight)
 
 	' Children in document order; this is the paint order and the stable
-	' tie-break for push-down.
+	' tie-break for push-down. Elements whose visible expression evaluates
+	' to false are skipped.
 	For Each e As ReportElement In Section.Elements
+		If IsVisible(e) = False Then Continue
 		Dim item As ReportLayoutElement
 		item.Initialize
 		item.Element = e
@@ -172,6 +175,30 @@ Private Sub ResolveValign (Def As ReportDefinition, e As ReportElement) As Strin
 	Dim st As ReportStyle = Def.StyleByName(e.StyleName)
 	If st <> Null And st.Valign.Length > 0 Then Return st.Valign
 	Return "top"
+End Sub
+
+Private Sub IsVisible (e As ReportElement) As Boolean
+	If e.VisibleExpression.Length = 0 Then Return True
+	If VisibleContext = Null Then Return True
+	Dim ev As ReportExpressionEvaluator
+	ev.Initialize
+	Dim r As Object = ev.Eval(e.VisibleExpression, VisibleContext)
+	If r Is Boolean Then Return r
+	If IsNumericValue2(r) Then
+		Dim d As Double = r
+		Return d <> 0
+	End If
+	If r = Null Then Return False
+	Dim s As String = r
+	If s.ToLowerCase = "false" Or s.Length = 0 Then Return False
+	Return True
+End Sub
+
+Private Sub IsNumericValue2 (v As Object) As Boolean
+	If v = Null Then Return False
+	If v Is Boolean Then Return False
+	If v Is String Then Return False
+	Return True
 End Sub
 
 Private Sub ResolveContent (e As ReportElement, Values As Map) As String

@@ -1,4 +1,4 @@
-B4J=true
+﻿B4J=true
 Group=Export
 ModulesStructureVersion=1
 Type=Class
@@ -54,6 +54,7 @@ Public Sub ExportCsv (DataSetName As String, OutputPath As String) As Boolean
 		File.WriteString(File.GetFileParent(OutputPath), File.GetName(OutputPath), sb.ToString)
 		Return True
 	Catch
+		Log(LastException.Message)
 		Diagnostics.AddError("E-IO-001", "CSV export failed: " & LastException.Message, "")
 		Return False
 	End Try
@@ -88,6 +89,7 @@ Public Sub ExportJson (DataSetName As String, OutputPath As String) As Boolean
 		File.WriteString(File.GetFileParent(OutputPath), File.GetName(OutputPath), sb.ToString)
 		Return True
 	Catch
+		Log(LastException.Message)
 		Diagnostics.AddError("E-IO-001", "JSON export failed: " & LastException.Message, "")
 		Return False
 	End Try
@@ -119,6 +121,7 @@ Public Sub ExportXml (DataSetName As String, OutputPath As String, RootName As S
 		File.WriteString(File.GetFileParent(OutputPath), File.GetName(OutputPath), sb.ToString)
 		Return True
 	Catch
+		Log(LastException.Message)
 		Diagnostics.AddError("E-IO-001", "XML export failed: " & LastException.Message, "")
 		Return False
 	End Try

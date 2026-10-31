@@ -1,4 +1,4 @@
-B4J=true
+﻿B4J=true
 Group=Layout
 ModulesStructureVersion=1
 Type=Class
@@ -63,6 +63,7 @@ Public Sub Initialize (Diags As ReportDiagnostics)
 		mFrc.InitializeNewInstance("java.awt.font.FontRenderContext", Array(Null, aaOn, fmOn))
 		IsAvailable = True
 	Catch
+		Log(LastException.Message)
 		LastError = LastException.Message
 		Diagnostics.AddError("E-MEA-001", "text measurement is unavailable: " & LastError, "")
 	End Try
@@ -243,6 +244,7 @@ Private Sub BaseFamily (Handle As JavaObject, Fallback As String) As String
 		If fam.Length = 0 Then Return Fallback
 		Return fam
 	Catch
+		Log(LastException.Message)
 		Return Fallback
 	End Try
 End Sub
@@ -260,6 +262,7 @@ Private Sub ReadMetrics (F As ReportFont)
 		F.Descent = d * scale
 		F.LineGap = g * scale
 	Catch
+		Log(LastException.Message)
 		F.Ascent = 0
 		F.Descent = 0
 		F.LineGap = 0
@@ -293,6 +296,7 @@ Private Sub MeasureWithFont (Text As String, F As ReportFont) As Double
 		mWidths.Put(key, w)
 		Return w
 	Catch
+		Log(LastException.Message)
 		Dim shortText As String = Text
 		If shortText.Length > 40 Then shortText = shortText.SubString2(0, 40) & "..."
 		Dim key2 As String = "measure#" & shortText
@@ -404,6 +408,7 @@ Public Sub LoadImage (Path As String, MaxPixels As Long) As ReportImage
 		img.PixelHeight = ph
 		img.Handle = bi
 	Catch
+		Log(LastException.Message)
 		Diagnostics.AddError("E-IO-001", "cannot read image '" & Path & "': " & LastException.Message, "")
 	End Try
 	Return img

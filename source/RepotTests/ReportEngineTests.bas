@@ -1,4 +1,4 @@
-B4J=true
+﻿B4J=true
 Group=Tests
 ModulesStructureVersion=1
 Type=Class
@@ -891,8 +891,8 @@ Private Sub TestExpressions
 
 	Dim r1 As Object = ev.Eval("if(2 > 3, 10, 20)", ctx)
 	Dim r2 As Object = ev.Eval("if(3 > 2, 10, 20)", ctx)
-	Check(r1 = 20 Or r1 = 20.0, "if false branch")
-	Check(r2 = 10 Or r2 = 10.0, "if true branch")
+	Check(20 = r1 Or 20.0 = r1, "if false branch")
+	Check(10 = r2 Or 10.0 = r2, "if true branch")
 
 	CheckNear(5, ev.Eval("len(" & Chr(34) & "hello" & Chr(34) & ")", ctx), 0.0001, "len")
 	Check(ev.Eval("upper(" & Chr(34) & "hi" & Chr(34) & ")", ctx) = "HI", "upper")

@@ -1,4 +1,4 @@
-B4J=true
+﻿B4J=true
 Group=Export
 ModulesStructureVersion=1
 Type=Class
@@ -51,10 +51,12 @@ Public Sub Export (Doc As ReportRenderDocument, OutputPath As String) As Boolean
 		jo.RunMethod("close", Array(mJavaDoc))
 		Return True
 	Catch
+		Log(LastException.Message)
 		Diagnostics.AddError("E-PDF-001", "PDF export failed: " & LastException.Message, "")
 		Try
 			jo.RunMethod("close", Array(mJavaDoc))
 		Catch
+			Log(LastException.Message)
 		End Try
 		Return False
 	End Try

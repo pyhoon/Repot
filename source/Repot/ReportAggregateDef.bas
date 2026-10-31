@@ -8,10 +8,10 @@ Version=10.7
 'declaring dataset or group. Names are document-unique by validation.
 Sub Class_Globals
 	Public Name As String
-Public FunctionName As String
-Public FieldName As String
-Public Scope As String
-Public ScopeId As String
+	Public FunctionName As String
+	Public FieldName As String
+	Public Scope As String
+	Public ScopeId As String
 End Sub
 
 Public Sub Initialize

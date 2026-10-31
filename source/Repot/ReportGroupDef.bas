@@ -1,4 +1,4 @@
-B4J=true
+﻿B4J=true
 Group=Model
 ModulesStructureVersion=1
 Type=Class
@@ -7,11 +7,11 @@ Version=10.7
 'Declared group. Declaration order is nesting order, outermost first.
 Sub Class_Globals
 	Public Id As String
-Public DataSet As String
-Public KeyExpression As String
-Public Sort As List
-Public RepeatHeader As Boolean
-Public Aggregates As List
+	Public DataSet As String
+	Public KeyExpression As String
+	Public Sort As List
+	Public RepeatHeader As Boolean
+	Public Aggregates As List
 End Sub
 
 Public Sub Initialize

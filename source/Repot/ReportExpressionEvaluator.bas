@@ -1,4 +1,4 @@
-B4J=true
+﻿B4J=true
 Group=Expressions
 ModulesStructureVersion=1
 Type=Class
@@ -301,6 +301,7 @@ Private Sub ParsePrimary As Object
 		Try
 			d = t.Value
 		Catch
+			Log(LastException.Message)
 			d = 0
 		End Try
 		Return d

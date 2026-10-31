@@ -1,4 +1,4 @@
-B4J=true
+﻿B4J=true
 Group=Export
 ModulesStructureVersion=1
 Type=Class
@@ -29,6 +29,7 @@ Public Sub Export (Doc As ReportRenderDocument, OutputPath As String) As Boolean
 		File.WriteString(File.GetFileParent(OutputPath), File.GetName(OutputPath), html)
 		Return True
 	Catch
+		Log(LastException.Message)
 		Diagnostics.AddError("E-HTML-001", "HTML export failed: " & LastException.Message, "")
 		Return False
 	End Try

@@ -1,4 +1,4 @@
-B4J=true
+﻿B4J=true
 Group=Layout
 ModulesStructureVersion=1
 Type=Class
@@ -212,6 +212,7 @@ End Sub
 '--------------------------------------------------------------- values
 
 Private Sub BuildValues (sec As ReportSection, rec As Map) As Map
+	mBandLayout.VisibleContext = MakeContext(rec)
 	Dim vals As Map
 	vals.Initialize
 	If sec = Null Then Return vals
@@ -866,4 +867,23 @@ Private Sub IsNumericValue (v As Object) As Boolean
 	If v Is Boolean Then Return False
 	If v Is String Then Return False
 	Return True
+End Sub
+
+Private Sub MakeContext (rec As Map) As ReportEvalContext
+	Dim ctx As ReportEvalContext
+	ctx.Initialize
+	If rec <> Null Then
+		If rec.IsInitialized Then ctx.CurrentRecord = rec
+	End If
+	ctx.CurrentDataSet = mCurrentDataSet
+	ctx.DataSets = Binder.DataSets
+	ctx.Params = Binder.Parameters
+	ctx.Aggregates = mAggregates
+	ctx.PageNumber = mPageNo
+	ctx.PageCount = mPageCount
+	Return ctx
+End Sub
+
+Private Sub SyncVisibleContext
+	mBandLayout.VisibleContext = MakeContext(mCurrentRecord)
 End Sub

@@ -1,4 +1,4 @@
-B4J=true
+﻿B4J=true
 Group=Export
 ModulesStructureVersion=1
 Type=Class
@@ -116,6 +116,7 @@ Public Sub Export (DataSetName As String, OutputPath As String) As Boolean
 		DeleteFolder(tmp)
 		Return True
 	Catch
+		Log(LastException.Message)
 		Diagnostics.AddError("E-IO-001", "XLSX export failed: " & LastException.Message, "")
 		Return False
 	End Try

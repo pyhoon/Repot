@@ -1,4 +1,4 @@
-B4J=true
+﻿B4J=true
 Group=Core
 ModulesStructureVersion=1
 Type=Class
@@ -10,10 +10,10 @@ Version=10.7
 'diagnostics. It never executes template content.
 Sub Class_Globals
 	Public Diagnostics As ReportDiagnostics
-Private mBaseDir As String
-Private mDpi As Double
-Private Const AllowedParamTypes As String = "|string|integer|decimal|boolean|datetime|date|"
-Private Const AllowedAggregateFunctions As String = "|sum|count|min|max|avg|"
+	Private mBaseDir As String
+	Private mDpi As Double
+	Private Const AllowedParamTypes As String = "|string|integer|decimal|boolean|datetime|date|"
+	Private Const AllowedAggregateFunctions As String = "|sum|count|min|max|avg|"
 End Sub
 
 Public Sub Initialize

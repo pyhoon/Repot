@@ -7,10 +7,10 @@ Version=10.7
 'Declared parameter supplied by the host application.
 Sub Class_Globals
 	Public Name As String
-Public DataType As String
-Public Required As Boolean
-Public HasDefault As Boolean
-Public DefaultValue As Object
+	Public DataType As String
+	Public Required As Boolean
+	Public HasDefault As Boolean
+	Public DefaultValue As Object
 End Sub
 
 Public Sub Initialize

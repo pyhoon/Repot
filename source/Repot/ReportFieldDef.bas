@@ -7,7 +7,7 @@ Version=10.7
 'Declared dataset field.
 Sub Class_Globals
 	Public Name As String
-Public DataType As String
+	Public DataType As String
 End Sub
 
 Public Sub Initialize
