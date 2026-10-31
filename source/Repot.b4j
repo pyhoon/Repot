@@ -5,7 +5,7 @@ Library1=jcore
 NumberOfFiles=0
 NumberOfLibraries=1
 NumberOfModules=0
-Version=8.31
+Version=10.7
 @EndOfDesignText@
 'Non-UI application (console / server application)
 #Region Project Attributes 
