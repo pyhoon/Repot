@@ -3,12 +3,12 @@
 A cross-platform reporting and document-generation engine for the B4X
 ecosystem, written in B4X and licensed MIT.
 
-Repot turns a portable report definition (`.b4xr`) plus data supplied
+Repot turns a portable report definition (`.repot`) plus data supplied
 by the host application into paginated documents and structured exports.
 The same template is intended to work from B4J desktop, B4J server, and
 B4A, and to render to HTML for browsers.
 
-> **Project status: M0–M7 complete; M8 (B4A adapter, HTML print path, cross-platform comparison) next.**
+> **Project status: M8 B4A adapter, HTML print path, cross-platform comparison next.**
 >
 > The repository contains design documentation, the fixture set with layout
 > goldens, a B4J fixture checker, and the engine modules: template model,
