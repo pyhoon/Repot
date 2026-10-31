@@ -31,9 +31,17 @@ Public Sub Export (DataSetName As String, OutputPath As String) As Boolean
 		Return False
 	End If
 	Try
+		#If B4A
+		Dim tmp As String = File.Combine(File.DirInternal, "xlsx_tmp")
+		#Else
 		Dim tmp As String = File.Combine(File.DirApp, "xlsx_tmp")
+		#End If
 		DeleteFolder(tmp)
+		#If B4A
+		File.MakeDir(File.DirInternal, "xlsx_tmp")
+		#Else
 		File.MakeDir(File.DirApp, "xlsx_tmp")
+		#End If
 		File.MakeDir(tmp, "_rels")
 		File.MakeDir(tmp, "xl")
 		File.MakeDir(tmp, "xl/_rels")

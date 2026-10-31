@@ -4,7 +4,7 @@ ModulesStructureVersion=1
 Type=Class
 Version=10.7
 @EndOfDesignText@
-'Data exporters (CSV, JSON, XML) for the processed data model. They do
+'Data exporters (CSV, JSON, XML) for the processed data model.
 'not use the render document; they consume the binder directly.
 
 Sub Class_Globals
@@ -50,9 +50,25 @@ Public Sub ExportCsv (DataSetName As String, OutputPath As String) As Boolean
 				sb.Append(CsvValue(v))
 			Next
 			sb.Append(CRLF)
+#If B4A
+			Dim fp As String = OutputPath
+			Dim i As Int = fp.LastIndexOf("/")
+			If i > -1 Then
+				fp = fp.SubString2(0, i)
+			Else
+				fp = ""
+			End If
+			Dim fn As String = OutputPath
+			i = fp.LastIndexOf("/")
+			If i > -1 Then
+				fn = fn.SubString(i + 1)
+			End If
+			File.WriteString(fp, fn, sb.ToString)
+#Else
+			File.WriteString(File.GetFileParent(OutputPath), File.GetName(OutputPath), sb.ToString)
+#End If
+			Return True
 		Next
-		File.WriteString(File.GetFileParent(OutputPath), File.GetName(OutputPath), sb.ToString)
-		Return True
 	Catch
 		Log(LastException.Message)
 		Diagnostics.AddError("E-IO-001", "CSV export failed: " & LastException.Message, "")
@@ -86,7 +102,23 @@ Public Sub ExportJson (DataSetName As String, OutputPath As String) As Boolean
 			sb.Append("}")
 		Next
 		sb.Append("]")
+#If B4A
+		Dim fp As String = OutputPath
+		Dim i As Int = fp.LastIndexOf("/")
+		If i > -1 Then
+			fp = fp.SubString2(0, i)
+		Else
+			fp = ""
+		End If
+		Dim fn As String = OutputPath
+		i = fp.LastIndexOf("/")
+		If i > -1 Then
+			fn = fn.SubString(i + 1)
+		End If
+		File.WriteString(fp, fn, sb.ToString)
+#Else
 		File.WriteString(File.GetFileParent(OutputPath), File.GetName(OutputPath), sb.ToString)
+#End If
 		Return True
 	Catch
 		Log(LastException.Message)
@@ -118,7 +150,23 @@ Public Sub ExportXml (DataSetName As String, OutputPath As String, RootName As S
 			sb.Append("  </row>").Append(CRLF)
 		Next
 		sb.Append("</").Append(RootName).Append(">").Append(CRLF)
+#If B4A
+		Dim fp As String = OutputPath
+		Dim i As Int = fp.LastIndexOf("/")
+		If i > -1 Then
+			fp = fp.SubString2(0, i)
+		Else
+			fp = ""
+		End If
+		Dim fn As String = OutputPath
+		i = fp.LastIndexOf("/")
+		If i > -1 Then
+			fn = fn.SubString(i + 1)
+		End If
+		File.WriteString(fp, fn, sb.ToString)
+#Else
 		File.WriteString(File.GetFileParent(OutputPath), File.GetName(OutputPath), sb.ToString)
+#End If
 		Return True
 	Catch
 		Log(LastException.Message)
@@ -157,8 +205,8 @@ End Sub
 
 Private Sub XmlEscape (s As String) As String
 	Dim out As String = s
-	out = out.Replace("&", "&amp;")
-	out = out.Replace("<", "&lt;")
-	out = out.Replace(">", "&gt;")
+	out = out.Replace("&", "&")
+	out = out.Replace("<", "<")
+	out = out.Replace(">", ">")
 	Return out
 End Sub

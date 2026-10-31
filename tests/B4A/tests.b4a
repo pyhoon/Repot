@@ -1,0 +1,108 @@
+﻿Build1=Default,b4a.example
+File1=Layout.bal
+FileGroup1=Default Group
+Group=Default Group
+Library1=core
+Library2=ime
+Library3=json
+Library4=xui
+Library5=javaobject
+ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="36"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~CreateResourceFromFile(Macro, Themes.LightTheme)~\n~'End of default text.~\n~
+Module1=|relative|..\..\source\ReportAggregateDef
+Module10=|relative|..\..\source\ReportDiagnostic
+Module11=|relative|..\..\source\ReportDiagnostics
+Module12=|relative|..\..\source\ReportDocxExporter
+Module13=|relative|..\..\source\ReportDrawOp
+Module14=|relative|..\..\source\ReportElement
+Module15=|relative|..\ReportEngineTests
+Module16=|relative|..\..\source\ReportEvalContext
+Module17=|relative|..\..\source\ReportExpressionEvaluator
+Module18=|relative|..\..\source\ReportExpressionRefs
+Module19=|relative|..\..\source\ReportFieldDef
+Module2=|relative|..\..\source\ReportB4JMeasure
+Module20=|relative|..\..\source\ReportFont
+Module21=|relative|..\..\source\ReportFontDef
+Module22=|relative|..\..\source\ReportGroupDef
+Module23=|relative|..\..\source\ReportHtmlExporter
+Module24=|relative|..\..\source\ReportImage
+Module25=|relative|..\..\source\ReportJsonUtil
+Module26=|relative|..\..\source\ReportJsonWriter
+Module27=|relative|..\..\source\ReportLayoutElement
+Module28=|relative|..\..\source\ReportPageSetup
+Module29=|relative|..\..\source\ReportPaginator
+Module3=|relative|..\..\source\ReportBand
+Module30=|relative|..\..\source\ReportParameterDef
+Module31=|relative|..\..\source\ReportPdfExporter
+Module32=|relative|..\..\source\ReportRenderAnchor
+Module33=|relative|..\..\source\ReportRenderDocument
+Module34=|relative|..\..\source\ReportRenderJsonWriter
+Module35=|relative|..\..\source\ReportRenderPage
+Module36=|relative|..\..\source\ReportSection
+Module37=|relative|..\..\source\ReportSortDef
+Module38=|relative|..\..\source\ReportStyle
+Module39=|relative|..\..\source\ReportTemplateLoader
+Module4=|relative|..\..\source\ReportBandLayout
+Module40=|relative|..\..\source\ReportTextMetrics
+Module41=|relative|..\..\source\ReportTextStyle
+Module42=|relative|..\..\source\ReportToken
+Module43=|relative|..\..\source\ReportUnits
+Module44=|relative|..\..\source\ReportValidator
+Module45=|relative|..\..\source\ReportVersion
+Module46=|relative|..\..\source\ReportXlsxExporter
+Module47=|relative|..\..\source\Utility
+Module5=|relative|..\..\source\ReportDataBinder
+Module6=|relative|..\..\source\ReportDataExporter
+Module7=|relative|..\..\source\ReportDataSet
+Module8=|relative|..\..\source\ReportDataSetDef
+Module9=|relative|..\..\source\ReportDefinition
+NumberOfFiles=1
+NumberOfLibraries=5
+NumberOfModules=47
+Version=14.2
+@EndOfDesignText@
+#Region  Project Attributes 
+	#ApplicationLabel: RepotTestsB4A
+	#VersionCode: 1
+	#VersionName: 
+	'SupportedOrientations possible values: unspecified, landscape or portrait.
+	#SupportedOrientations: unspecified
+	#EdgeToEdgeOldDevices: True
+#End Region
+
+#Region  Activity Attributes 
+	#FullScreen: False
+	#IncludeTitle: True
+#End Region
+
+Sub Process_Globals
+	'These global variables will be declared once when the application starts.
+	'These variables can be accessed from all modules.
+	Private xui As XUI
+End Sub
+
+Sub Globals
+	'These global variables will be redeclared each time the activity is created.
+	Private ime As IME
+	Private root As B4XView
+End Sub
+
+Sub Activity_Create(FirstTime As Boolean)
+	ime.Initialize("ime")
+	root = xui.CreatePanel("")
+	Dim Content As Rect = ime.GetContentRect
+	Activity.AddView(root, Content.Left, Content.Top, Content.Width, Content.Height)
+	ime.UpdatePercentageReference(root.Width, root.Height)
+	root.LoadLayout("Layout")
+End Sub
+
+Sub Activity_Resume
+
+End Sub
+
+Sub Activity_Pause (UserClosed As Boolean)
+
+End Sub
+
+Sub Button1_Click
+	xui.MsgboxAsync("Hello world!", "B4X")
+End Sub

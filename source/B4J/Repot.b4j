@@ -1,0 +1,77 @@
+﻿AppType=StandardJava
+Build1=Default,b4j.example
+Group=Default Group
+Library1=jcore
+Library2=json
+Library3=javaobject
+Module1=|relative|..\ReportAggregateDef
+Module10=|relative|..\ReportDiagnostic
+Module11=|relative|..\ReportDiagnostics
+Module12=|relative|..\ReportDocxExporter
+Module13=|relative|..\ReportDrawOp
+Module14=|relative|..\ReportElement
+Module15=|relative|..\ReportEvalContext
+Module16=|relative|..\ReportExpressionEvaluator
+Module17=|relative|..\ReportExpressionRefs
+Module18=|relative|..\ReportFieldDef
+Module19=|relative|..\ReportFont
+Module2=|relative|..\ReportB4JMeasure
+Module20=|relative|..\ReportFontDef
+Module21=|relative|..\ReportGroupDef
+Module22=|relative|..\ReportHtmlExporter
+Module23=|relative|..\ReportImage
+Module24=|relative|..\ReportJsonUtil
+Module25=|relative|..\ReportJsonWriter
+Module26=|relative|..\ReportLayoutElement
+Module27=|relative|..\ReportPageSetup
+Module28=|relative|..\ReportPaginator
+Module29=|relative|..\ReportParameterDef
+Module3=|relative|..\ReportBand
+Module30=|relative|..\ReportPdfExporter
+Module31=|relative|..\ReportRenderAnchor
+Module32=|relative|..\ReportRenderDocument
+Module33=|relative|..\ReportRenderJsonWriter
+Module34=|relative|..\ReportRenderPage
+Module35=|relative|..\ReportSection
+Module36=|relative|..\ReportSortDef
+Module37=|relative|..\ReportStyle
+Module38=|relative|..\ReportTemplateLoader
+Module39=|relative|..\ReportTextMetrics
+Module4=|relative|..\ReportBandLayout
+Module40=|relative|..\ReportTextStyle
+Module41=|relative|..\ReportToken
+Module42=|relative|..\ReportUnits
+Module43=|relative|..\ReportValidator
+Module44=|relative|..\ReportVersion
+Module45=|relative|..\ReportXlsxExporter
+Module5=|relative|..\ReportDataBinder
+Module6=|relative|..\ReportDataExporter
+Module7=|relative|..\ReportDataSet
+Module8=|relative|..\ReportDataSetDef
+Module9=|relative|..\ReportDefinition
+NumberOfFiles=0
+NumberOfLibraries=3
+NumberOfModules=45
+Version=10.7
+@EndOfDesignText@
+#Region Project Attributes
+	#AdditionalJar: C:\B4X\Additional\B4J\pdfbox-app-3.0.8.jar
+	#CommandLineArgs:
+	#MergeLibraries: True
+#End Region
+#Region Project Copyright
+#LibraryName: Repot
+#LibraryAuthor: Repot contributors
+#LibraryVersion: 0.12
+'This project builds the engine library. It also runs as a small console
+'smoke test so the command-line build proves the modules link.
+#End Region
+
+Sub Process_Globals
+
+End Sub
+
+Sub AppStart (Args() As String)
+	Dim u As Double = ReportUnits.ParseLength("12mm", 0)
+	Log("Repot " & ReportVersion.LibraryVersion & " loaded; 12mm = " & ReportUnits.FormatNumber(u, 4) & " pt")
+End Sub

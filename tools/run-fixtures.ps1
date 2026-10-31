@@ -31,7 +31,7 @@ if (-not (Test-Path $Fixtures)) {
 }
 $Fixtures = (Resolve-Path $Fixtures).Path
 
-$project = Join-Path $repo 'source\RepotTests'
+$project = Join-Path $repo 'tests\B4J'
 $builder = Join-Path $env:ProgramFiles 'B4X\B4J\B4JBuilder.exe'
 if (-not (Test-Path $builder)) {
     throw "B4JBuilder not found at $builder"
@@ -78,7 +78,7 @@ $resultFile = Join-Path $objects 'fixture-check.txt'
 Remove-Item $resultFile -ErrorAction SilentlyContinue
 Push-Location $objects
 try {
-    $output = & $java "-Djava.awt.headless=true" -jar 'RepotTests.jar' $Fixtures $objects 2>&1 | Out-String
+    $output = & $java "-Djava.awt.headless=true" -jar 'tests.jar' $Fixtures $objects 2>&1 | Out-String
     $javaCode = $LASTEXITCODE
 }
 finally {
