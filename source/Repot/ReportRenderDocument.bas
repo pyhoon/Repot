@@ -23,8 +23,8 @@ Public Sub Initialize
 End Sub
 
 'Adds a page and assigns its 1-based index.
-Public Sub AddPage (PageWidth As Double, PageHeight As Double) As RepotRenderPage
-	Dim p As RepotRenderPage
+Public Sub AddPage (PageWidth As Double, PageHeight As Double) As ReportRenderPage
+	Dim p As ReportRenderPage
 	p.Initialize
 	p.Width = PageWidth
 	p.Height = PageHeight
@@ -38,8 +38,8 @@ Public Sub PageCount As Int
 End Sub
 
 'Returns the page at a 1-based index, or Null when out of range.
-Public Sub PageAt (PageIndex As Int) As RepotRenderPage
+Public Sub PageAt (PageIndex As Int) As ReportRenderPage
 	If PageIndex < 1 Or PageIndex > Pages.Size Then Return Null
-	Dim p As RepotRenderPage = Pages.Get(PageIndex - 1)
+	Dim p As ReportRenderPage = Pages.Get(PageIndex - 1)
 	Return p
 End Sub

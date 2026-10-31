@@ -1,4 +1,4 @@
-﻿B4J=true
+B4J=true
 Group=Core
 ModulesStructureVersion=1
 Type=Code
@@ -14,7 +14,7 @@ Sub Process_Globals
 
 End Sub
 
-Public Sub Extract (Text As String, Diagnostics As RepotDiagnostics, Path As String) As List
+Public Sub Extract (Text As String, Diagnostics As ReportDiagnostics, Path As String) As List
 	Dim out As List
 	out.Initialize
 	Dim i As Int = 0
@@ -57,7 +57,7 @@ End Sub
 
 'Returns the identifiers in one expression, skipping literals, numbers and
 'operators. Reports characters that the expression grammar cannot accept.
-Public Sub Identifiers (Expression As String, Diagnostics As RepotDiagnostics, Path As String) As List
+Public Sub Identifiers (Expression As String, Diagnostics As ReportDiagnostics, Path As String) As List
 	Dim out As List
 	out.Initialize
 	Dim i As Int = 0

@@ -1,4 +1,4 @@
-﻿B4J=true
+B4J=true
 Group=Model
 ModulesStructureVersion=1
 Type=Class
@@ -31,8 +31,8 @@ Public Sub Initialize
 	SourcePath = ""
 End Sub
 
-Public Sub ElementById (ElementId As String) As RepotElement
-	For Each e As RepotElement In Elements
+Public Sub ElementById (ElementId As String) As ReportElement
+	For Each e As ReportElement In Elements
 		If e.Id = ElementId Then Return e
 	Next
 	Return Null

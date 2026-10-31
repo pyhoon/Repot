@@ -1,4 +1,4 @@
-﻿B4J=true
+B4J=true
 Group=Core
 ModulesStructureVersion=1
 Type=Class
@@ -30,7 +30,7 @@ Public Sub AddWarningAt (Code As String, Message As String, Path As String, Elem
 End Sub
 
 Private Sub AddOne (Severity As String, Code As String, Message As String, Path As String, ElementId As String)
-	Dim d As RepotDiagnostic
+	Dim d As ReportDiagnostic
 	d.Initialize(Severity, Code, Message)
 	d.Path = Path
 	d.ElementId = ElementId
@@ -39,7 +39,7 @@ End Sub
 
 Public Sub ErrorCount As Int
 	Dim n As Int = 0
-	For Each d As RepotDiagnostic In Items
+	For Each d As ReportDiagnostic In Items
 		If d.Severity = "error" Then n = n + 1
 	Next
 	Return n
@@ -47,7 +47,7 @@ End Sub
 
 Public Sub WarningCount As Int
 	Dim n As Int = 0
-	For Each d As RepotDiagnostic In Items
+	For Each d As ReportDiagnostic In Items
 		If d.Severity = "warning" Then n = n + 1
 	Next
 	Return n
@@ -57,8 +57,8 @@ Public Sub HasErrors As Boolean
 	Return ErrorCount > 0
 End Sub
 
-Public Sub Merge (Other As RepotDiagnostics)
-	For Each d As RepotDiagnostic In Other.Items
+Public Sub Merge (Other As ReportDiagnostics)
+	For Each d As ReportDiagnostic In Other.Items
 		Items.Add(d)
 	Next
 End Sub
@@ -66,7 +66,7 @@ End Sub
 Public Sub Errors As List
 	Dim out As List
 	out.Initialize
-	For Each d As RepotDiagnostic In Items
+	For Each d As ReportDiagnostic In Items
 		If d.Severity = "error" Then out.Add(d)
 	Next
 	Return out
@@ -75,7 +75,7 @@ End Sub
 Public Sub Warnings As List
 	Dim out As List
 	out.Initialize
-	For Each d As RepotDiagnostic In Items
+	For Each d As ReportDiagnostic In Items
 		If d.Severity = "warning" Then out.Add(d)
 	Next
 	Return out
@@ -84,7 +84,7 @@ End Sub
 Public Sub ToLines As List
 	Dim out As List
 	out.Initialize
-	For Each d As RepotDiagnostic In Items
+	For Each d As ReportDiagnostic In Items
 		out.Add(d.ToText)
 	Next
 	Return out

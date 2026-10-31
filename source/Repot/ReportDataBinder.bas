@@ -1,4 +1,4 @@
-﻿B4J=true
+B4J=true
 Group=Data
 ModulesStructureVersion=1
 Type=Class
@@ -11,13 +11,13 @@ Version=10.7
 'unknown fields produce a warning and are not copied.
 
 Sub Class_Globals
-	Public Diagnostics As RepotDiagnostics
+	Public Diagnostics As ReportDiagnostics
 	Public DataSets As Map
 	Public Parameters As Map
-	Private mDef As RepotDefinition
+	Private mDef As ReportDefinition
 End Sub
 
-Public Sub Initialize (Definition As RepotDefinition)
+Public Sub Initialize (Definition As ReportDefinition)
 	Diagnostics.Initialize
 	DataSets.Initialize
 	Parameters.Initialize
@@ -26,7 +26,7 @@ Public Sub Initialize (Definition As RepotDefinition)
 End Sub
 
 Private Sub ApplyDefaults
-	For Each p As RepotParameterDef In mDef.Parameters
+	For Each p As ReportParameterDef In mDef.Parameters
 		If p.HasDefault And Parameters.ContainsKey(p.Name) = False Then
 			Dim v As Object = NormalizeValue(p.DefaultValue, p.DataType, p.Name, "default for parameter " & p.Name)
 			Parameters.Put(p.Name, v)
@@ -35,7 +35,7 @@ Private Sub ApplyDefaults
 End Sub
 
 Public Sub SetDataSource (Name As String, Rows As List)
-	Dim dsDef As RepotDataSetDef = mDef.DataSetByName(Name)
+	Dim dsDef As ReportDataSetDef = mDef.DataSetByName(Name)
 	If dsDef = Null Then
 		Diagnostics.AddWarning("W-DATA-001", "dataset '" & Name & "' is not declared in the template", "/dataSets")
 		Return
@@ -49,7 +49,7 @@ Public Sub SetDataSource (Name As String, Rows As List)
 		Return
 	End If
 
-	Dim ds As RepotDataSet
+	Dim ds As ReportDataSet
 	ds.Initialize(Name, "rows", dsDef)
 	ds.Supplied = True
 	For i = 0 To Rows.Size - 1
@@ -64,7 +64,7 @@ Public Sub SetDataSource (Name As String, Rows As List)
 End Sub
 
 Public Sub SetDataSourceSingle (Name As String, Record As Map)
-	Dim dsDef As RepotDataSetDef = mDef.DataSetByName(Name)
+	Dim dsDef As ReportDataSetDef = mDef.DataSetByName(Name)
 	If dsDef = Null Then
 		Diagnostics.AddWarning("W-DATA-001", "dataset '" & Name & "' is not declared in the template", "/dataSets")
 		Return
@@ -78,7 +78,7 @@ Public Sub SetDataSourceSingle (Name As String, Record As Map)
 		Return
 	End If
 
-	Dim ds As RepotDataSet
+	Dim ds As ReportDataSet
 	ds.Initialize(Name, "single", dsDef)
 	ds.Supplied = True
 	ds.SingleRecord = NormalizeRecord(dsDef, Record, "/dataSets/" & Name)
@@ -86,7 +86,7 @@ Public Sub SetDataSourceSingle (Name As String, Record As Map)
 End Sub
 
 Public Sub SetParameter (Name As String, Value As Object)
-	Dim p As RepotParameterDef = mDef.ParameterByName(Name)
+	Dim p As ReportParameterDef = mDef.ParameterByName(Name)
 	If p = Null Then
 		Diagnostics.AddWarning("W-DATA-002", "parameter '" & Name & "' is not declared in the template", "/parameters")
 		Parameters.Put(Name, Value)
@@ -112,7 +112,7 @@ Public Sub SetParameterDate (Name As String, Value As Long)
 	SetParameter(Name, Value)
 End Sub
 
-Public Sub GetDataSet (Name As String) As RepotDataSet
+Public Sub GetDataSet (Name As String) As ReportDataSet
 	If DataSets.ContainsKey(Name) Then Return DataSets.Get(Name)
 	Return Null
 End Sub
@@ -128,7 +128,7 @@ Public Sub Validate As Boolean
 			Diagnostics.AddError("E-DATA-010", "dataset '" & name & "' was not supplied by the application", "/dataSets/" & name)
 		End If
 	Next
-	For Each p As RepotParameterDef In mDef.Parameters
+	For Each p As ReportParameterDef In mDef.Parameters
 		If p.Required Then
 			If Parameters.ContainsKey(p.Name) = False Then
 				Diagnostics.AddError("E-DATA-011", "required parameter '" & p.Name & "' was not supplied", "/parameters/" & p.Name)
@@ -143,10 +143,10 @@ End Sub
 
 '--------------------------------------------------------------- values
 
-Private Sub NormalizeRecord (dsDef As RepotDataSetDef, Source As Map, Path As String) As Map
+Private Sub NormalizeRecord (dsDef As ReportDataSetDef, Source As Map, Path As String) As Map
 	Dim out As Map
 	out.Initialize
-	For Each f As RepotFieldDef In dsDef.Fields
+	For Each f As ReportFieldDef In dsDef.Fields
 		If Source.ContainsKey(f.Name) Then
 			Dim v As Object = NormalizeValue(Source.Get(f.Name), f.DataType, f.Name, Path & "/" & f.Name)
 			out.Put(f.Name, v)

@@ -37,8 +37,8 @@ RenderDocument
     Anchors[]           named positions
 ```
 
-The implementation is `RepotRenderDocument`, `RepotRenderPage`,
-`RepotDrawOp`, and `RepotRenderAnchor`. A document is immutable by
+The implementation is `ReportRenderDocument`, `ReportRenderPage`,
+`ReportDrawOp`, and `ReportRenderAnchor`. A document is immutable by
 convention after `Build` returns. Layout is the only writer.
 
 Data exports (CSV, JSON, XML) do not use this document. They consume the
@@ -50,7 +50,7 @@ processed data model directly.
   y growing downward.
 - Page `Width` and `Height` keep full precision, for example A4 is
   `595.2755905511812 × 841.8897637795277`.
-- `RepotRenderPage.Add*` rounds every operation coordinate and size
+- `ReportRenderPage.Add*` rounds every operation coordinate and size
   half-up to **0.01 pt**. Measurement and pagination use unrounded values;
   only emission is rounded.
 - Font sizes, line widths, and DPI are not geometry and are not rounded by
@@ -59,7 +59,7 @@ processed data model directly.
 
 ## 4. Operations
 
-`RepotDrawOp` is one flat class. `OpType` selects the meaning; unused
+`ReportDrawOp` is one flat class. `OpType` selects the meaning; unused
 fields keep their initial values. A flat class is used because B4X has no
 stable interface or inheritance mechanism for this boundary, and because
 the canonical golden writer can serialise it without reflection.

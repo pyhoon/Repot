@@ -20,10 +20,10 @@ collide with an existing B4X library.
 
 The project is **Repot**.
 
-- Public classes use the `Repot` prefix: `Repot`, `RepotResult`,
-  `RepotDiagnostic`, `RepotPdf`, `RepotHtml`, `RepotCsv`, `RepotJson`,
-  `RepotXml`, `RepotDocx`, `RepotXlsx`, `RepotB4JAdapter`,
-  `RepotB4AAdapter`.
+- Public classes use the `Repot` prefix: `Repot`, `ReportResult`,
+  `ReportDiagnostic`, `ReportPdf`, `ReportHtml`, `ReportCsv`, `ReportJson`,
+  `ReportXml`, `ReportDocx`, `ReportXlsx`, `ReportB4JAdapter`,
+  `ReportB4AAdapter`.
 - The library file is `Repot.b4xlib`; the B4J projects are `Repot` and
   `RepotTests`.
 - `[B4X]` is used only as a forum tag to signal the ecosystem, never as

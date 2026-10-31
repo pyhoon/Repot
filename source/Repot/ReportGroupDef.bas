@@ -1,4 +1,4 @@
-﻿B4J=true
+B4J=true
 Group=Model
 ModulesStructureVersion=1
 Type=Class
@@ -23,8 +23,8 @@ Public Sub Initialize
 	Aggregates.Initialize
 End Sub
 
-Public Sub AggregateByName (AggregateName As String) As RepotAggregateDef
-	For Each a As RepotAggregateDef In Aggregates
+Public Sub AggregateByName (AggregateName As String) As ReportAggregateDef
+	For Each a As ReportAggregateDef In Aggregates
 		If a.Name = AggregateName Then Return a
 	Next
 	Return Null

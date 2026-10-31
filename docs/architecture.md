@@ -68,23 +68,23 @@ only inside a platform adapter, together with the DPI that produced them.
 
 These are the adapter contracts layout depends on. They are internal
 contracts: B4X has no stable, portable interface mechanism, so a platform
-adapter is selected at build time (`RepotB4JAdapter`, later
-`RepotB4AAdapter`) and compiled against the same method signatures. The
+adapter is selected at build time (`ReportB4JAdapter`, later
+`ReportB4AAdapter`) and compiled against the same method signatures. The
 public API exposes the adapter object, not an abstract base class.
 
 ### 4.1 Measurement adapter
 
 ```vb
 ' Returns laid-out lines and the metrics needed for pagination.
-Sub MeasureBlock(Text As String, Style As RepotTextStyle, MaxWidth As Double) As RepotTextMetrics
+Sub MeasureBlock(Text As String, Style As ReportTextStyle, MaxWidth As Double) As ReportTextMetrics
 ' Width of a single line without wrapping.
-Sub MeasureLine(Text As String, Style As RepotTextStyle) As Double
+Sub MeasureLine(Text As String, Style As ReportTextStyle) As Double
 ' Nominal line height for the resolved style.
-Sub LineHeight(Style As RepotTextStyle) As Double
+Sub LineHeight(Style As ReportTextStyle) As Double
 ```
 
-`RepotTextStyle` is a resolved style, not a template style: family, size,
-bold, italic, underline, line spacing, and colour. `RepotTextMetrics`
+`ReportTextStyle` is a resolved style, not a template style: family, size,
+bold, italic, underline, line spacing, and colour. `ReportTextMetrics`
 carries `Lines` and `Widths` (one entry per laid-out line), `Width`,
 `Height`, `Ascent`, `Descent`, and `LineHeight`. Line breaks are final;
 layout does not re-wrap measured text. `Height` is `Lines.Size *
@@ -92,8 +92,8 @@ LineHeight`, and `LineHeight` is `font size * line spacing`; platform
 leading is reported separately and does not silently change the nominal
 line height.
 
-Implemented in M2 slice 1 as `RepotB4JMeasure`, with `RepotTextStyle`,
-`RepotTextMetrics` and `RepotFont`. It wraps at spaces and tabs, honours
+Implemented in M2 slice 1 as `ReportB4JMeasure`, with `ReportTextStyle`,
+`ReportTextMetrics` and `ReportFont`. It wraps at spaces and tabs, honours
 explicit line breaks, breaks an over-wide word by character, ignores
 trailing whitespace, and records a diagnostic if AWT cannot initialise
 or a string cannot be measured.
@@ -105,10 +105,10 @@ maximum line count or depth is rejected with a diagnostic.
 ### 4.2 Font resolution
 
 ```vb
-Sub ResolveFont(Family As String, Bold As Boolean, Italic As Boolean, SizePt As Double) As RepotFont
+Sub ResolveFont(Family As String, Bold As Boolean, Italic As Boolean, SizePt As Double) As ReportFont
 ```
 
-`RepotFont` carries `Key` (measurement identity), resolved `Family`,
+`ReportFont` carries `Key` (measurement identity), resolved `Family`,
 `Bold`, `Italic`, `Size`, `Ascent`, `Descent`, `LineGap`, and an opaque
 `Handle`. Two platforms may return different metrics for the same logical
 font; that difference is contained here and documented as a tolerance.
@@ -117,19 +117,19 @@ Fallback follows the family list declared in the template's `fonts`
 entry, then the platform default. A substitution is reported as a warning
 with the requested and chosen family. Falling back silently is forbidden.
 
-`RepotB4JMeasure` implements this for B4J. It measures with public AWT
+`ReportB4JMeasure` implements this for B4J. It measures with public AWT
 font APIs at a base size of 1000 pt and scales linearly, because AWT font
 sizes are integers and templates may use fractional point sizes. The
-resolved family and the `Substituted` flag are recorded on `RepotFont`, so
+resolved family and the `Substituted` flag are recorded on `ReportFont`, so
 a layout golden can state which font it actually used.
 
 ### 4.3 Image loading
 
 ```vb
-Sub LoadImage(Path As String, MaxPixels As Long) As RepotImage
+Sub LoadImage(Path As String, MaxPixels As Long) As ReportImage
 ```
 
-`RepotImage` carries `Path`, `PixelWidth`, `PixelHeight`, and an opaque
+`ReportImage` carries `Path`, `PixelWidth`, `PixelHeight`, and an opaque
 `Handle`. Caching is the adapter's responsibility. Images larger than the
 configured pixel limit fail with a diagnostic. The engine needs intrinsic
 size and a way to hand the handle to a drawing backend; it does not decode
@@ -221,7 +221,7 @@ document generated last year.
   financial document.
 - Missing fields resolve to null, not to an error, unless the field is
   declared required.
-- Errors surface as `RepotResult.Errors`, not as raw exceptions. The
+- Errors surface as `ReportResult.Errors`, not as raw exceptions. The
   public API converts platform exceptions into diagnostics at the adapter
   boundary.
 - Warnings (for example, text truncated by a fixed-height element) are

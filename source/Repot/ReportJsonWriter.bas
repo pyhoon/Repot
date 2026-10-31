@@ -1,10 +1,10 @@
-﻿B4J=true
+B4J=true
 Group=Core
 ModulesStructureVersion=1
 Type=Class
 Version=10.7
 @EndOfDesignText@
-'Canonical JSON writer for RepotDefinition.
+'Canonical JSON writer for ReportDefinition.
 '
 'Output is deterministic: object keys are sorted, numbers use an invariant
 'dot, and no timestamps or platform paths are written. The writer is used
@@ -18,7 +18,7 @@ Public Sub Initialize
 	mSb.Initialize
 End Sub
 
-Public Sub ToJson (Def As RepotDefinition) As String
+Public Sub ToJson (Def As ReportDefinition) As String
 	mSb.Initialize
 	Dim root As Map = DefinitionToMap(Def)
 	WriteValue(root, 0)
@@ -28,7 +28,7 @@ End Sub
 
 '--------------------------------------------------------------- model to maps
 
-Private Sub DefinitionToMap (Def As RepotDefinition) As Map
+Private Sub DefinitionToMap (Def As ReportDefinition) As Map
 	Dim root As Map
 	root.Initialize
 	root.Put("schemaVersion", Def.SchemaVersion)
@@ -46,7 +46,7 @@ Private Sub DefinitionToMap (Def As RepotDefinition) As Map
 	Return root
 End Sub
 
-Private Sub PageToMap (Page As RepotPageSetup) As Map
+Private Sub PageToMap (Page As ReportPageSetup) As Map
 	Dim m As Map
 	m.Initialize
 	If Page.SizeName.Length > 0 Then
@@ -84,7 +84,7 @@ Private Sub FontsToMap (Fonts As Map) As Map
 	Dim out As Map
 	out.Initialize
 	For Each name As String In Fonts.Keys
-		Dim f As RepotFontDef = Fonts.Get(name)
+		Dim f As ReportFontDef = Fonts.Get(name)
 		Dim m As Map
 		m.Initialize
 		m.Put("family", f.Family)
@@ -98,7 +98,7 @@ Private Sub StylesToMap (Styles As Map) As Map
 	Dim out As Map
 	out.Initialize
 	For Each name As String In Styles.Keys
-		Dim st As RepotStyle = Styles.Get(name)
+		Dim st As ReportStyle = Styles.Get(name)
 		Dim m As Map
 		m.Initialize
 		m.Put("font", st.FontName)
@@ -137,7 +137,7 @@ End Sub
 Private Sub ParametersToList (Parameters As List) As List
 	Dim out As List
 	out.Initialize
-	For Each p As RepotParameterDef In Parameters
+	For Each p As ReportParameterDef In Parameters
 		Dim m As Map
 		m.Initialize
 		m.Put("name", p.Name)
@@ -160,14 +160,14 @@ Private Sub DataSetsToList (DataSets As Map) As List
 	Next
 	names.Sort(True)
 	For Each name As String In names
-		Dim ds As RepotDataSetDef = DataSets.Get(name)
+		Dim ds As ReportDataSetDef = DataSets.Get(name)
 		Dim m As Map
 		m.Initialize
 		m.Put("name", ds.Name)
 		m.Put("kind", ds.Kind)
 		Dim fields As List
 		fields.Initialize
-		For Each f As RepotFieldDef In ds.Fields
+		For Each f As ReportFieldDef In ds.Fields
 			Dim fm As Map
 			fm.Initialize
 			fm.Put("name", f.Name)
@@ -184,7 +184,7 @@ End Sub
 Private Sub AggregatesToList (Aggregates As List) As List
 	Dim out As List
 	out.Initialize
-	For Each a As RepotAggregateDef In Aggregates
+	For Each a As ReportAggregateDef In Aggregates
 		Dim m As Map
 		m.Initialize
 		m.Put("name", a.Name)
@@ -198,7 +198,7 @@ End Sub
 Private Sub GroupsToList (Groups As List) As List
 	Dim out As List
 	out.Initialize
-	For Each g As RepotGroupDef In Groups
+	For Each g As ReportGroupDef In Groups
 		Dim m As Map
 		m.Initialize
 		m.Put("id", g.Id)
@@ -207,7 +207,7 @@ Private Sub GroupsToList (Groups As List) As List
 		If g.Sort.Size > 0 Then
 			Dim sorts As List
 			sorts.Initialize
-			For Each s As RepotSortDef In g.Sort
+			For Each s As ReportSortDef In g.Sort
 				Dim sm As Map
 				sm.Initialize
 				sm.Put("field", s.FieldName)
@@ -226,7 +226,7 @@ End Sub
 Private Sub SectionsToList (Sections As List) As List
 	Dim out As List
 	out.Initialize
-	For Each s As RepotSection In Sections
+	For Each s As ReportSection In Sections
 		Dim m As Map
 		m.Initialize
 		m.Put("type", s.SectionType)
@@ -239,7 +239,7 @@ Private Sub SectionsToList (Sections As List) As List
 		If s.VisibleExpression.Length > 0 Then m.Put("visible", s.VisibleExpression)
 		Dim elements As List
 		elements.Initialize
-		For Each e As RepotElement In s.Elements
+		For Each e As ReportElement In s.Elements
 			elements.Add(ElementToMap(e))
 		Next
 		m.Put("elements", elements)
@@ -248,7 +248,7 @@ Private Sub SectionsToList (Sections As List) As List
 	Return out
 End Sub
 
-Private Sub ElementToMap (e As RepotElement) As Map
+Private Sub ElementToMap (e As ReportElement) As Map
 	Dim m As Map
 	m.Initialize
 	m.Put("type", e.ElementType)
@@ -300,7 +300,7 @@ Private Sub WriteValue (Value As Object, Indent As Int)
 	If Value = Null Then
 		mSb.Append("null")
 	Else If Value Is String Then
-		mSb.Append(RepotJsonUtil.JsonQuote(Value))
+		mSb.Append(ReportJsonUtil.JsonQuote(Value))
 	Else If Value Is Boolean Then
 		If Value Then
 			mSb.Append("true")
@@ -309,7 +309,7 @@ Private Sub WriteValue (Value As Object, Indent As Int)
 		End If
 	Else If IsNumber(Value) Then
 		Dim d As Double = Value
-		mSb.Append(RepotUnits.FormatNumber(d, 4))
+		mSb.Append(ReportUnits.FormatNumber(d, 4))
 	Else If Value Is Map Then
 		WriteMap(Value, Indent)
 	Else If Value Is List Then
@@ -333,7 +333,7 @@ Private Sub WriteMap (Value As Map, Indent As Int)
 	keys.Sort(True)
 	For i = 0 To keys.Size - 1
 		Dim k As String = keys.Get(i)
-		mSb.Append(Spaces(Indent + 2)).Append(RepotJsonUtil.JsonQuote(k)).Append(": ")
+		mSb.Append(Spaces(Indent + 2)).Append(ReportJsonUtil.JsonQuote(k)).Append(": ")
 		WriteValue(Value.Get(k), Indent + 2)
 		If i < keys.Size - 1 Then mSb.Append(",")
 		mSb.Append(CRLF)

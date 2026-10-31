@@ -129,9 +129,9 @@ Report.SetParameter("InvoiceNumber", "INV-1042")
 Report.SetTimestamp(DateTime.Now)                ' explicit clock, no ambient time
 Report.SetLocale("en-GB")                        ' explicit formatting culture
 
-Wait For (Report.Build) Complete (Result As RepotResult)
+Wait For (Report.Build) Complete (Result As ReportResult)
 If Result.Success Then
-    Dim Pdf As RepotPdf
+    Dim Pdf As ReportPdf
     Pdf.Initialize(Result)
     Wait For (Pdf.Export(File.DirApp, "invoice.pdf")) Complete (Ok As Boolean)
 End If

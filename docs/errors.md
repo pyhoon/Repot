@@ -5,8 +5,8 @@ different meaning; new checks get new codes.
 
 Diagnostics carry a severity (`error` or `warning`), the code, a message,
 a JSON pointer when the source is a template, and the element id when one
-applies. Loading returns them in `RepotDiagnostics`; binding returns them
-on `RepotDataBinder.Diagnostics`. Nothing is written to the console or
+applies. Loading returns them in `ReportDiagnostics`; binding returns them
+on `ReportDataBinder.Diagnostics`. Nothing is written to the console or
 raised as a platform exception for an expected validation failure.
 
 ## 1. Prefixes

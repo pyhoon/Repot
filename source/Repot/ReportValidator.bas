@@ -1,4 +1,4 @@
-﻿B4J=true
+B4J=true
 Group=Core
 ModulesStructureVersion=1
 Type=Class
@@ -11,8 +11,8 @@ Version=10.7
 'carry the source path and element id so a designer can highlight them.
 
 Sub Class_Globals
-	Private mDef As RepotDefinition
-	Private mDiags As RepotDiagnostics
+	Private mDef As ReportDefinition
+	Private mDiags As ReportDiagnostics
 	Private mBaseDir As String
 	Private mParams As Map
 	Private mDataSets As Map
@@ -39,7 +39,7 @@ Public Sub Initialize
 	mSectionTypes.Initialize
 End Sub
 
-Public Sub Validate (Def As RepotDefinition, Diags As RepotDiagnostics, BaseDir As String)
+Public Sub Validate (Def As ReportDefinition, Diags As ReportDiagnostics, BaseDir As String)
 	mDef = Def
 	mDiags = Diags
 	mBaseDir = BaseDir
@@ -72,7 +72,7 @@ End Sub
 
 Private Sub IndexFonts
 	For Each name As String In mDef.Fonts.Keys
-		Dim f As RepotFontDef = mDef.Fonts.Get(name)
+		Dim f As ReportFontDef = mDef.Fonts.Get(name)
 		mFonts.Put(name, f)
 		If f.Family.Size = 0 Then
 			mDiags.AddError("E-VAL-001", "font '" & name & "' has no family", "/fonts/" & name)
@@ -85,7 +85,7 @@ End Sub
 
 Private Sub IndexStyles
 	For Each name As String In mDef.Styles.Keys
-		Dim st As RepotStyle = mDef.Styles.Get(name)
+		Dim st As ReportStyle = mDef.Styles.Get(name)
 		mStyles.Put(name, st)
 		If st.FontName.Length > 0 And mFonts.ContainsKey(st.FontName) = False Then
 			mDiags.AddError("E-VAL-010", "style '" & name & "' references unknown font '" & st.FontName & "'", "/styles/" & name & "/font")
@@ -109,7 +109,7 @@ Private Sub IndexStyles
 End Sub
 
 Private Sub IndexParameters
-	For Each p As RepotParameterDef In mDef.Parameters
+	For Each p As ReportParameterDef In mDef.Parameters
 		mParams.Put(p.Name, p)
 		If AllowedFieldTypes.IndexOf("|" & p.DataType & "|") < 0 Then
 			mDiags.AddError("E-VAL-020", "parameter '" & p.Name & "' has unknown type '" & p.DataType & "'", "/parameters")
@@ -119,7 +119,7 @@ End Sub
 
 Private Sub IndexDataSets
 	For Each name As String In mDef.DataSets.Keys
-		Dim ds As RepotDataSetDef = mDef.DataSets.Get(name)
+		Dim ds As ReportDataSetDef = mDef.DataSets.Get(name)
 		mDataSets.Put(name, ds)
 		If ds.Kind <> "rows" And ds.Kind <> "single" Then
 			mDiags.AddError("E-VAL-030", "dataset '" & name & "' has invalid kind '" & ds.Kind & "'", "/dataSets/" & name)
@@ -127,7 +127,7 @@ Private Sub IndexDataSets
 		If ds.Fields.Size = 0 Then
 			mDiags.AddError("E-VAL-031", "dataset '" & name & "' has no fields", "/dataSets/" & name & "/fields")
 		End If
-		For Each f As RepotFieldDef In ds.Fields
+		For Each f As ReportFieldDef In ds.Fields
 			If AllowedFieldTypes.IndexOf("|" & f.DataType & "|") < 0 Then
 				mDiags.AddError("E-VAL-032", "field '" & name & "." & f.Name & "' has unknown type '" & f.DataType & "'", "/dataSets/" & name & "/fields")
 			End If
@@ -136,7 +136,7 @@ Private Sub IndexDataSets
 End Sub
 
 Private Sub IndexGroups
-	For Each g As RepotGroupDef In mDef.Groups
+	For Each g As ReportGroupDef In mDef.Groups
 		mGroups.Put(g.Id, g)
 		If g.DataSet.Length = 0 Then
 			mDiags.AddError("E-VAL-040", "group '" & g.Id & "' has no dataSet", "/groups/" & g.Id)
@@ -146,8 +146,8 @@ Private Sub IndexGroups
 		If g.KeyExpression.Length = 0 Then
 			mDiags.AddError("E-VAL-042", "group '" & g.Id & "' has no key", "/groups/" & g.Id & "/key")
 		End If
-		For Each s As RepotSortDef In g.Sort
-			Dim ds As RepotDataSetDef = DataSetOrNull(g.DataSet)
+		For Each s As ReportSortDef In g.Sort
+			Dim ds As ReportDataSetDef = DataSetOrNull(g.DataSet)
 			If ds <> Null Then
 				If ds.FieldByName(s.FieldName) = Null Then
 					mDiags.AddError("E-VAL-043", "group '" & g.Id & "' sorts by unknown field '" & s.FieldName & "'", "/groups/" & g.Id & "/sort")
@@ -160,27 +160,27 @@ End Sub
 Private Sub IndexAggregates
 	'Dataset aggregates.
 	For Each name As String In mDef.DataSets.Keys
-		Dim ds As RepotDataSetDef = mDef.DataSets.Get(name)
-		For Each a As RepotAggregateDef In ds.Aggregates
+		Dim ds As ReportDataSetDef = mDef.DataSets.Get(name)
+		For Each a As ReportAggregateDef In ds.Aggregates
 			RegisterAggregate(a, ds.Name, "/dataSets/" & name & "/aggregates")
 		Next
 	Next
 	'Group aggregates.
-	For Each g As RepotGroupDef In mDef.Groups
-		For Each a As RepotAggregateDef In g.Aggregates
+	For Each g As ReportGroupDef In mDef.Groups
+		For Each a As ReportAggregateDef In g.Aggregates
 			RegisterAggregate(a, g.DataSet, "/groups/" & g.Id & "/aggregates")
 		Next
 	Next
 End Sub
 
-Private Sub RegisterAggregate (a As RepotAggregateDef, DataSetName As String, Path As String)
+Private Sub RegisterAggregate (a As ReportAggregateDef, DataSetName As String, Path As String)
 	If a.Name.Length = 0 Then Return
 	If mAggs.ContainsKey(a.Name) Then
 		mDiags.AddError("E-VAL-050", "duplicate aggregate name '" & a.Name & "' (aggregate names are document-unique)", Path)
 		Return
 	End If
 	mAggs.Put(a.Name, a)
-	Dim ds As RepotDataSetDef = DataSetOrNull(DataSetName)
+	Dim ds As ReportDataSetDef = DataSetOrNull(DataSetName)
 	If ds = Null Then
 		mDiags.AddError("E-VAL-051", "aggregate '" & a.Name & "' has no dataset", Path)
 	Else If a.FunctionName <> "count" And a.FieldName.Length > 0 Then
@@ -190,7 +190,7 @@ Private Sub RegisterAggregate (a As RepotAggregateDef, DataSetName As String, Pa
 	End If
 End Sub
 
-Private Sub DataSetOrNull (Name As String) As RepotDataSetDef
+Private Sub DataSetOrNull (Name As String) As ReportDataSetDef
 	If Name.Length > 0 Then
 		If mDataSets.ContainsKey(Name) Then Return mDataSets.Get(Name)
 	End If
@@ -212,7 +212,7 @@ End Sub
 
 Private Sub ValidateSections
 	Dim detailCount As Int = 0
-	For Each s As RepotSection In mDef.Sections
+	For Each s As ReportSection In mDef.Sections
 		ValidateSection(s)
 		If s.SectionType = "Detail" Then detailCount = detailCount + 1
 	Next
@@ -228,7 +228,7 @@ Private Sub ValidateSections
 	Next
 End Sub
 
-Private Sub ValidateSection (s As RepotSection)
+Private Sub ValidateSection (s As ReportSection)
 	Dim path As String = s.SourcePath
 	If AllowedSectionTypes.IndexOf("|" & s.SectionType & "|") < 0 Then
 		mDiags.AddError("E-VAL-072", "unknown section type '" & s.SectionType & "'", path & "/type")
@@ -264,7 +264,7 @@ Private Sub ValidateSection (s As RepotSection)
 		Else If mGroups.ContainsKey(s.GroupId) = False Then
 			mDiags.AddError("E-VAL-084", s.SectionType & " references unknown group '" & s.GroupId & "'", path & "/group")
 		Else
-			Dim g As RepotGroupDef = mGroups.Get(s.GroupId)
+			Dim g As ReportGroupDef = mGroups.Get(s.GroupId)
 			expressionDataSet = g.DataSet
 		End If
 		If s.DataSet.Length > 0 Then
@@ -283,14 +283,14 @@ Private Sub ValidateSection (s As RepotSection)
 		ValidateExpression(s.VisibleExpression, expressionDataSet, path & "/visible", s.Id)
 	End If
 
-	For Each e As RepotElement In s.Elements
+	For Each e As ReportElement In s.Elements
 		ValidateElement(e, s, expressionDataSet)
 	Next
 End Sub
 
 '--------------------------------------------------------------- elements
 
-Private Sub ValidateElement (e As RepotElement, s As RepotSection, SectionDataSet As String)
+Private Sub ValidateElement (e As ReportElement, s As ReportSection, SectionDataSet As String)
 	Dim path As String = e.SourcePath
 	Dim where As String = s.Id & "/" & e.Id
 
@@ -413,9 +413,9 @@ End Sub
 '--------------------------------------------------------------- expressions
 
 Private Sub ValidateExpression (Expression As String, SectionDataSet As String, Path As String, ElementId As String)
-	Dim expressions As List = RepotExpressionRefs.Extract(Expression, mDiags, Path)
+	Dim expressions As List = ReportExpressionRefs.Extract(Expression, mDiags, Path)
 	For Each expr As String In expressions
-		Dim ids As List = RepotExpressionRefs.Identifiers(expr, mDiags, Path)
+		Dim ids As List = ReportExpressionRefs.Identifiers(expr, mDiags, Path)
 		For Each raw As String In ids
 			ValidateIdentifier(raw, SectionDataSet, Path, ElementId)
 		Next
@@ -448,7 +448,7 @@ Private Sub ValidateIdentifier (Raw As String, SectionDataSet As String, Path As
 			mDiags.AddErrorAt("E-EXPR-011", "unknown dataset '" & dsName & "' in expression", Path, ElementId)
 			Return
 		End If
-		Dim ds As RepotDataSetDef = mDataSets.Get(dsName)
+		Dim ds As ReportDataSetDef = mDataSets.Get(dsName)
 		If ds.FieldByName(rest) = Null And mAggs.ContainsKey(rest) = False Then
 			mDiags.AddErrorAt("E-EXPR-012", "unknown field or aggregate '" & rest & "' in " & dsName, Path, ElementId)
 		End If
@@ -460,7 +460,7 @@ Private Sub ValidateIdentifier (Raw As String, SectionDataSet As String, Path As
 	Dim matches As Int = 0
 	If mAggs.ContainsKey(name) Then matches = matches + 1
 	If SectionDataSet.Length > 0 Then
-		Dim sds As RepotDataSetDef = DataSetOrNull(SectionDataSet)
+		Dim sds As ReportDataSetDef = DataSetOrNull(SectionDataSet)
 		If sds <> Null Then
 			If sds.FieldByName(name) <> Null Then matches = matches + 1
 		End If

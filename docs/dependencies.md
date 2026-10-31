@@ -37,7 +37,7 @@ enough because B4JBuilder is Windows-only.
 | `Regex` | part of B4X | B4A/B4J | use for expressions and identifiers |
 | `DateTime` / ticks | part of B4X | B4A/B4J | use for date formatting |
 | `StringUtils` | part of B4X | B4A/B4J | evaluate; avoid if trivial to implement |
-| `JavaObject` (B4J library) | part of B4J | B4J | use only in `RepotB4JMeasure`; required by consumers because it is not merged into the engine library jar |
+| `JavaObject` (B4J library) | part of B4J | B4J | use only in `ReportB4JMeasure`; required by consumers because it is not merged into the engine library jar |
 | `java.desktop` / AWT fonts | JDK 19 | B4J, headless | use public `java.awt.font` APIs for measurement; no `sun.*` access, no `Graphics2D`, no UI thread |
 | `XmlBuilder` | part of B4X | B4J / B4A | verify API and availability per platform |
 | `Archiver` / zip support | part of B4X | verify per platform | needed for DOCX/XLSX/ODF; verify |

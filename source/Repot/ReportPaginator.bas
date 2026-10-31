@@ -13,13 +13,13 @@ Version=10.7
 'full expression evaluation remains M6 work.
 
 Sub Class_Globals
-	Public Definition As RepotDefinition
-	Public Binder As RepotDataBinder
-	Public Measure As RepotB4JMeasure
-	Public Diagnostics As RepotDiagnostics
+	Public Definition As ReportDefinition
+	Public Binder As ReportDataBinder
+	Public Measure As ReportB4JMeasure
+	Public Diagnostics As ReportDiagnostics
 
-	Private mDoc As RepotRenderDocument
-	Private mBandLayout As RepotBandLayout
+	Private mDoc As ReportRenderDocument
+	Private mBandLayout As ReportBandLayout
 	Private mEmit As Boolean
 	Private mPageNo As Int
 	Private mPageCount As Int
@@ -33,10 +33,10 @@ Sub Class_Globals
 	Private mPageHeight As Double
 	Private mPageHeaderHeight As Double
 	Private mPageFooterHeight As Double
-	Private mCurrentPage As RepotRenderPage
+	Private mCurrentPage As ReportRenderPage
 	Private mCurrentY As Double
 
-	Private mDetailSection As RepotSection
+	Private mDetailSection As ReportSection
 	Private mDetailDataSetName As String
 	Private mHasReportHeader As Boolean
 	Private mHasPageHeader As Boolean
@@ -48,13 +48,13 @@ Sub Class_Globals
 	Private mAggregates As Map
 End Sub
 
-Public Sub Initialize (Def As RepotDefinition, B As RepotDataBinder, M As RepotB4JMeasure, Diags As RepotDiagnostics)
+Public Sub Initialize (Def As ReportDefinition, B As ReportDataBinder, M As ReportB4JMeasure, Diags As ReportDiagnostics)
 	Definition = Def
 	Binder = B
 	Measure = M
 	Diagnostics = Diags
 	If Diagnostics = Null Then
-		Dim fresh As RepotDiagnostics
+		Dim fresh As ReportDiagnostics
 		fresh.Initialize
 		Diagnostics = fresh
 	End If
@@ -78,20 +78,20 @@ Public Sub Initialize (Def As RepotDefinition, B As RepotDataBinder, M As RepotB
 	mHasPageFooter = (Def.SectionByType("PageFooter") <> Null)
 
 	If mHasPageHeader Then
-		Dim ph As RepotSection = Def.SectionByType("PageHeader")
+		Dim ph As ReportSection = Def.SectionByType("PageHeader")
 		mPageHeaderHeight = ph.Height
 	Else
 		mPageHeaderHeight = 0
 	End If
 	If mHasPageFooter Then
-		Dim pf As RepotSection = Def.SectionByType("PageFooter")
+		Dim pf As ReportSection = Def.SectionByType("PageFooter")
 		mPageFooterHeight = pf.Height
 	Else
 		mPageFooterHeight = 0
 	End If
 End Sub
 
-Public Sub Render As RepotRenderDocument
+Public Sub Render As ReportRenderDocument
 	' pass 1: count pages
 	mEmit = False
 	mDoc = Null
@@ -102,7 +102,7 @@ Public Sub Render As RepotRenderDocument
 
 	' pass 2: emit
 	mEmit = True
-	Dim newDoc As RepotRenderDocument
+	Dim newDoc As ReportRenderDocument
 	newDoc.Initialize
 	mDoc = newDoc
 	mPageNo = 0
@@ -117,36 +117,36 @@ Private Sub RunPass
 	NewPage
 	' page 1: report header then page header
 	If firstPage And mHasReportHeader Then
-		Dim rh As RepotSection = Definition.SectionByType("ReportHeader")
-		Dim rhBand As RepotBand = mBandLayout.LayoutBand(Definition, rh, mContentWidth, mContentHeight, BuildValues(rh, Null))
+		Dim rh As ReportSection = Definition.SectionByType("ReportHeader")
+		Dim rhBand As ReportBand = mBandLayout.LayoutBand(Definition, rh, mContentWidth, mContentHeight, BuildValues(rh, Null))
 		PlaceBand(rhBand, mCurrentY)
 		mCurrentY = mCurrentY + rhBand.Height
 	End If
 	If mHasPageHeader Then
-		Dim ph As RepotSection = Definition.SectionByType("PageHeader")
-		Dim phBand As RepotBand = mBandLayout.LayoutBand(Definition, ph, mContentWidth, mContentHeight, BuildValues(ph, Null))
+		Dim ph As ReportSection = Definition.SectionByType("PageHeader")
+		Dim phBand As ReportBand = mBandLayout.LayoutBand(Definition, ph, mContentWidth, mContentHeight, BuildValues(ph, Null))
 		PlaceBand(phBand, mCurrentY)
 		mCurrentY = mCurrentY + phBand.Height
 	End If
 
 	' detail loop
 	If mDetailSection <> Null Then
-		Dim ds As RepotDataSet = Binder.GetDataSet(mDetailDataSetName)
+		Dim ds As ReportDataSet = Binder.GetDataSet(mDetailDataSetName)
 		Dim records As List
 		If ds <> Null Then records = ds.Records Else records = Null
 		If records <> Null Then
 			For Each rec As Map In records
 				mCurrentRecord = rec
 				mCurrentDataSet = mDetailDataSetName
-				Dim dband As RepotBand = mBandLayout.LayoutBand(Definition, mDetailSection, mContentWidth, mContentHeight, BuildValues(mDetailSection, rec))
+				Dim dband As ReportBand = mBandLayout.LayoutBand(Definition, mDetailSection, mContentWidth, mContentHeight, BuildValues(mDetailSection, rec))
 				Dim contentBottom As Double = mPageHeight - mMarginBottom - mPageFooterHeight
 				If mCurrentY + dband.Height > contentBottom + 0.000001 Then
 					FinishPage
 					NewPage
 					' page header on new page
 					If mHasPageHeader Then
-						Dim ph2 As RepotSection = Definition.SectionByType("PageHeader")
-						Dim phBand2 As RepotBand = mBandLayout.LayoutBand(Definition, ph2, mContentWidth, mContentHeight, BuildValues(ph2, Null))
+						Dim ph2 As ReportSection = Definition.SectionByType("PageHeader")
+						Dim phBand2 As ReportBand = mBandLayout.LayoutBand(Definition, ph2, mContentWidth, mContentHeight, BuildValues(ph2, Null))
 						PlaceBand(phBand2, mCurrentY)
 						mCurrentY = mCurrentY + phBand2.Height
 					End If
@@ -161,15 +161,15 @@ Private Sub RunPass
 	If mHasReportFooter Then
 		mCurrentRecord = Null
 		mCurrentDataSet = ""
-		Dim rf As RepotSection = Definition.SectionByType("ReportFooter")
-		Dim rfBand As RepotBand = mBandLayout.LayoutBand(Definition, rf, mContentWidth, mContentHeight, BuildValues(rf, Null))
+		Dim rf As ReportSection = Definition.SectionByType("ReportFooter")
+		Dim rfBand As ReportBand = mBandLayout.LayoutBand(Definition, rf, mContentWidth, mContentHeight, BuildValues(rf, Null))
 		Dim contentBottom2 As Double = mPageHeight - mMarginBottom - mPageFooterHeight
 		If mCurrentY + rfBand.Height > contentBottom2 + 0.000001 Then
 			FinishPage
 			NewPage
 			If mHasPageHeader Then
-				Dim ph3 As RepotSection = Definition.SectionByType("PageHeader")
-				Dim phBand3 As RepotBand = mBandLayout.LayoutBand(Definition, ph3, mContentWidth, mContentHeight, BuildValues(ph3, Null))
+				Dim ph3 As ReportSection = Definition.SectionByType("PageHeader")
+				Dim phBand3 As ReportBand = mBandLayout.LayoutBand(Definition, ph3, mContentWidth, mContentHeight, BuildValues(ph3, Null))
 				PlaceBand(phBand3, mCurrentY)
 				mCurrentY = mCurrentY + phBand3.Height
 			End If
@@ -191,17 +191,17 @@ End Sub
 
 Private Sub FinishPage
 	If mHasPageFooter Then
-		Dim pf As RepotSection = Definition.SectionByType("PageFooter")
+		Dim pf As ReportSection = Definition.SectionByType("PageFooter")
 		Dim vals As Map = BuildValues(pf, Null)
-		Dim pfBand As RepotBand = mBandLayout.LayoutBand(Definition, pf, mContentWidth, mContentHeight, vals)
+		Dim pfBand As ReportBand = mBandLayout.LayoutBand(Definition, pf, mContentWidth, mContentHeight, vals)
 		Dim y As Double = mPageHeight - mMarginBottom - mPageFooterHeight
 		PlaceBand(pfBand, y)
 	End If
 End Sub
 
-Private Sub PlaceBand (band As RepotBand, y As Double)
+Private Sub PlaceBand (band As ReportBand, y As Double)
 	' item.Y is relative to the band; make it absolute on the page.
-	For Each pe As RepotLayoutElement In band.Elements
+	For Each pe As ReportLayoutElement In band.Elements
 		pe.Y = pe.Y + y
 	Next
 	band.Y = y
@@ -211,14 +211,14 @@ Private Sub PlaceBand (band As RepotBand, y As Double)
 End Sub
 '--------------------------------------------------------------- values
 
-Private Sub BuildValues (sec As RepotSection, rec As Map) As Map
+Private Sub BuildValues (sec As ReportSection, rec As Map) As Map
 	Dim vals As Map
 	vals.Initialize
 	If sec = Null Then Return vals
-	For Each el As RepotElement In sec.Elements
+	For Each el As ReportElement In sec.Elements
 		If el.ElementType = "field" Then
 			Dim raw As Object = ResolveRaw(el.ValueExpression)
-			Dim st As RepotStyle = Definition.StyleByName(el.StyleName)
+			Dim st As ReportStyle = Definition.StyleByName(el.StyleName)
 			Dim formatted As String = FormatValue(raw, el, st)
 			vals.Put(el.Id, formatted)
 		End If
@@ -260,11 +260,11 @@ Private Sub ResolveInner (Expr As String) As Object
 		If parts.Get(1) = "count" Then Return mPageCount
 	End If
 
-	Dim dsDef As RepotDataSetDef = Definition.DataSetByName(first)
+	Dim dsDef As ReportDataSetDef = Definition.DataSetByName(first)
 	If dsDef <> Null And parts.Size >= 2 Then
 		Dim field As String = parts.Get(1)
 		If dsDef.Kind = "single" Then
-			Dim ds As RepotDataSet = Binder.GetDataSet(first)
+			Dim ds As ReportDataSet = Binder.GetDataSet(first)
 			If ds <> Null Then
 				If ds.SingleRecord.IsInitialized Then
 					If ds.SingleRecord.ContainsKey(field) Then Return ds.SingleRecord.Get(field)
@@ -340,18 +340,18 @@ End Sub
 Private Sub ComputeAggregates
 	mAggregates.Initialize
 	For Each dsName As String In Definition.DataSets.Keys
-		Dim dsDef As RepotDataSetDef = Definition.DataSetByName(dsName)
-		Dim ds As RepotDataSet = Binder.GetDataSet(dsName)
+		Dim dsDef As ReportDataSetDef = Definition.DataSetByName(dsName)
+		Dim ds As ReportDataSet = Binder.GetDataSet(dsName)
 		If ds = Null Then Continue
 		If dsDef.Aggregates = Null Then Continue
-		For Each agg As RepotAggregateDef In dsDef.Aggregates
+		For Each agg As ReportAggregateDef In dsDef.Aggregates
 			Dim v As Object = ComputeAggregate(agg, ds)
 			mAggregates.Put(agg.Name, v)
 		Next
 	Next
 End Sub
 
-Private Sub ComputeAggregate (agg As RepotAggregateDef, ds As RepotDataSet) As Object
+Private Sub ComputeAggregate (agg As ReportAggregateDef, ds As ReportDataSet) As Object
 	Select Case agg.FunctionName
 		Case "count"
 			Return ds.Records.Size
@@ -412,7 +412,7 @@ End Sub
 
 '--------------------------------------------------------------- formatting
 
-Private Sub FormatValue (Raw As Object, El As RepotElement, St As RepotStyle) As String
+Private Sub FormatValue (Raw As Object, El As ReportElement, St As ReportStyle) As String
 	Dim fmt As Map = El.FormatMap
 	If fmt = Null Or fmt.Size = 0 Then
 		If St <> Null Then fmt = St.FormatMap
@@ -436,7 +436,7 @@ Private Sub FormatValue (Raw As Object, El As RepotElement, St As RepotStyle) As
 		If fmt.ContainsKey("suffix") Then suffix = fmt.Get("suffix")
 		Dim d As Double = 0
 		If IsNumber(Raw) Then d = Raw
-		Dim s As String = RepotUnits.FormatNumber(d, decimals)
+		Dim s As String = ReportUnits.FormatNumber(d, decimals)
 		If grouping Then s = AddGrouping(s)
 		Return prefix & s & suffix
 	Else If typ = "date" Then
@@ -520,11 +520,11 @@ Private Sub Pad4 (n As Int) As String
 	Loop
 	Return s
 End Sub
-Private Sub EmitBand (band As RepotBand)
-	For Each item As RepotLayoutElement In band.Elements
+Private Sub EmitBand (band As ReportBand)
+	For Each item As ReportLayoutElement In band.Elements
 		Dim x As Double = mMarginLeft + item.X
 		Dim y As Double = item.Y
-		Dim el As RepotElement = item.Element
+		Dim el As ReportElement = item.Element
 		Select Case el.ElementType
 			Case "text"
 				EmitTextItem(item, x, y)
@@ -533,7 +533,7 @@ Private Sub EmitBand (band As RepotBand)
 			Case "image"
 				Dim resPath As String = el.Resource
 				If Definition.SourceDir.Length > 0 Then resPath = Definition.SourceDir & "/" & resPath
-				Dim img As RepotImage = Measure.LoadImage(resPath, 0)
+				Dim img As ReportImage = Measure.LoadImage(resPath, 0)
 				mCurrentPage.AddImage(x, y, item.Width, item.Height, el.Resource, img.PixelWidth, img.PixelHeight, el.Dpi, el.Fit, img.Handle)
 			Case "line"
 				mCurrentPage.AddLine(x, y, x + item.Width, y + item.Height, el.LineWidth, el.Colour, el.Dash)
@@ -543,7 +543,7 @@ Private Sub EmitBand (band As RepotBand)
 	Next
 End Sub
 
-Private Sub EmitTextItem (item As RepotLayoutElement, x As Double, y As Double)
+Private Sub EmitTextItem (item As ReportLayoutElement, x As Double, y As Double)
 	Dim lh As Double = item.Style.LineSpacing * item.Style.Size
 	If lh <= 0 Then lh = item.Style.Size * 1.2
 	Dim lines As List = item.Lines

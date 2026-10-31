@@ -8,7 +8,7 @@ Version=10.7
 'auto-grow, push-down and height calculation. Coordinates are relative to
 'the band's top-left; pagination adds the page offset later.
 Sub Class_Globals
-	Public Section As RepotSection
+	Public Section As ReportSection
 	Public X As Double
 	Public Y As Double
 	Public Width As Double

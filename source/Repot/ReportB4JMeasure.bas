@@ -22,7 +22,7 @@ Version=10.7
 'zero is returned; layout must treat that as a hard failure.
 
 Sub Class_Globals
-	Public Diagnostics As RepotDiagnostics
+	Public Diagnostics As ReportDiagnostics
 	Public IsAvailable As Boolean
 	Public LastError As String
 	Public MaxLines As Int
@@ -37,10 +37,10 @@ Sub Class_Globals
 	Private mTooLong As Boolean
 End Sub
 
-Public Sub Initialize (Diags As RepotDiagnostics)
+Public Sub Initialize (Diags As ReportDiagnostics)
 	Diagnostics = Diags
 	If Diagnostics = Null Then
-		Dim fresh As RepotDiagnostics
+		Dim fresh As ReportDiagnostics
 		fresh.Initialize
 		Diagnostics = fresh
 	End If
@@ -70,7 +70,7 @@ End Sub
 
 'Resolves one requested family. Falls back to the platform default when
 'the family is unavailable, recording a warning.
-Public Sub ResolveFont (Family As String, Bold As Boolean, Italic As Boolean, SizePt As Double) As RepotFont
+Public Sub ResolveFont (Family As String, Bold As Boolean, Italic As Boolean, SizePt As Double) As ReportFont
 	Dim families As List
 	families.Initialize
 	Dim name As String = Family.Trim
@@ -80,13 +80,13 @@ End Sub
 
 'Resolves a style's declared fallback list, outermost first. A warning is
 'recorded whenever the first declared family is not the one used.
-Public Sub ResolveStyle (Style As RepotTextStyle) As RepotFont
+Public Sub ResolveStyle (Style As ReportTextStyle) As ReportFont
 	Return ResolveList(Style.Family, Style.Bold, Style.Italic, Style.Size)
 End Sub
 
 'Nominal line height in points: the style's font size times its line
 'spacing. Platform leading is deliberately not part of this number.
-Public Sub LineHeight (Style As RepotTextStyle) As Double
+Public Sub LineHeight (Style As ReportTextStyle) As Double
 	Dim spacing As Double = Style.LineSpacing
 	If spacing <= 0 Then spacing = 1.2
 	Return Style.Size * spacing
@@ -94,8 +94,8 @@ End Sub
 
 'Width of a single line in points. The text is not wrapped and line
 'breaks inside Text are not meaningful; use MeasureBlock for blocks.
-Public Sub MeasureLine (Text As String, Style As RepotTextStyle) As Double
-	Dim f As RepotFont = ResolveStyle(Style)
+Public Sub MeasureLine (Text As String, Style As ReportTextStyle) As Double
+	Dim f As ReportFont = ResolveStyle(Style)
 	Return MeasureWithFont(Text.Trim, f)
 End Sub
 
@@ -103,12 +103,12 @@ End Sub
 'at spaces and tabs; runs of whitespace between words collapse to one
 'space. A word wider than MaxWidth is broken by character. Explicit line
 'breaks are honoured. Trailing whitespace is removed before measuring.
-Public Sub MeasureBlock (Text As String, Style As RepotTextStyle, MaxWidth As Double) As RepotTextMetrics
-	Dim m As RepotTextMetrics
+Public Sub MeasureBlock (Text As String, Style As ReportTextStyle, MaxWidth As Double) As ReportTextMetrics
+	Dim m As ReportTextMetrics
 	m.Initialize
 	mTooLong = False
 
-	Dim f As RepotFont = ResolveStyle(Style)
+	Dim f As ReportFont = ResolveStyle(Style)
 	m.Font = f
 	m.Ascent = f.Ascent
 	m.Descent = f.Descent
@@ -131,11 +131,11 @@ End Sub
 
 '--------------------------------------------------------------- fonts
 
-Private Sub ResolveList (Families As List, Bold As Boolean, Italic As Boolean, SizePt As Double) As RepotFont
+Private Sub ResolveList (Families As List, Bold As Boolean, Italic As Boolean, SizePt As Double) As ReportFont
 	Dim key As String = StyleKey(Families, Bold, Italic, SizePt)
 	If mFonts.ContainsKey(key) Then Return mFonts.Get(key)
 
-	Dim rf As RepotFont
+	Dim rf As ReportFont
 	rf.Initialize
 	rf.Bold = Bold
 	rf.Italic = Italic
@@ -190,14 +190,14 @@ Private Sub StyleKey (Families As List, Bold As Boolean, Italic As Boolean, Size
 		If sb.Length > 0 Then sb.Append("|")
 		sb.Append(f.Trim)
 	Next
-	Return sb.ToString & "#" & FlagKey(Bold, Italic) & "#" & RepotUnits.FormatNumber(SizePt, 6)
+	Return sb.ToString & "#" & FlagKey(Bold, Italic) & "#" & ReportUnits.FormatNumber(SizePt, 6)
 End Sub
 
 'Measurement identity: resolved family, face flags and size. Two templates
 'that request different fallback lists but resolve to the same family
 'share widths.
 Private Sub FontKey (Family As String, Bold As Boolean, Italic As Boolean, SizePt As Double) As String
-	Return Family.ToLowerCase & "#" & FlagKey(Bold, Italic) & "#" & RepotUnits.FormatNumber(SizePt, 6)
+	Return Family.ToLowerCase & "#" & FlagKey(Bold, Italic) & "#" & ReportUnits.FormatNumber(SizePt, 6)
 End Sub
 
 Private Sub FlagKey (Bold As Boolean, Italic As Boolean) As String
@@ -247,7 +247,7 @@ Private Sub BaseFamily (Handle As JavaObject, Fallback As String) As String
 	End Try
 End Sub
 
-Private Sub ReadMetrics (F As RepotFont)
+Private Sub ReadMetrics (F As ReportFont)
 	Try
 		Dim base As JavaObject = F.Handle
 		Dim tl As JavaObject
@@ -276,7 +276,7 @@ End Sub
 
 '--------------------------------------------------------------- text
 
-Private Sub MeasureWithFont (Text As String, F As RepotFont) As Double
+Private Sub MeasureWithFont (Text As String, F As ReportFont) As Double
 	If Text.Length = 0 Then Return 0
 	If IsAvailable = False Then Return 0
 	If F.Handle = Null Then Return 0
@@ -304,7 +304,7 @@ Private Sub MeasureWithFont (Text As String, F As RepotFont) As Double
 	End Try
 End Sub
 
-Private Sub WrapParagraph (Para As String, F As RepotFont, MaxWidth As Double, M As RepotTextMetrics)
+Private Sub WrapParagraph (Para As String, F As ReportFont, MaxWidth As Double, M As ReportTextMetrics)
 	Dim words As List = SplitWords(Para)
 	If words.Size = 0 Then
 		AddMeasuredLine(M, "", F)
@@ -347,7 +347,7 @@ End Sub
 
 'Adds every full chunk of an over-wide word to M and returns the final
 'chunk, which the caller keeps as the current line.
-Private Sub PlaceLongWord (Word As String, F As RepotFont, MaxWidth As Double, M As RepotTextMetrics) As String
+Private Sub PlaceLongWord (Word As String, F As ReportFont, MaxWidth As Double, M As ReportTextMetrics) As String
 	Dim chunk As String = ""
 	Dim i As Int = 0
 	Do While i < Word.Length
@@ -364,7 +364,7 @@ Private Sub PlaceLongWord (Word As String, F As RepotFont, MaxWidth As Double, M
 	Return chunk
 End Sub
 
-Private Sub AddMeasuredLine (M As RepotTextMetrics, Line As String, F As RepotFont)
+Private Sub AddMeasuredLine (M As ReportTextMetrics, Line As String, F As ReportFont)
 	If M.LineCount >= MaxLines Then
 		If mTooLong = False Then
 			mTooLong = True
@@ -376,8 +376,8 @@ Private Sub AddMeasuredLine (M As RepotTextMetrics, Line As String, F As RepotFo
 	M.AddLine(t, MeasureWithFont(t, F))
 End Sub
 
-Public Sub LoadImage (Path As String, MaxPixels As Long) As RepotImage
-	Dim img As RepotImage
+Public Sub LoadImage (Path As String, MaxPixels As Long) As ReportImage
+	Dim img As ReportImage
 	img.Initialize
 	img.Path = Path
 	If IsAvailable = False Then

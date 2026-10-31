@@ -39,8 +39,8 @@ End Sub
 
 'Copies this style. The family list is duplicated so callers cannot
 'mutate a shared style through an alias.
-Public Sub Copy As RepotTextStyle
-	Dim s As RepotTextStyle
+Public Sub Copy As ReportTextStyle
+	Dim s As ReportTextStyle
 	s.Initialize
 	For Each f As String In Family
 		s.Family.Add(f)

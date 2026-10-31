@@ -1,4 +1,4 @@
-﻿B4J=true
+B4J=true
 Group=Model
 ModulesStructureVersion=1
 Type=Class
@@ -19,8 +19,8 @@ Public Sub Initialize
 	Aggregates.Initialize
 End Sub
 
-Public Sub FieldByName (FieldName As String) As RepotFieldDef
-	For Each f As RepotFieldDef In Fields
+Public Sub FieldByName (FieldName As String) As ReportFieldDef
+	For Each f As ReportFieldDef In Fields
 		If f.Name = FieldName Then Return f
 	Next
 	Return Null
@@ -30,8 +30,8 @@ Public Sub HasField (FieldName As String) As Boolean
 	Return FieldByName(FieldName) <> Null
 End Sub
 
-Public Sub AggregateByName (AggregateName As String) As RepotAggregateDef
-	For Each a As RepotAggregateDef In Aggregates
+Public Sub AggregateByName (AggregateName As String) As ReportAggregateDef
+	For Each a As ReportAggregateDef In Aggregates
 		If a.Name = AggregateName Then Return a
 	Next
 	Return Null

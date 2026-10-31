@@ -4,43 +4,43 @@ Group=Default Group
 Library1=jcore
 Library2=json
 Library3=JavaObject
-Module1=|relative|..\Repot\RepotAggregateDef
-Module2=|relative|..\Repot\RepotExpressionRefs
-Module3=|relative|..\Repot\RepotFieldDef
-Module4=|relative|..\Repot\RepotFontDef
-Module5=|relative|..\Repot\RepotGroupDef
-Module6=|relative|..\Repot\RepotJsonUtil
-Module7=|relative|..\Repot\RepotJsonWriter
-Module8=|relative|..\Repot\RepotPageSetup
-Module9=|relative|..\Repot\RepotParameterDef
-Module10=|relative|..\Repot\RepotRenderAnchor
-Module11=|relative|..\Repot\RepotRenderDocument
-Module12=|relative|..\Repot\RepotDataBinder
-Module13=|relative|..\Repot\RepotRenderPage
-Module14=|relative|..\Repot\RepotSection
-Module15=|relative|..\Repot\RepotSortDef
-Module16=|relative|..\Repot\RepotStyle
-Module17=|relative|..\Repot\RepotTemplateLoader
-Module18=|relative|..\Repot\RepotUnits
-Module19=|relative|..\Repot\RepotValidator
-Module20=|relative|..\Repot\RepotVersion
-Module21=|relative|..\Repot\RepotTextStyle
-Module22=|relative|..\Repot\RepotFont
-Module23=|relative|..\Repot\RepotTextMetrics
-Module24=|relative|..\Repot\RepotB4JMeasure
-Module25=|relative|..\Repot\RepotBand
-Module26=|relative|..\Repot\RepotLayoutElement
-Module27=|relative|..\Repot\RepotBandLayout
-Module28=|relative|..\Repot\RepotDataSet
-Module29=|relative|..\Repot\RepotDataSetDef
-Module30=|relative|..\Repot\RepotDefinition
-Module31=|relative|..\Repot\RepotDiagnostic
-Module32=|relative|..\Repot\RepotDiagnostics
-Module33=|relative|..\Repot\RepotDrawOp
-Module34=|relative|..\Repot\RepotElement
-Module35=RepotEngineTests
-Module36=|relative|..\Repot\RepotImage
-Module37=|relative|..\Repot\RepotPaginator
+Module1=|relative|..\Repot\ReportAggregateDef
+Module2=|relative|..\Repot\ReportExpressionRefs
+Module3=|relative|..\Repot\ReportFieldDef
+Module4=|relative|..\Repot\ReportFontDef
+Module5=|relative|..\Repot\ReportGroupDef
+Module6=|relative|..\Repot\ReportJsonUtil
+Module7=|relative|..\Repot\ReportJsonWriter
+Module8=|relative|..\Repot\ReportPageSetup
+Module9=|relative|..\Repot\ReportParameterDef
+Module10=|relative|..\Repot\ReportRenderAnchor
+Module11=|relative|..\Repot\ReportRenderDocument
+Module12=|relative|..\Repot\ReportDataBinder
+Module13=|relative|..\Repot\ReportRenderPage
+Module14=|relative|..\Repot\ReportSection
+Module15=|relative|..\Repot\ReportSortDef
+Module16=|relative|..\Repot\ReportStyle
+Module17=|relative|..\Repot\ReportTemplateLoader
+Module18=|relative|..\Repot\ReportUnits
+Module19=|relative|..\Repot\ReportValidator
+Module20=|relative|..\Repot\ReportVersion
+Module21=|relative|..\Repot\ReportTextStyle
+Module22=|relative|..\Repot\ReportFont
+Module23=|relative|..\Repot\ReportTextMetrics
+Module24=|relative|..\Repot\ReportB4JMeasure
+Module25=|relative|..\Repot\ReportBand
+Module26=|relative|..\Repot\ReportLayoutElement
+Module27=|relative|..\Repot\ReportBandLayout
+Module28=|relative|..\Repot\ReportDataSet
+Module29=|relative|..\Repot\ReportDataSetDef
+Module30=|relative|..\Repot\ReportDefinition
+Module31=|relative|..\Repot\ReportDiagnostic
+Module32=|relative|..\Repot\ReportDiagnostics
+Module33=|relative|..\Repot\ReportDrawOp
+Module34=|relative|..\Repot\ReportElement
+Module35=ReportEngineTests
+Module36=|relative|..\Repot\ReportImage
+Module37=|relative|..\Repot\ReportPaginator
 NumberOfFiles=0
 NumberOfLibraries=3
 NumberOfModules=37
@@ -55,7 +55,7 @@ Version=10.7
 'binder honest before layout exists.
 '
 'Usage:
-'  java -jar RepotTests.jar <fixtures folder> [output folder]
+'  java -jar ReportTests.jar <fixtures folder> [output folder]
 '
 'Writes fixture-check.txt next to the jar. CI greps the first line for
 'errors=0. See docs/testing.md.
@@ -145,7 +145,7 @@ Sub AppStart (Args() As String)
 		End If
 	Next
 
-	Dim engine As RepotEngineTests
+	Dim engine As ReportEngineTests
 	engine.Initialize
 	engine.Run(root)
 	totalChecks = totalChecks + engine.Checks

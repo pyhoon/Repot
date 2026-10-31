@@ -20,7 +20,7 @@ Sub Class_Globals
 	Public Ascent As Double
 	Public Descent As Double
 	Public LineHeight As Double
-	Public Font As RepotFont
+	Public Font As ReportFont
 End Sub
 
 Public Sub Initialize

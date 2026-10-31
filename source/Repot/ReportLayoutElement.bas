@@ -8,14 +8,14 @@ Version=10.7
 'LineWidths come from the measurement adapter and must not be re-wrapped
 'by exporters.
 Sub Class_Globals
-	Public Element As RepotElement
+	Public Element As ReportElement
 	Public X As Double
 	Public Y As Double
 	Public Width As Double
 	Public Height As Double
 	Public DeclaredHeight As Double
-	Public Style As RepotTextStyle
-	Public Font As RepotFont
+	Public Style As ReportTextStyle
+	Public Font As ReportFont
 	Public Align As String
 	Public Valign As String
 	Public Overflow As String

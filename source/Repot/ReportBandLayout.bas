@@ -8,17 +8,17 @@ Version=10.7
 'auto-grow and push-down. Pagination is deliberately not part of this
 'class; it consumes the bands produced here.
 Sub Class_Globals
-	Public Diagnostics As RepotDiagnostics
-	Public Measure As RepotB4JMeasure
+	Public Diagnostics As ReportDiagnostics
+	Public Measure As ReportB4JMeasure
 	Private mCellWidth As Double
 	Private mCellHeight As Double
 	Private mGridReady As Boolean
 End Sub
 
-Public Sub Initialize (Diags As RepotDiagnostics, Measurement As RepotB4JMeasure)
+Public Sub Initialize (Diags As ReportDiagnostics, Measurement As ReportB4JMeasure)
 	Diagnostics = Diags
 	If Diagnostics = Null Then
-		Dim fresh As RepotDiagnostics
+		Dim fresh As ReportDiagnostics
 		fresh.Initialize
 		Diagnostics = fresh
 	End If
@@ -34,8 +34,8 @@ End Sub
 'page content box in points; they drive grid cell sizes when the page
 'uses column/row counts. Values supplies resolved text for field elements
 '(keyed by element id); text elements use their own text.
-Public Sub LayoutBand (Def As RepotDefinition, Section As RepotSection, ContentWidth As Double, ContentHeight As Double, Values As Map) As RepotBand
-	Dim band As RepotBand
+Public Sub LayoutBand (Def As ReportDefinition, Section As ReportSection, ContentWidth As Double, ContentHeight As Double, Values As Map) As ReportBand
+	Dim band As ReportBand
 	band.Initialize
 	band.Section = Section
 	band.Width = ContentWidth
@@ -52,8 +52,8 @@ Public Sub LayoutBand (Def As RepotDefinition, Section As RepotSection, ContentW
 
 	' Children in document order; this is the paint order and the stable
 	' tie-break for push-down.
-	For Each e As RepotElement In Section.Elements
-		Dim item As RepotLayoutElement
+	For Each e As ReportElement In Section.Elements
+		Dim item As ReportLayoutElement
 		item.Initialize
 		item.Element = e
 		item.DeclaredHeight = e.Height
@@ -76,7 +76,7 @@ End Sub
 
 '--------------------------------------------------------------- grid
 
-Private Sub PrepareGrid (Page As RepotPageSetup, ContentWidth As Double, ContentHeight As Double)
+Private Sub PrepareGrid (Page As ReportPageSetup, ContentWidth As Double, ContentHeight As Double)
 	mGridReady = True
 	If Page.CellWidth > 0 Then
 		mCellWidth = Page.CellWidth
@@ -94,7 +94,7 @@ Private Sub PrepareGrid (Page As RepotPageSetup, ContentWidth As Double, Content
 	End If
 End Sub
 
-Private Sub NormalizeBounds (e As RepotElement, item As RepotLayoutElement)
+Private Sub NormalizeBounds (e As ReportElement, item As ReportLayoutElement)
 	If e.UseCell Then
 		item.X = e.CellCol * mCellWidth
 		item.Y = e.CellRow * mCellHeight
@@ -112,12 +112,12 @@ End Sub
 
 '--------------------------------------------------------------- style
 
-Private Sub ResolveStyle (Def As RepotDefinition, e As RepotElement) As RepotTextStyle
-	Dim ts As RepotTextStyle
+Private Sub ResolveStyle (Def As ReportDefinition, e As ReportElement) As ReportTextStyle
+	Dim ts As ReportTextStyle
 	ts.Initialize
 
-	Dim st As RepotStyle = Def.StyleByName(e.StyleName)
-	Dim fd As RepotFontDef = Null
+	Dim st As ReportStyle = Def.StyleByName(e.StyleName)
+	Dim fd As ReportFontDef = Null
 	If st <> Null Then
 		fd = Def.FontByName(st.FontName)
 	End If
@@ -149,8 +149,8 @@ Private Sub ResolveStyle (Def As RepotDefinition, e As RepotElement) As RepotTex
 	Return ts
 End Sub
 
-Private Sub ResolveOverflow (Def As RepotDefinition, e As RepotElement) As String
-	Dim st As RepotStyle = Def.StyleByName(e.StyleName)
+Private Sub ResolveOverflow (Def As ReportDefinition, e As ReportElement) As String
+	Dim st As ReportStyle = Def.StyleByName(e.StyleName)
 	If st <> Null And st.Overflow.Length > 0 Then Return st.Overflow
 	Select Case e.ElementType
 		Case "text", "field"
@@ -160,21 +160,21 @@ Private Sub ResolveOverflow (Def As RepotDefinition, e As RepotElement) As Strin
 	End Select
 End Sub
 
-Private Sub ResolveAlign (Def As RepotDefinition, e As RepotElement) As String
+Private Sub ResolveAlign (Def As ReportDefinition, e As ReportElement) As String
 	If e.Align.Length > 0 Then Return e.Align
-	Dim st As RepotStyle = Def.StyleByName(e.StyleName)
+	Dim st As ReportStyle = Def.StyleByName(e.StyleName)
 	If st <> Null And st.Align.Length > 0 Then Return st.Align
 	Return "left"
 End Sub
 
-Private Sub ResolveValign (Def As RepotDefinition, e As RepotElement) As String
+Private Sub ResolveValign (Def As ReportDefinition, e As ReportElement) As String
 	If e.Valign.Length > 0 Then Return e.Valign
-	Dim st As RepotStyle = Def.StyleByName(e.StyleName)
+	Dim st As ReportStyle = Def.StyleByName(e.StyleName)
 	If st <> Null And st.Valign.Length > 0 Then Return st.Valign
 	Return "top"
 End Sub
 
-Private Sub ResolveContent (e As RepotElement, Values As Map) As String
+Private Sub ResolveContent (e As ReportElement, Values As Map) As String
 	Select Case e.ElementType
 		Case "text"
 			Return e.Text
@@ -188,20 +188,20 @@ End Sub
 
 '--------------------------------------------------------------- measurement
 
-Private Sub IsTextElement (e As RepotElement) As Boolean
+Private Sub IsTextElement (e As ReportElement) As Boolean
 	Return e.ElementType = "text" Or e.ElementType = "field"
 End Sub
 
-Private Sub MeasureAndGrow (band As RepotBand, Def As RepotDefinition)
+Private Sub MeasureAndGrow (band As ReportBand, Def As ReportDefinition)
 	If Measure = Null Then Return
-	For Each item As RepotLayoutElement In band.Elements
+	For Each item As ReportLayoutElement In band.Elements
 		If IsTextElement(item.Element) = False Then Continue
 		Dim lh As Double = Measure.LineHeight(item.Style)
 		If lh <= 0 Then lh = item.Style.Size * item.Style.LineSpacing
 		If item.Style.LineSpacing <= 0 Then lh = item.Style.Size * 1.2
 		Select Case item.Overflow
 			Case "grow"
-				Dim m As RepotTextMetrics = Measure.MeasureBlock(item.Content, item.Style, item.Width)
+				Dim m As ReportTextMetrics = Measure.MeasureBlock(item.Content, item.Style, item.Width)
 				item.Lines = m.Lines
 				item.LineWidths = m.Widths
 				item.MeasuredHeight = m.Height
@@ -212,7 +212,7 @@ Private Sub MeasureAndGrow (band As RepotBand, Def As RepotDefinition)
 					item.GrowBy = 0
 				End If
 			Case "clip"
-				Dim m2 As RepotTextMetrics = Measure.MeasureBlock(item.Content, item.Style, item.Width)
+				Dim m2 As ReportTextMetrics = Measure.MeasureBlock(item.Content, item.Style, item.Width)
 				item.MeasuredHeight = m2.Height
 				Dim maxLines As Int = 0
 				If lh > 0 Then maxLines = Floor(item.Height / lh)
@@ -277,11 +277,11 @@ Private Sub ApplyPushDown (Items As List)
 	Dim a As Int
 	For a = 1 To n - 1
 		Dim keyIdx As Int = order.Get(a)
-		Dim keyItem As RepotLayoutElement = Items.Get(keyIdx)
+		Dim keyItem As ReportLayoutElement = Items.Get(keyIdx)
 		Dim b As Int = a - 1
 		Do While b >= 0
 			Dim otherIdx As Int = order.Get(b)
-			Dim otherItem As RepotLayoutElement = Items.Get(otherIdx)
+			Dim otherItem As ReportLayoutElement = Items.Get(otherIdx)
 			If LessThanOrEqual(otherItem, keyItem) Then Exit
 			order.Set(b + 1, otherIdx)
 			b = b - 1
@@ -291,14 +291,14 @@ Private Sub ApplyPushDown (Items As List)
 
 	For a = 0 To n - 1
 		Dim ia As Int = order.Get(a)
-		Dim itemA As RepotLayoutElement = Items.Get(ia)
+		Dim itemA As ReportLayoutElement = Items.Get(ia)
 		If itemA.GrowBy <= 0 Then Continue
 		Dim delta As Double = itemA.GrowBy
 		Dim threshold As Double = itemA.Y + itemA.DeclaredHeight
 		Dim bb As Int
 		For bb = a + 1 To n - 1
 			Dim ib As Int = order.Get(bb)
-			Dim itemB As RepotLayoutElement = Items.Get(ib)
+			Dim itemB As ReportLayoutElement = Items.Get(ib)
 			If itemB.Y >= threshold - 0.000001 Then
 				itemB.Y = itemB.Y + delta
 			End If
@@ -306,7 +306,7 @@ Private Sub ApplyPushDown (Items As List)
 	Next
 End Sub
 
-Private Sub LessThanOrEqual (a As RepotLayoutElement, b As RepotLayoutElement) As Boolean
+Private Sub LessThanOrEqual (a As ReportLayoutElement, b As ReportLayoutElement) As Boolean
 	If a.Y < b.Y - 0.000001 Then Return True
 	If a.Y > b.Y + 0.000001 Then Return False
 	If a.X < b.X - 0.000001 Then Return True
@@ -316,9 +316,9 @@ End Sub
 
 '--------------------------------------------------------------- height
 
-Private Sub ComputeHeight (band As RepotBand)
+Private Sub ComputeHeight (band As ReportBand)
 	Dim maxBottom As Double = band.MinHeight
-	For Each item As RepotLayoutElement In band.Elements
+	For Each item As ReportLayoutElement In band.Elements
 		Dim bottom As Double = item.Y + item.Height
 		If bottom > maxBottom Then maxBottom = bottom
 	Next

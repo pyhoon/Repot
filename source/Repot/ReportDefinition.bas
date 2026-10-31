@@ -1,4 +1,4 @@
-﻿B4J=true
+B4J=true
 Group=Model
 ModulesStructureVersion=1
 Type=Class
@@ -11,7 +11,7 @@ Sub Class_Globals
 Public Id As String
 Public Name As String
 Public Description As String
-Public Page As RepotPageSetup
+Public Page As ReportPageSetup
 Public Fonts As Map
 Public Styles As Map
 Public Parameters As List
@@ -23,7 +23,7 @@ Public SourceDir As String
 End Sub
 
 Public Sub Initialize
-	SchemaVersion = RepotVersion.SupportedSchemaVersion
+	SchemaVersion = ReportVersion.SupportedSchemaVersion
 	Id = ""
 	Name = ""
 	Description = ""
@@ -38,44 +38,44 @@ Public Sub Initialize
 	SourceDir = ""
 End Sub
 
-Public Sub FontByName (FontName As String) As RepotFontDef
+Public Sub FontByName (FontName As String) As ReportFontDef
 	If Fonts.ContainsKey(FontName) Then Return Fonts.Get(FontName)
 	Return Null
 End Sub
 
-Public Sub StyleByName (StyleName As String) As RepotStyle
+Public Sub StyleByName (StyleName As String) As ReportStyle
 	If Styles.ContainsKey(StyleName) Then Return Styles.Get(StyleName)
 	Return Null
 End Sub
 
-Public Sub ParameterByName (ParameterName As String) As RepotParameterDef
-	For Each p As RepotParameterDef In Parameters
+Public Sub ParameterByName (ParameterName As String) As ReportParameterDef
+	For Each p As ReportParameterDef In Parameters
 		If p.Name = ParameterName Then Return p
 	Next
 	Return Null
 End Sub
 
-Public Sub DataSetByName (DataSetName As String) As RepotDataSetDef
+Public Sub DataSetByName (DataSetName As String) As ReportDataSetDef
 	If DataSets.ContainsKey(DataSetName) Then Return DataSets.Get(DataSetName)
 	Return Null
 End Sub
 
-Public Sub GroupById (GroupId As String) As RepotGroupDef
-	For Each g As RepotGroupDef In Groups
+Public Sub GroupById (GroupId As String) As ReportGroupDef
+	For Each g As ReportGroupDef In Groups
 		If g.Id = GroupId Then Return g
 	Next
 	Return Null
 End Sub
 
-Public Sub SectionById (SectionId As String) As RepotSection
-	For Each s As RepotSection In Sections
+Public Sub SectionById (SectionId As String) As ReportSection
+	For Each s As ReportSection In Sections
 		If s.Id = SectionId Then Return s
 	Next
 	Return Null
 End Sub
 
-Public Sub SectionByType (SectionType As String) As RepotSection
-	For Each s As RepotSection In Sections
+Public Sub SectionByType (SectionType As String) As ReportSection
+	For Each s As ReportSection In Sections
 		If s.SectionType = SectionType Then Return s
 	Next
 	Return Null
@@ -84,17 +84,17 @@ End Sub
 Public Sub AllElements As List
 	Dim l As List
 	l.Initialize
-	For Each s As RepotSection In Sections
-		For Each e As RepotElement In s.Elements
+	For Each s As ReportSection In Sections
+		For Each e As ReportElement In s.Elements
 			l.Add(e)
 		Next
 	Next
 	Return l
 End Sub
 
-Public Sub ElementById (ElementId As String) As RepotElement
-	For Each s As RepotSection In Sections
-		Dim e As RepotElement = s.ElementById(ElementId)
+Public Sub ElementById (ElementId As String) As ReportElement
+	For Each s As ReportSection In Sections
+		Dim e As ReportElement = s.ElementById(ElementId)
 		If e <> Null Then Return e
 	Next
 	Return Null
@@ -104,21 +104,21 @@ Public Sub AllAggregates As List
 	Dim l As List
 	l.Initialize
 	For Each dsName As String In DataSets.Keys
-		Dim ds As RepotDataSetDef = DataSets.Get(dsName)
-		For Each a As RepotAggregateDef In ds.Aggregates
+		Dim ds As ReportDataSetDef = DataSets.Get(dsName)
+		For Each a As ReportAggregateDef In ds.Aggregates
 			l.Add(a)
 		Next
 	Next
-	For Each g As RepotGroupDef In Groups
-		For Each a As RepotAggregateDef In g.Aggregates
+	For Each g As ReportGroupDef In Groups
+		For Each a As ReportAggregateDef In g.Aggregates
 			l.Add(a)
 		Next
 	Next
 	Return l
 End Sub
 
-Public Sub AggregateByName (AggregateName As String) As RepotAggregateDef
-	For Each a As RepotAggregateDef In AllAggregates
+Public Sub AggregateByName (AggregateName As String) As ReportAggregateDef
+	For Each a As ReportAggregateDef In AllAggregates
 		If a.Name = AggregateName Then Return a
 	Next
 	Return Null

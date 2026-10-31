@@ -11,7 +11,7 @@ Version=10.7
 'shape without reflection. Unused fields keep their initial values.
 '
 'Geometry is in points. Page layout rounds coordinates to 0.01 pt when it
-'calls RepotRenderPage.Add*, so exporters never see measurement precision.
+'calls ReportRenderPage.Add*, so exporters never see measurement precision.
 'OpType values: text, image, line, rect, clip, restore, link.
 Sub Class_Globals
 	Public OpType As String

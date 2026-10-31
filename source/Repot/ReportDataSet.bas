@@ -1,4 +1,4 @@
-﻿B4J=true
+B4J=true
 Group=Data
 ModulesStructureVersion=1
 Type=Class
@@ -10,13 +10,13 @@ Version=10.7
 Sub Class_Globals
 	Public Name As String
 	Public Kind As String
-	Public Definition As RepotDataSetDef
+	Public Definition As ReportDataSetDef
 	Public Records As List
 	Public SingleRecord As Map
 	Public Supplied As Boolean
 End Sub
 
-Public Sub Initialize (Name1 As String, Kind1 As String, Definition1 As RepotDataSetDef)
+Public Sub Initialize (Name1 As String, Kind1 As String, Definition1 As ReportDataSetDef)
 	Name = Name1
 	Kind = Kind1
 	Definition = Definition1

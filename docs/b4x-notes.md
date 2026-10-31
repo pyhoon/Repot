@@ -151,10 +151,10 @@ Dim l As List = parser.NextArray      ' array at the top level
 - `Map.Keys`, `Map.ContainsKey`, `Map.Get`, `Map.Put`.
 - `StringBuilder.Length` and `StringBuilder.ToString`.
 - A class sub may return another class instance, and the caller may assign
-  it directly: `Dim p As RepotRenderPage = doc.AddPage(w, h)`. Verified by
+  it directly: `Dim p As ReportRenderPage = doc.AddPage(w, h)`. Verified by
   the render-document tests.
 - A no-argument sub may be declared without parentheses
-  (`Public Sub AddRestore As RepotDrawOp`) and called as
+  (`Public Sub AddRestore As ReportDrawOp`) and called as
   `page.AddRestore`. Verified by the same tests.
 - **Headless AWT text measurement works through `JavaObject`** when only
   public `java.awt` APIs are used. `Font`, `FontRenderContext` and
@@ -200,7 +200,7 @@ verified section:
   `ClassCastException: Map$IterableMap cannot be cast to List`. Copy the
   keys into a new `List` when sorting is needed.
 - **`Quote` is a reserved word.** It cannot be a sub, variable, or
-  parameter name. `RepotJsonUtil.JsonQuote` is used instead.
+  parameter name. `ReportJsonUtil.JsonQuote` is used instead.
 - **`asc` is a reserved word.** It cannot be a variable or parameter
   name (it is the built-in for character code). Use `ascentPx`.
 - **`Return Not X` is a syntax error.** Use

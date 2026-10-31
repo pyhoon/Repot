@@ -393,10 +393,10 @@ slices so each has a testable boundary:
 
 | Slice | Files | Status | Acceptance |
 |-------|-------|--------|------------|
-| 1. Measurement | `RepotTextStyle`, `RepotTextMetrics`, `RepotFont`, `RepotB4JMeasure` | done 2026-10-31 | Headless AWT metrics with explicit fallback warnings; `MeasureLine` and `MeasureBlock`; no JavaFX or UI thread |
-| 2. Band layout | `RepotBand`, `RepotLayoutElement`, `RepotBandLayout` | done 2026-10-31 | Style resolution, grid-to-points, auto-grow, push-down, band height, bounds in points; 23 band-layout checks |
-| 3. Pagination | `RepotPaginator`, `RepotImage` | done 2026-11-01 | Page header/footer reserve, keep-together, page breaks, two-pass `Page N of M`, render-document emission, basic field-value interpolation and formatting; 13 pagination checks |
-| 4. Goldens | `RepotRenderJsonWriter`, `fixtures/*/expected/layout.json` | next | Canonical deterministic JSON; page count and geometry for the invoice and listing |
+| 1. Measurement | `ReportTextStyle`, `ReportTextMetrics`, `ReportFont`, `ReportB4JMeasure` | done 2026-10-31 | Headless AWT metrics with explicit fallback warnings; `MeasureLine` and `MeasureBlock`; no JavaFX or UI thread |
+| 2. Band layout | `ReportBand`, `ReportLayoutElement`, `ReportBandLayout` | done 2026-10-31 | Style resolution, grid-to-points, auto-grow, push-down, band height, bounds in points; 23 band-layout checks |
+| 3. Pagination | `ReportPaginator`, `ReportImage` | done 2026-11-01 | Page header/footer reserve, keep-together, page breaks, two-pass `Page N of M`, render-document emission, basic field-value interpolation and formatting; 13 pagination checks |
+| 4. Goldens | `ReportRenderJsonWriter`, `fixtures/*/expected/layout.json` | next | Canonical deterministic JSON; page count and geometry for the invoice and listing |
 
 Group headers, grouping and aggregates remain M6 work. M2 structures the
 pagination loop for them but does not claim them. Acceptance is Gate C for
