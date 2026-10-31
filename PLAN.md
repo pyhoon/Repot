@@ -3,7 +3,7 @@
 **Document status:** Working plan, open-source route\
 **Project:** Repot\
 **Ecosystem:** B4X (B4J first, B4A second)\
-**Template format:** Versioned JSON, `.b4xr` extension\
+**Template format:** Versioned JSON, `.repot` extension\
 **License:** MIT, all components\
 **Current stage:** M8 B4A adapter, HTML print path, cross-platform comparison next
 
@@ -32,7 +32,7 @@ re-litigate them during implementation.
 | 2 | Layout is banded sections whose elements may be grid-snapped rather than purely absolute. | [ADR 0002](docs/decisions/0002-layout-model.md) |
 | 3 | PDF rendering goes through a narrow canvas interface, bound to PDFBox. iText is rejected on license grounds. | [ADR 0003](docs/decisions/0003-pdf-backend.md) |
 | 4 | B4A ships after the B4J engine, using an HTML-to-print path. No JVM PDF library on Android. | [ADR 0004](docs/decisions/0004-b4a-output-strategy.md) |
-| 5 | The `.b4xr` schema is frozen last, driven by fixtures. JRXML is not adopted. | [ADR 0005](docs/decisions/0005-template-format.md) |
+| 5 | The `.repot` schema is frozen last, driven by fixtures. JRXML is not adopted. | [ADR 0005](docs/decisions/0005-template-format.md) |
 | 6 | One `.b4xlib` ships all public modules; jar dependencies are the optional boundary. | [ADR 0006](docs/decisions/0006-packaging.md) |
 | 7 | The project is named Repot; no `B4X` prefix in file or class names. | [ADR 0007](docs/decisions/0007-project-name.md) |
 
@@ -79,7 +79,7 @@ it, which is what makes "build once, export many" possible.
 
 ## 5. Template format summary
 
-UTF-8 JSON, `.b4xr`, explicit `schemaVersion`, stable element IDs,
+UTF-8 JSON, `.repot`, explicit `schemaVersion`, stable element IDs,
 unknown optional properties ignored, unknown required constructs
 rejected with a diagnostic. Draft schema and an example template:
 [docs/template-format.md](docs/template-format.md).
@@ -108,7 +108,7 @@ Expression semantics are specified and unit-tested before grouping ships.
 
 ### 7.1 v0.1 — first useful release
 
-- Load and validate `.b4xr`; save templates; programmatic construction.
+- Load and validate `.repot`; save templates; programmatic construction.
 - Page size, orientation, margins, points as the internal unit.
 - ReportHeader, PageHeader, Detail, ReportFooter, PageFooter.
 - Text, data-bound field, image, line, rectangle, page number, page count.
@@ -172,7 +172,7 @@ Indicative: v0.1 at M0–M5 (about 10–13 weeks); v1.0 at M0–M9 (about
 
 ### Phase gates
 
-- **Gate A:** a `.b4xr` file loads, validates, and binds data.
+- **Gate A:** a `.repot` file loads, validates, and binds data.
 - **Gate B:** a one-page report renders correctly to PDF and HTML.
 - **Gate C:** multi-page pagination passes the fixture suite, including
   page counts and repeated headers.
@@ -340,7 +340,7 @@ Implemented in `source/Repot` and exercised from `source/RepotTests`:
 |-------------|--------|
 | Definition model: page, fonts, styles, parameters, datasets, groups, sections, elements | done |
 | Unit conversion (pt/mm/cm/in, px with explicit DPI) and invariant number formatting | done |
-| `.b4xr` loader with structured diagnostics and unknown-property warnings | done |
+| `.repot` loader with structured diagnostics and unknown-property warnings | done |
 | Semantic validation: references, uniqueness, section rules, aggregates, resources | done |
 | Expression reference scanner and identifier resolution (not evaluation) | done, parser/evaluator in M6 |
 | Canonical JSON writer and load → save → reload round-trip | done |
@@ -463,7 +463,7 @@ clip, ellipsis, min height, align override, field content
 
 | Term | Meaning |
 |------|---------|
-| Template | The `.b4xr` JSON file describing a report |
+| Template | The `.repot` JSON file describing a report |
 | Definition | The in-memory template model |
 | Dataset | A named, host-supplied sequence of typed records |
 | Band / section | A horizontal region of a report: header, detail, footer |
