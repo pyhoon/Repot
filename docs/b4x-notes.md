@@ -150,6 +150,28 @@ Dim l As List = parser.NextArray      ' array at the top level
 - `List.Sort(True)`, `List.IndexOf(value)`, `List.Size`.
 - `Map.Keys`, `Map.ContainsKey`, `Map.Get`, `Map.Put`.
 - `StringBuilder.Length` and `StringBuilder.ToString`.
+- A class sub may return another class instance, and the caller may assign
+  it directly: `Dim p As RepotRenderPage = doc.AddPage(w, h)`. Verified by
+  the render-document tests.
+- A no-argument sub may be declared without parentheses
+  (`Public Sub AddRestore As RepotDrawOp`) and called as
+  `page.AddRestore`. Verified by the same tests.
+- **Headless AWT text measurement works through `JavaObject`** when only
+  public `java.awt` APIs are used. `Font`, `FontRenderContext` and
+  `TextLayout` need `LibraryN=JavaObject`. Do not call `createGraphics` or
+  `getFontMetrics`: the returned `sun.java2d.SunGraphics2D` cannot be
+  wrapped (`IllegalAccessException`, module `java.desktop` does not export
+  `sun.java2d`). `getLineMetrics` fails the same way because the runtime
+  class is `sun.font.FontLineMetrics`; `TextLayout.getAscent`,
+  `getDescent`, `getLeading` and `getAdvance` are the public replacement.
+- **Static fields are not reachable through `JavaObject.InitializeStatic`.**
+  `GetField` inspects the wrapped `java.lang.Class` object, not the class
+  it represents. `RenderingHints.VALUE_TEXT_ANTIALIAS_ON` and
+  `VALUE_FRACTIONALMETRICS_ON` are obtained from an instance:
+  `New RenderingHints(New HashMap)` then `GetField`.
+- **AWT `Font` sizes are integers.** `Font(String, int, int)` rounds, and
+  `deriveFont(float)` is not matched by `JavaObject` because B4X passes a
+  `Double`. Measure at 1000 pt and scale linearly for fractional sizes.
 
 ## Still unverified — check before use
 
@@ -159,7 +181,6 @@ verified section:
 - `XmlBuilder` availability and API per platform.
 - Zip/`Archiver` support for the office-document writer.
 - XUI image loading and bitmap access from a headless B4J app.
-- Font enumeration and text measurement outside a UI.
 - PDFBox classes and the B4J wrapper jar layout.
 - Anything Android-specific: `WebView` printing, `PrintDocumentAdapter`,
   `PdfDocument`, minimum API level.
@@ -180,6 +201,8 @@ verified section:
   keys into a new `List` when sorting is needed.
 - **`Quote` is a reserved word.** It cannot be a sub, variable, or
   parameter name. `RepotJsonUtil.JsonQuote` is used instead.
+- **`asc` is a reserved word.** It cannot be a variable or parameter
+  name (it is the built-in for character code). Use `ascentPx`.
 - **`Return Not X` is a syntax error.** Use
   `If X Then Return False` / `Return True`.
 - **`Function` is not a B4X keyword.** All subs return with `Sub ... As

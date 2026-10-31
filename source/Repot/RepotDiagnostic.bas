@@ -7,11 +7,11 @@ Version=10.7
 'One structured diagnostic. Codes are stable strings; see docs/errors.md.
 Sub Class_Globals
 	Public Severity As String
-Public Code As String
-Public Message As String
-Public ElementId As String
-Public Path As String
-Public Hint As String
+	Public Code As String
+	Public Message As String
+	Public ElementId As String
+	Public Path As String
+	Public Hint As String
 End Sub
 
 Public Sub Initialize (Severity1 As String, Code1 As String, Message1 As String)

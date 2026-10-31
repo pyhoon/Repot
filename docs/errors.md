@@ -19,6 +19,7 @@ raised as a platform exception for an expected validation failure.
 | `E-VAL-` | Semantic validation of a loaded definition |
 | `E-EXPR-` | Expression extraction and identifier resolution |
 | `E-DATA-` | Dataset and parameter binding |
+| `E-MEA-` | Text and font measurement at the platform adapter |
 | `W-` | Warnings; rendering would still be possible |
 
 ## 2. File and units
@@ -183,7 +184,16 @@ M1 resolves identifiers only. Evaluation diagnostics are added in M6.
 | `E-DATA-021` | Integer field received a fractional value |
 | `E-DATA-022` | Declared type is unknown |
 
-## 7. Warnings
+## 7. Measurement
+
+| Code | Meaning |
+|------|---------|
+| `E-MEA-001` | The platform measurement adapter cannot be initialised |
+| `E-MEA-002` | Font vertical metrics cannot be read |
+| `E-MEA-003` | A specific string cannot be laid out |
+| `E-MEA-004` | A text block exceeds the adapter's line limit |
+
+## 8. Warnings
 
 | Code | Meaning |
 |------|---------|
@@ -192,3 +202,4 @@ M1 resolves identifiers only. Evaluation diagnostics are added in M6.
 | `W-DATA-001` | Undeclared dataset supplied; ignored |
 | `W-DATA-002` | Undeclared parameter supplied |
 | `W-DATA-003` | Undeclared record field ignored |
+| `W-MEA-001` | A requested font family was unavailable and another family was used |

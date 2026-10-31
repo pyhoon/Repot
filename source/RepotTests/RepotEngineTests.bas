@@ -21,6 +21,9 @@ End Sub
 Public Sub Run (FixturesDir As String)
 	mFixtures = FixturesDir
 	TestUnits
+	TestRenderDocument
+	TestMeasurement
+	TestBandLayout
 	TestFixturesLoadAndRoundTrip
 	TestValidationFailures
 	TestExpressionScanner
@@ -53,6 +56,406 @@ Private Sub TestUnits
 	CheckText("34.0157", RepotUnits.FormatNumber(RepotUnits.ParseLength("12mm", 0), 4), "12mm formatted")
 End Sub
 
+'--------------------------------------------------------------- render document
+
+Private Sub TestRenderDocument
+	CheckNear(1.23, RepotUnits.RoundTo(1.234, 2), 0.0001, "round down to 0.01 pt")
+	CheckNear(1.24, RepotUnits.RoundTo(1.236, 2), 0.0001, "round up to 0.01 pt")
+	CheckNear(-1.24, RepotUnits.RoundTo(-1.236, 2), 0.0001, "negative rounds away from zero")
+	CheckNear(10, RepotUnits.RoundTo(10, 2), 0.0001, "whole number is unchanged")
+
+	Dim doc As RepotRenderDocument
+	doc.Initialize
+	Check(doc.Version = 1, "render document version is 1")
+	Check(doc.PageCount = 0, "new render document has no pages")
+	Check(doc.PageAt(1) = Null, "page lookup rejects index zero")
+
+	Dim p As RepotRenderPage = doc.AddPage(595.2755905511812, 841.8897637795277)
+	Check(doc.PageCount = 1, "page is added")
+	Check(p.Index = 1, "first page index is 1")
+	CheckNear(595.2756, p.Width, 0.0001, "page width is kept at full precision")
+	CheckNear(841.8898, p.Height, 0.0001, "page height is kept at full precision")
+	Check(doc.PageAt(1).Index = 1, "page lookup is 1-based")
+	Check(doc.PageAt(2) = Null, "page lookup rejects an out-of-range index")
+
+	Dim p2 As RepotRenderPage = doc.AddPage(612, 792)
+	Check(p2.Index = 2, "second page index is 2")
+	Check(doc.PageAt(2).Index = 2, "second page is found")
+
+	Dim t As RepotDrawOp = p.AddText(10.004, 20.006, 100.004, 12.006, 9.004, "Hello", "DejaVu Sans", 9, False, False, True, "#112233", "right")
+	CheckText("text", t.OpType, "text operation type")
+	CheckNear(10, t.X, 0.0001, "text x is rounded")
+	CheckNear(20.01, t.Y, 0.0001, "text y is rounded")
+	CheckNear(100, t.Width, 0.0001, "text width is rounded")
+	CheckNear(12.01, t.Height, 0.0001, "text height is rounded")
+	CheckNear(9, t.Baseline, 0.0001, "text baseline is rounded")
+	CheckText("Hello", t.Text, "text content")
+	CheckText("DejaVu Sans", t.FontName, "text font family")
+	Check(t.Underline, "text underline flag")
+	CheckText("#112233", t.Colour, "text colour")
+	CheckText("right", t.Align, "text alignment")
+
+	Dim aligned As RepotDrawOp = p.AddText(0, 0, 10, 10, 8, "x", "f", 9, False, False, False, "", "")
+	CheckText("left", aligned.Align, "empty alignment defaults to left")
+
+	Dim img As RepotDrawOp = p.AddImage(0, 0, 130, 48, "logo.png", 200, 100, 0, "", Null)
+	CheckText("image", img.OpType, "image operation type")
+	CheckText("logo.png", img.ResourcePath, "image resource path")
+	Check(img.PixelWidth = 200 And img.PixelHeight = 100, "image intrinsic size")
+	CheckText("contain", img.Fit, "empty image fit defaults to contain")
+	Check(img.Handle = Null, "image handle can be null")
+
+	Dim ln As RepotDrawOp = p.AddLine(0, 17, 510, 17, 0.5, "#999999", "")
+	CheckText("line", ln.OpType, "line operation type")
+	CheckNear(510, ln.X2, 0.0001, "line end x")
+	CheckNear(17, ln.Y2, 0.0001, "line end y")
+	CheckText("#999999", ln.Colour, "line colour")
+
+	Dim rc As RepotDrawOp = p.AddRect(1.006, 2.006, 3.006, 4.006, 0.5, "#000000", "#ffffff", 2.004)
+	CheckText("rect", rc.OpType, "rect operation type")
+	CheckNear(1.01, rc.X, 0.0001, "rect x is rounded")
+	CheckNear(4.01, rc.Height, 0.0001, "rect height is rounded")
+	CheckText("#ffffff", rc.FillColour, "rect fill colour")
+	CheckNear(2, rc.Radius, 0.0001, "rect radius is rounded")
+
+	Dim cl As RepotDrawOp = p.AddClip(0, 0, 100, 50)
+	CheckText("clip", cl.OpType, "clip operation type")
+	Dim rs As RepotDrawOp = p.AddRestore
+	CheckText("restore", rs.OpType, "restore operation type")
+
+	Dim lk As RepotDrawOp = p.AddLink(0, 0, 100, 12, "https://example.com", "")
+	CheckText("link", lk.OpType, "link operation type")
+	CheckText("https://example.com", lk.Url, "external link url")
+	Dim lk2 As RepotDrawOp = p.AddLink(0, 0, 100, 12, "", "chapter-1")
+	CheckText("chapter-1", lk2.AnchorName, "internal link anchor")
+
+	Dim a As RepotRenderAnchor = p.AddAnchor("chapter-1", 5.006, 6.004)
+	CheckText("chapter-1", a.Name, "anchor name")
+	CheckNear(5.01, a.X, 0.0001, "anchor x is rounded")
+	CheckNear(6, a.Y, 0.0001, "anchor y is rounded")
+	Check(p.Anchors.Size = 1, "one anchor is stored")
+
+	Check(p.Ops.Size = 9, "page operations keep insertion order and count")
+	Dim first As RepotDrawOp = p.Ops.Get(0)
+	Dim last As RepotDrawOp = p.Ops.Get(p.Ops.Size - 1)
+	CheckText("text", first.OpType, "first operation is the text run")
+	CheckText("link", last.OpType, "last operation is the second link")
+End Sub
+
+'--------------------------------------------------------------- measurement
+
+Private Sub TestMeasurement
+	Dim diags As RepotDiagnostics
+	diags.Initialize
+	Dim mm As RepotB4JMeasure
+	mm.Initialize(diags)
+	Check(mm.IsAvailable, "measurement adapter is available headless")
+
+	Dim body As RepotTextStyle
+	body.Initialize
+	body.SetFamily("Arial")
+	body.Size = 12
+
+	Dim f As RepotFont = mm.ResolveStyle(body)
+	CheckText("Arial", f.Family, "declared family is resolved as-is")
+	CheckText("Arial", f.RequestedFamily, "requested family is recorded")
+	Check(f.Substituted = False, "available family is not substituted")
+	Check(f.HasMetrics, "resolved font has vertical metrics")
+	Check(f.Ascent > 0, "ascent is positive")
+	Check(f.Descent > 0, "descent is positive")
+	CheckNear(12, f.Size, 0.0001, "font size is retained")
+
+	Dim w12 As Double = mm.MeasureLine("Hello", body)
+	Check(w12 > 0, "line width is measured, not guessed")
+	CheckNear(w12, mm.MeasureLine("Hello", body), 0.000001, "repeated measurement is identical")
+	Check(mm.MeasureLine("Hello, world", body) > w12, "longer text is wider")
+	CheckNear(0, mm.MeasureLine("", body), 0.000001, "empty line has zero width")
+	CheckNear(0, mm.MeasureLine("   ", body), 0.000001, "whitespace-only text has zero width")
+
+	Dim large As RepotTextStyle = body.Copy
+	large.Size = 24
+	CheckNear(w12 * 2, mm.MeasureLine("Hello", large), 0.05, "advance scales with point size")
+	Dim f24 As RepotFont = mm.ResolveStyle(large)
+	CheckNear(f.Ascent * 2, f24.Ascent, 0.05, "ascent scales with point size")
+	CheckNear(f.Descent * 2, f24.Descent, 0.05, "descent scales with point size")
+
+	Dim fractional As RepotTextStyle = body.Copy
+	fractional.Size = 10.5
+	CheckNear(w12 * 10.5 / 12, mm.MeasureLine("Hello", fractional), 0.05, "fractional point size scales linearly")
+
+	Dim bold As RepotTextStyle = body.Copy
+	bold.Bold = True
+	Check(mm.MeasureLine("Hello", bold) > w12, "bold face is measured with bold metrics")
+
+	CheckNear(14.4, mm.LineHeight(body), 0.0001, "line height is size times line spacing")
+	Dim tight As RepotTextStyle = body.Copy
+	tight.LineSpacing = 1
+	CheckNear(12, mm.LineHeight(tight), 0.0001, "line spacing one gives the font size")
+
+	Dim one As RepotTextMetrics = mm.MeasureBlock("Hello world", body, 1000)
+	Check(one.LineCount = 1, "wide block stays on one line")
+	CheckText("Hello world", one.Lines.Get(0), "single line keeps its text")
+	CheckNear(mm.MeasureLine("Hello world", body), one.Width, 0.0001, "block width matches line measurement")
+	CheckNear(one.LineHeight, one.Height, 0.0001, "one-line block height is one line height")
+	CheckNear(f.Ascent, one.Ascent, 0.0001, "block ascent comes from the font")
+
+	Dim narrow As RepotTextMetrics = mm.MeasureBlock("Hello world", body, 40)
+	Check(narrow.LineCount = 2, "narrow block wraps at the space")
+	CheckText("Hello", narrow.Lines.Get(0), "first wrapped line")
+	CheckText("world", narrow.Lines.Get(1), "second wrapped line")
+	Check(narrow.Width <= 40.0001, "wrapped lines fit the maximum width")
+	CheckNear(narrow.LineHeight * 2, narrow.Height, 0.0001, "two-line block height is two line heights")
+
+	Dim explicit As RepotTextMetrics = mm.MeasureBlock("Hello" & Chr(10) & "world", body, 1000)
+	Check(explicit.LineCount = 2, "explicit line break is honoured")
+	CheckText("world", explicit.Lines.Get(1), "text after the explicit break")
+
+	Dim trailing As RepotTextMetrics = mm.MeasureBlock("Hello   ", body, 1000)
+	CheckText("Hello", trailing.Lines.Get(0), "trailing whitespace is removed")
+	CheckNear(w12, trailing.Width, 0.0001, "trailing whitespace does not affect width")
+
+	Dim longWord As RepotTextMetrics = mm.MeasureBlock("Supercalifragilistic", body, 30)
+	Check(longWord.LineCount > 1, "over-wide word is broken by character")
+	Dim fit As Boolean = True
+	For Each lw As Double In longWord.Widths
+		If lw > 30.0001 Then fit = False
+	Next
+	Check(fit, "character-broken lines fit the maximum width")
+
+	Dim empty As RepotTextMetrics = mm.MeasureBlock("", body, 100)
+	Check(empty.LineCount = 1, "empty block has one empty line")
+	CheckText("", empty.Lines.Get(0), "empty block line is empty")
+	CheckNear(0, empty.Width, 0.000001, "empty block has zero width")
+	CheckNear(empty.LineHeight, empty.Height, 0.0001, "empty block still has a line height")
+
+	Dim noWrap As RepotTextMetrics = mm.MeasureBlock("Hello world", body, 0)
+	Check(noWrap.LineCount = 1, "zero maximum width disables wrapping")
+
+	Dim fb As RepotTextStyle
+	fb.Initialize
+	fb.SetFamily("NoSuchFamilyXYZ")
+	fb.Size = 12
+	Dim before As Int = diags.WarningCount
+	Dim fallback As RepotFont = mm.ResolveStyle(fb)
+	CheckText("Dialog", fallback.Family, "missing family falls back to the platform default")
+	Check(fallback.Substituted, "platform default is reported as a substitution")
+	Check(diags.WarningCount > before, "substitution records a warning")
+	Check(HasDiagnostic(diags, "W-MEA-001"), "substitution warning has a stable code")
+
+	Dim declared As RepotTextStyle
+	declared.Initialize
+	declared.Family.Add("NoSuchFamilyXYZ")
+	declared.Family.Add("Arial")
+	declared.Size = 12
+	Dim second As RepotFont = mm.ResolveStyle(declared)
+	CheckText("Arial", second.Family, "declared fallback order is followed")
+	Check(second.Substituted, "using a later declared family is reported")
+	CheckText("NoSuchFamilyXYZ", second.RequestedFamily, "primary requested family is retained")
+
+	Dim logical As RepotTextStyle
+	logical.Initialize
+	logical.SetFamily("sans-serif")
+	logical.Size = 12
+	Dim logicalFont As RepotFont = mm.ResolveStyle(logical)
+	Check(logicalFont.Substituted = False, "logical family is not a substitution")
+	Check(logicalFont.HasMetrics, "logical family has metrics")
+End Sub
+
+'--------------------------------------------------------------- band layout
+
+Private Sub TestBandLayout
+	Dim def As RepotDefinition = MakeBandDefinition
+	Dim sec As RepotSection = def.Sections.Get(0)
+	Dim measure As RepotB4JMeasure
+	Dim diags As RepotDiagnostics
+	diags.Initialize
+	measure.Initialize(diags)
+	Dim layout As RepotBandLayout
+	layout.Initialize(diags, measure)
+
+	Dim band As RepotBand = layout.LayoutBand(def, sec, def.Page.ContentWidth, def.Page.ContentHeight, Null)
+	Check(band.Width = def.Page.ContentWidth, "band uses the content width")
+	Check(band.Elements.Size = 2, "band keeps its children")
+
+	Dim title As RepotLayoutElement = band.Elements.Get(0)
+	Dim note As RepotLayoutElement = band.Elements.Get(1)
+	CheckNear(0, title.X, 0.0001, "first child keeps its x")
+	CheckNear(0, title.Y, 0.0001, "first child keeps its y")
+	CheckNear(40, title.Width, 0.0001, "declared width is retained")
+	Check(title.Style.Family.Get(0) = "Arial", "style resolves the declared font family")
+	Check(title.Font.Family = "Arial", "measurement resolves the font")
+	Check(title.Align = "left", "element inherits style alignment")
+	Check(title.Overflow = "grow", "element inherits style overflow")
+
+	Check(title.Lines.Size = 2, "wide text wraps to two lines")
+	Check(title.Height > title.DeclaredHeight, "growing element increases its height")
+	Check(note.Y >= title.Y + title.DeclaredHeight - 0.0001, "push-down moves the later child")
+	Check(note.Y = title.Y + title.DeclaredHeight + title.GrowBy, "push-down uses the growth delta")
+	Check(band.Height >= note.Y + note.Height, "band height covers the pushed child")
+
+	' grid normalisation
+	Dim gdef As RepotDefinition = MakeGridDefinition
+	Dim gsec As RepotSection = gdef.Sections.Get(0)
+	Dim gband As RepotBand = layout.LayoutBand(gdef, gsec, gdef.Page.ContentWidth, gdef.Page.ContentHeight, Null)
+	Dim cell As RepotLayoutElement = gband.Elements.Get(0)
+	CheckNear(10, cell.X, 0.0001, "grid cell x is col times cell width")
+	CheckNear(10, cell.Y, 0.0001, "grid cell y is row times cell height")
+	CheckNear(20, cell.Width, 0.0001, "grid cell width is colSpan times cell width")
+	CheckNear(10, cell.Height, 0.0001, "grid cell height is rowSpan times cell height")
+
+	' clip keeps the declared height
+	Dim cdef As RepotDefinition = MakeBandDefinition
+	Dim csec As RepotSection = cdef.Sections.Get(0)
+	Dim clipEl As RepotElement = csec.Elements.Get(0)
+	clipEl.Height = 12
+	Dim cstyle As RepotStyle = cdef.Styles.Get("body")
+	cstyle.Overflow = "clip"
+	Dim cband As RepotBand = layout.LayoutBand(cdef, csec, cdef.Page.ContentWidth, cdef.Page.ContentHeight, Null)
+	Dim citem As RepotLayoutElement = cband.Elements.Get(0)
+	Check(citem.Height = 12, "clip does not grow the element")
+	Check(citem.Lines.Size <= 1, "clip limits the laid-out lines")
+
+	' min height
+	Dim mdef As RepotDefinition = MakeBandDefinition
+	Dim msec As RepotSection = mdef.Sections.Get(0)
+	msec.Height = 100
+	Dim mband As RepotBand = layout.LayoutBand(mdef, msec, mdef.Page.ContentWidth, mdef.Page.ContentHeight, Null)
+	Check(mband.Height >= 100, "band never shrinks below its declared height")
+
+	' element-level align override
+	Dim adef As RepotDefinition = MakeBandDefinition
+	Dim asec As RepotSection = adef.Sections.Get(0)
+	Dim alignEl As RepotElement = asec.Elements.Get(0)
+	alignEl.Align = "right"
+	Dim aband As RepotBand = layout.LayoutBand(adef, asec, adef.Page.ContentWidth, adef.Page.ContentHeight, Null)
+	Dim aitem As RepotLayoutElement = aband.Elements.Get(0)
+	Check(aitem.Align = "right", "element align overrides the style")
+
+	' field content comes from the values map
+	Dim fdef As RepotDefinition = MakeBandDefinition
+	Dim fsec As RepotSection = fdef.Sections.Get(0)
+	Dim fieldEl As RepotElement = fsec.Elements.Get(1)
+	fieldEl.ElementType = "field"
+	fieldEl.ValueExpression = "{X}"
+	Dim vals As Map
+	vals.Initialize
+	vals.Put(fieldEl.Id, "field text")
+	Dim fband As RepotBand = layout.LayoutBand(fdef, fsec, fdef.Page.ContentWidth, fdef.Page.ContentHeight, vals)
+	Dim fitem As RepotLayoutElement = fband.Elements.Get(1)
+	Check(fitem.Content = "field text", "field content is taken from the values map")
+End Sub
+
+Private Sub MakeBandDefinition As RepotDefinition
+	Dim def As RepotDefinition
+	def.Initialize
+	def.Page.Width = 200
+	def.Page.Height = 300
+	def.Page.MarginTop = 0
+	def.Page.MarginRight = 0
+	def.Page.MarginBottom = 0
+	def.Page.MarginLeft = 0
+
+	Dim fd As RepotFontDef
+	fd.Initialize
+	fd.Name = "body"
+	fd.Family.Add("Arial")
+	fd.Size = 12
+	def.Fonts.Put("body", fd)
+
+	Dim st As RepotStyle
+	st.Initialize
+	st.Name = "body"
+	st.FontName = "body"
+	st.Size = 12
+	st.LineSpacing = 1.2
+	st.Overflow = "grow"
+	st.Align = "left"
+	st.Valign = "top"
+	def.Styles.Put("body", st)
+
+	Dim sec As RepotSection
+	sec.Initialize
+	sec.SectionType = "Detail"
+	sec.Id = "detail"
+	sec.Height = 10
+
+	Dim e1 As RepotElement
+	e1.Initialize
+	e1.ElementType = "text"
+	e1.Id = "title"
+	e1.X = 0
+	e1.Y = 0
+	e1.Width = 40
+	e1.Height = 12
+	e1.StyleName = "body"
+	e1.Text = "Hello world"
+	sec.Elements.Add(e1)
+
+	Dim e2 As RepotElement
+	e2.Initialize
+	e2.ElementType = "text"
+	e2.Id = "note"
+	e2.X = 0
+	e2.Y = 12
+	e2.Width = 40
+	e2.Height = 10
+	e2.StyleName = "body"
+	e2.Text = "note"
+	sec.Elements.Add(e2)
+
+	def.Sections.Add(sec)
+	Return def
+End Sub
+
+Private Sub MakeGridDefinition As RepotDefinition
+	Dim def As RepotDefinition
+	def.Initialize
+	def.Page.Width = 100
+	def.Page.Height = 50
+	def.Page.MarginTop = 0
+	def.Page.MarginRight = 0
+	def.Page.MarginBottom = 0
+	def.Page.MarginLeft = 0
+	def.Page.GridColumns = 10
+	def.Page.GridRows = 5
+
+	Dim fd As RepotFontDef
+	fd.Initialize
+	fd.Name = "body"
+	fd.Family.Add("Arial")
+	fd.Size = 12
+	def.Fonts.Put("body", fd)
+
+	Dim st As RepotStyle
+	st.Initialize
+	st.Name = "body"
+	st.FontName = "body"
+	st.Size = 12
+	st.Overflow = "clip"
+	def.Styles.Put("body", st)
+
+	Dim sec As RepotSection
+	sec.Initialize
+	sec.SectionType = "Detail"
+	sec.Id = "detail"
+	sec.Height = 0
+
+	Dim e As RepotElement
+	e.Initialize
+	e.ElementType = "text"
+	e.Id = "cell"
+	e.UseCell = True
+	e.CellCol = 1
+	e.CellRow = 1
+	e.CellColSpan = 2
+	e.CellRowSpan = 1
+	e.StyleName = "body"
+	e.Text = "x"
+	sec.Elements.Add(e)
+
+	def.Sections.Add(sec)
+	Return def
+End Sub
 '--------------------------------------------------------------- fixtures
 
 Private Sub TestFixturesLoadAndRoundTrip
@@ -315,6 +718,13 @@ Private Sub CheckError (Diags As RepotDiagnostics, Code As String, Message As St
 		If d.Code = Code Then found = True
 	Next
 	Check(found, Message & " (diagnostic not found)")
+End Sub
+
+Private Sub HasDiagnostic (Diags As RepotDiagnostics, Code As String) As Boolean
+	For Each d As RepotDiagnostic In Diags.Items
+		If d.Code = Code Then Return True
+	Next
+	Return False
 End Sub
 
 Private Sub FirstWarnings (Diags As RepotDiagnostics, Limit As Int) As String

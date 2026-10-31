@@ -170,6 +170,22 @@ Public Sub ParseNumberText (s As String) As Double
 	Return sign * (intPart + fracPart)
 End Sub
 
+'Rounds half-up to a fixed number of decimals. Negative values round away
+'from zero at the half, matching the geometry rule in docs/architecture.md.
+Public Sub RoundTo (Value As Double, Decimals As Int) As Double
+	If Decimals < 0 Then Decimals = 0
+	If Decimals > 6 Then Decimals = 6
+	Dim scale As Double = 1
+	Dim k As Int
+	For k = 1 To Decimals
+		scale = scale * 10
+	Next
+	Dim scaled As Long = Round(Abs(Value) * scale)
+	Dim result As Double = scaled / scale
+	If Value < 0 Then result = -result
+	Return result
+End Sub
+
 'Formats with an invariant dot and exactly Decimals fraction digits.
 'Used by the canonical JSON writer so goldens never depend on a locale.
 Public Sub FormatNumber (Value As Double, Decimals As Int) As String

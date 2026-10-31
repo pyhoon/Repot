@@ -7,19 +7,19 @@ Version=10.7
 'Page setup. All lengths are points after loading.
 Sub Class_Globals
 	Public SizeName As String
-Public Width As Double
-Public Height As Double
-Public Orientation As String
-Public MarginTop As Double
-Public MarginRight As Double
-Public MarginBottom As Double
-Public MarginLeft As Double
-Public GridColumns As Int
-Public GridRows As Int
-Public CellWidth As Double
-Public CellHeight As Double
-Public FooterReserve As Double
-Public Dpi As Double
+	Public Width As Double
+	Public Height As Double
+	Public Orientation As String
+	Public MarginTop As Double
+	Public MarginRight As Double
+	Public MarginBottom As Double
+	Public MarginLeft As Double
+	Public GridColumns As Int
+	Public GridRows As Int
+	Public CellWidth As Double
+	Public CellHeight As Double
+	Public FooterReserve As Double
+	Public Dpi As Double
 End Sub
 
 Public Sub Initialize

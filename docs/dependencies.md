@@ -37,11 +37,22 @@ enough because B4JBuilder is Windows-only.
 | `Regex` | part of B4X | B4A/B4J | use for expressions and identifiers |
 | `DateTime` / ticks | part of B4X | B4A/B4J | use for date formatting |
 | `StringUtils` | part of B4X | B4A/B4J | evaluate; avoid if trivial to implement |
+| `JavaObject` (B4J library) | part of B4J | B4J | use only in `RepotB4JMeasure`; required by consumers because it is not merged into the engine library jar |
+| `java.desktop` / AWT fonts | JDK 19 | B4J, headless | use public `java.awt.font` APIs for measurement; no `sun.*` access, no `Graphics2D`, no UI thread |
 | `XmlBuilder` | part of B4X | B4J / B4A | verify API and availability per platform |
 | `Archiver` / zip support | part of B4X | verify per platform | needed for DOCX/XLSX/ODF; verify |
 
 The core must remain pure B4X. Anything here that turns out to be
 platform-specific gets an adapter, not a `#If` branch in logic code.
+
+The B4J measurement adapter was verified headless on 2026-10-31 with
+Java 19 (`-Djava.awt.headless=true`). It uses `java.awt.Font`,
+`java.awt.font.FontRenderContext` and `java.awt.font.TextLayout` only.
+`Graphics2D` and `sun.java2d` are not used: `JavaObject` cannot wrap the
+`sun.*` return types, and the module system rightly refuses access.
+AWT font sizes are integers, so the adapter measures at 1000 pt and
+scales advances and vertical metrics linearly to the requested size.
+This keeps fractional point sizes without rounding the template.
 
 ## 3. PDF
 

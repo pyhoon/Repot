@@ -76,7 +76,10 @@ Result.SourceVersion As String     ' schemaVersion of the template
 `E-TPL-104` and are listed in the docs as they are introduced.
 
 The result also carries the render document, but as an opaque handle.
-Applications do not read it; exporters do.
+Applications do not read it; exporters do. Its version 1 structure is
+specified in [render-document.md](render-document.md). The classes are
+public so exporters can be written outside the core, but the contract is
+for exporters, not for application code.
 
 ## 4. Exporters
 

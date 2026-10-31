@@ -5,7 +5,7 @@
 **Ecosystem:** B4X (B4J first, B4A second)\
 **Template format:** Versioned JSON, `.b4xr` extension\
 **License:** MIT, all components\
-**Current stage:** M1 in progress (core model, loader, validation, binding)
+**Current stage:** M0 complete, M1 core complete, M2 in progress (layout)
 
 ---
 
@@ -297,9 +297,12 @@ M0 is documentation, definition, and de-risking. No engine code.
    `docs/dependencies.md`, including rejected options and why.
 4. Define the adapter contracts: text measurement, font resolution, image
    loading, resource resolution, PDF canvas. Signatures in
-   `docs/architecture.md`; code comes in M1.
+   `docs/architecture.md`; code comes in M1. Status: signatures written,
+   implementations not started.
 5. Define the render document contract (page, text run, image, line,
    rect, clip). This is the most expensive contract to change later.
+   Status: version 1 in `docs/render-document.md`; types implemented,
+   producer planned for M2.
 6. Verify headless build and test invocation on this machine:
    `B4JBuilder.exe -Task=Build` on a console harness project. Record the
    exact command and the exit-code behaviour.
@@ -307,6 +310,7 @@ M0 is documentation, definition, and de-risking. No engine code.
    release. `Repot` reads as an official Anywhere Software library;
    decide deliberately and note it.
 8. Present the fixture-driven schema outline for review before M1.
+   Status: signed off 2026-10-31 (`docs/schema-review.md`, ADR 0009).
 
 Begin M1 only after the M0 review.
 
@@ -319,16 +323,16 @@ Begin M1 only after the M0 review.
 | Negative test of the checker (injected faults) | done, all five faults reported |
 | Headless build verification (B4J 10.7 / Java 19) | done, `-Task=Build` and `-Task=BuildLibrary` both exit `0` |
 | Dependency audit (`docs/dependencies.md`) | draft; PDF and office jars still unverified |
-| Adapter and render-document contracts (`docs/architecture.md`) | draft |
+| Adapter and render-document contracts (`docs/architecture.md`, `docs/render-document.md`) | accepted 2026-10-31; render types implemented, adapters not |
 | Project name and package prefix | done: Repot (ADR 0007) |
-| Fixture-driven schema review | open |
+| Fixture-driven schema review | done: signed off 2026-10-31 (`docs/schema-review.md`, ADR 0009) |
 
 The schema change that came out of writing the fixtures: aggregates are
 document-unique and referenced bare, and groups may declare their own
 aggregates. See `fixtures/statement-grouped` and
 `docs/template-format.md` §4.4.
 
-### M1 status — core model (partial, 2026-10-31)
+### M1 status — core model and render contract (2026-10-31)
 
 Implemented in `source/Repot` and exercised from `source/RepotTests`:
 
@@ -341,18 +345,19 @@ Implemented in `source/Repot` and exercised from `source/RepotTests`:
 | Expression reference scanner and identifier resolution (not evaluation) | done, parser/evaluator in M6 |
 | Canonical JSON writer and load → save → reload round-trip | done |
 | Dataset and parameter binding with typed-value checks | done |
-| Engine unit tests in the headless harness | done, 108 checks |
-| Adapter contracts and render document | not started |
-| Layout, pagination, exporters | not started |
+| Render-document types: document, page, draw operation, anchor, 0.01 pt rounding | done, version 1 |
+| Text measurement adapter: style, font, metrics, headless AWT | done, M2 slice 1 |
+| Engine unit tests in the headless harness | done, 234 checks |
+| Layout, pagination, exporters | in progress (slice 2 done) |
 
-The whole harness currently reports 166 checks and zero errors:
+The whole harness currently reports 292 checks and zero errors:
 
 ```text
 PASS invoice-basic (19 checks, 0 errors, 0 warnings)
 PASS listing-multipage (17 checks, 0 errors, 0 warnings)
 PASS statement-grouped (22 checks, 0 errors, 0 warnings)
-PASS engine (108 checks)
-fixtures=3 checks=166 errors=0
+PASS engine (234 checks)
+fixtures=3 checks=292 errors=0
 ```
 
 Build commands verified:
@@ -363,13 +368,16 @@ B4JBuilder.exe -Task=Build          # console jar, exit 0
 B4JBuilder.exe -Task=BuildLibrary   # Repot.jar + Repot.xml in %Additional%\B4J
 ```
 
-Known M1 limitations:
+Known M1/M2 limitations:
 
-- The M0 schema review is still open. The non-visual core was started
-  first because it is fixture-driven and does not freeze the schema;
-  layout must not start until the review is closed.
+- Adapter contracts are documented in `docs/architecture.md`. Text and
+  font measurement is implemented for B4J; image loading, resource
+  resolution and the PDF canvas are not.
+- The render document is produced by no code yet; only its types and
+  contract exist. The canonical golden writer arrives with slice 4.
 - `BuildLibrary` writes a jar and XML metadata to the B4J Additional
-  folder; the `.b4xlib` packaging step is still M9 work.
+  folder; the `.b4xlib` packaging step is still M9 work. Consumers of
+  `Repot.jar` must also include the `JavaObject` library.
 - Expression validation is lexical. There is no parser, evaluator, or
   aggregate engine yet.
 - `date` and `datetime` values are carried as supplied (string or ticks);
@@ -377,8 +385,57 @@ Known M1 limitations:
   work.
 - Element-level `align` and `valign` were added because the fixtures use
   them; the schema draft is updated to match.
-- The M0 schema review and the adapter/render-document contracts remain
-  open, so M1 is deliberately scoped to the non-visual core.
+
+### M2 status — layout (in progress, started 2026-10-31)
+
+M0 and the render-document contract are signed off. M2 is split into four
+slices so each has a testable boundary:
+
+| Slice | Files | Status | Acceptance |
+|-------|-------|--------|------------|
+| 1. Measurement | `RepotTextStyle`, `RepotTextMetrics`, `RepotFont`, `RepotB4JMeasure` | done 2026-10-31 | Headless AWT metrics with explicit fallback warnings; `MeasureLine` and `MeasureBlock`; no JavaFX or UI thread |
+| 2. Band layout | `RepotBand`, `RepotLayoutElement`, `RepotBandLayout` | done 2026-10-31 | Style resolution, grid-to-points, auto-grow, push-down, band height, bounds in points; 23 band-layout checks |
+| 3. Pagination | `RepotPaginator` | next | Page header/footer reserve, keep-together, page breaks, two-pass `Page N of M` |
+| 4. Goldens | `RepotRenderJsonWriter`, `fixtures/*/expected/layout.json` | planned | Canonical deterministic JSON; page count and geometry for the invoice and listing |
+
+Group headers, grouping and aggregates remain M6 work. M2 structures the
+pagination loop for them but does not claim them. Acceptance is Gate C for
+`invoice-basic` and `listing-multipage`: page count, break positions,
+repeated page headers and deterministic geometry. `statement-grouped`
+becomes active when M6 lands.
+
+Implementation notes:
+
+- Measurement is verified headless: `tools/run-fixtures.ps1` runs the
+  harness with `java.awt.headless=true`, and slice 1 tests fail if AWT
+  initialisation fails. Java AWT through public `java.awt.font` APIs is
+  the B4J path; JavaFX is not acceptable in a server build. `Graphics2D`
+  and `sun.*` types are not used, because `JavaObject` cannot wrap them.
+- AWT font sizes are integers. The adapter measures at 1000 pt and scales
+  linearly, so fractional template sizes are not rounded before layout.
+- Fixtures name DejaVu Sans first and Arial as a fallback. The adapter
+  reports the family it used, marks substitution, and records a
+  `W-MEA-001` warning whenever the first declared family was not used.
+  The layout golden metadata will record the resolved family.
+- Layout uses unrounded measurements; only render-document emission
+  rounds to 0.01 pt.
+
+Slice 1 verification (2026-10-31):
+
+```text
+run-fixtures.ps1 -> fixtures=3 checks=269 errors=0 (engine 211)
+B4JBuilder -Task=Build and -Task=BuildLibrary -> exit 0
+headless AWT: font=Arial, advance/ascent/descent read through TextLayout
+```
+
+Slice 2 verification (2026-10-31):
+
+```text
+run-fixtures.ps1 -> fixtures=3 checks=292 errors=0 (engine 234)
+B4JBuilder -Task=Build and -Task=BuildLibrary -> exit 0
+band layout: style resolution, grid cells, auto-grow, push-down,
+clip, ellipsis, min height, align override, field content
+```
 
 ---
 

@@ -16,6 +16,8 @@ accepted; a later ADR supersedes an earlier one.
 | [0005](0005-template-format.md) | Own `.b4xr` JSON format, schema frozen last | accepted | 2026-10-31 |
 | [0006](0006-packaging.md) | One `.b4xlib`, optional jars | accepted | 2026-10-31 |
 | [0007](0007-project-name.md) | Project name: Repot | accepted | 2026-10-31 |
+| [0008](0008-render-document.md) | Render document is a versioned display list | accepted | 2026-10-31 |
+| [0009](0009-schema-clarifications.md) | Fixture-driven schema clarifications | accepted | 2026-10-31 |
 
 ## Template
 

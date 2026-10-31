@@ -78,7 +78,7 @@ $resultFile = Join-Path $objects 'fixture-check.txt'
 Remove-Item $resultFile -ErrorAction SilentlyContinue
 Push-Location $objects
 try {
-    $output = & $java -jar 'RepotTests.jar' $Fixtures $objects 2>&1 | Out-String
+    $output = & $java "-Djava.awt.headless=true" -jar 'RepotTests.jar' $Fixtures $objects 2>&1 | Out-String
     $javaCode = $LASTEXITCODE
 }
 finally {

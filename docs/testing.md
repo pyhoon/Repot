@@ -21,22 +21,29 @@ the report. It produces false failures and trains maintainers to ignore
 the suite.
 
 Instead, layout writes a canonical JSON description of the render
-document:
+document, following [render-document.md](render-document.md):
 
 ```json
 {
-  "fixture": "invoice-basic",
-  "schemaVersion": "0.1",
-  "pageCount": 1,
+  "version": 1,
   "pages": [
     {
-      "width": 595.28,
-      "height": 841.89,
+      "index": 1,
+      "width": 595.2756,
+      "height": 841.8898,
       "ops": [
-        { "op": "text", "text": "INVOICE", "x": 360.0, "y": 12.0, "w": 78.42, "font": "DejaVu Sans", "size": 18, "bold": true },
-        { "op": "image", "resource": "logo.png", "x": 0.0, "y": 0.0, "w": 130.0, "h": 48.0 },
-        { "op": "rect", "x": 410.0, "y": 6.0, "w": 100.0, "h": 16.0, "fill": "#eeeeee" }
-      ]
+        { "type": "text", "x": 360.00, "y": 12.00, "width": 78.42,
+          "height": 21.60, "baseline": 17.20, "text": "INVOICE",
+          "font": "DejaVu Sans", "size": 18.00, "bold": true,
+          "italic": false, "underline": false, "colour": "#000000",
+          "align": "left" },
+        { "type": "image", "x": 0.00, "y": 0.00, "width": 130.00,
+          "height": 48.00, "resource": "logo.png", "pixelWidth": 260,
+          "pixelHeight": 96, "fit": "contain" },
+        { "type": "rect", "x": 410.00, "y": 6.00, "width": 100.00,
+          "height": 16.00, "fill": "#eeeeee" }
+      ],
+      "anchors": []
     }
   ]
 }
@@ -44,9 +51,11 @@ document:
 
 Rules:
 
-- Numbers rounded to 0.01 pt.
-- Ops in paint order.
-- No timestamps, no absolute paths, no platform names.
+- Page dimensions use four decimal places; operation geometry uses two,
+  rounded half-up.
+- Ops in paint order; object keys in a fixed order, not map order.
+- Empty optional strings and zero optional numbers are omitted.
+- No timestamps, no absolute paths, no platform names, no image handles.
 - Text is the resolved string, so a regression in binding or formatting
   shows up as a text diff.
 
@@ -89,9 +98,10 @@ The first three fixtures are defined in M0, before the schema is frozen:
 
 1. **Fixture lint.** It validates every fixture against the draft schema.
 2. **Engine unit tests.** It compiles the engine modules from
-   `source/Repot` through relative module references and runs the M1
-   tests: units, loading, validation, canonical round-trip, expression
-   reference scanning and dataset/parameter binding.
+   `source/Repot` through relative module references and runs the M1 and
+   M2 tests: units, render-document construction/ordering/rounding,
+   text measurement, loading, validation, canonical round-trip,
+   expression reference scanning and dataset/parameter binding.
 
 The fixture lint checks:
 
@@ -114,7 +124,12 @@ agree; it does not prove layout. Geometry goldens arrive in M3.
 The engine tests use the same fixtures as real input. They load each
 template, assert model values and diagnostics, save it to canonical JSON,
 reload it, save again, and require the two saves to be identical. They
-also check that two loads of the same file produce the same output.
+also check that two loads of the same file produce the same output. The
+render-document tests check page indexing, operation order, defaults,
+anchor storage, and half-up rounding to 0.01 pt. The measurement tests run
+the B4J adapter with `java.awt.headless=true` and check font resolution,
+fallback warnings, advance scaling, ascent/descent, line height, wrapping,
+explicit breaks, over-wide words, trailing whitespace and empty blocks.
 
 Run both with:
 
@@ -131,7 +146,9 @@ Logs tab.
 
 The wrapper treats a non-zero Java exit code as failure and removes the
 previous result file before a run, so a stale `errors=0` cannot hide a
-crash.
+crash. It runs the harness with `-Djava.awt.headless=true`, so a
+measurement path that needs a display fails the suite instead of passing
+on a developer desktop.
 
 The fixture checker was itself validated in M0 by injecting faults into a
 copy of `invoice-basic` (bad style reference, unknown aggregate,

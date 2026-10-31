@@ -5,9 +5,12 @@ frozen only after the fixture set in `fixtures/` renders correctly
 through the real engine. See
 [decisions/0005-template-format.md](decisions/0005-template-format.md).
 
-Implementation note: the 0.1 loader, validator, canonical writer and
-data binder exist in `source/Repot`. Layout and exporters do not exist
-yet, so this remains a draft.
+Implementation note: the 0.1 loader, validator, canonical writer,
+data binder and render-document types exist in `source/Repot`. Layout and
+exporters do not exist yet, so this remains a draft. The fixture-driven
+review that closes M0 was signed off on 2026-10-31; see
+[schema-review.md](schema-review.md) and
+[ADR 0009](decisions/0009-schema-clarifications.md).
 
 ## 1. Conventions
 
@@ -179,17 +182,23 @@ change as fixtures are added.
 | `grid` | object | `cellWidth`/`cellHeight` in points, or `columns`/`rows` resolved against the content box |
 | `footerReserve` | number | Optional; overrides the computed page-footer height for content boxes |
 
+A grid may declare `columns` with `cellHeight` and no `rows`; rows are then
+implicit. If both explicit sizes and counts are present, explicit sizes
+win.
+
 ### 4.2 `fonts` and `styles`
 
 - `fonts.<name>` declares `family` (string or ordered fallback array) and
   a default `size`. It does not embed anything; embedding is an exporter
   concern.
 - `styles.<name>` declares typography and formatting: `font`, `size`,
-  `bold`, `italic`, `underline`, `colour` (`#rgb` or `#rrggbb`),
-  `align` (`left` \| `center` \| `right`), `valign`
+  `bold`, `italic`, `underline`, `colour` (`#rgb` or `#rrggbb`, no
+  alpha in 0.1), `align` (`left` \| `center` \| `right`), `valign`
   (`top` \| `middle` \| `bottom`), `lineSpacing`, `padding`, `border`
   (`{ width, colour }`), `fill`, `overflow` (`grow` \| `clip` \|
   `ellipsis`), and `format`.
+- Element-level `align`, `valign`, and `format` replace the style value;
+  they do not merge with it.
 - `format` supports `type`: `text`, `number` (`decimals`, `grouping`,
   `prefix`, `suffix`), `date` (`pattern` with `yyyy`, `MM`, `dd`, `HH`,
   `mm`, `ss`), `boolean` (`trueText`, `falseText`). It is not a full ICU
@@ -198,7 +207,7 @@ change as fixtures are added.
 ### 4.3 `parameters`
 
 `{ "name", "type", "required", "default" }` where `type` is `string`,
-`integer`, `decimal`, `boolean`, or `datetime`. Missing required
+`integer`, `decimal`, `boolean`, `datetime`, or `date`. Missing required
 parameters fail the build with a diagnostic.
 
 ### 4.4 `dataSets`
@@ -249,8 +258,15 @@ never supplied is an error.
 Groups are declared once and referenced by section `group` properties in
 v0.2. The declaration order defines nesting, outermost first.
 `repeatHeader` re-emits the group header after a page break inside the
-group. Aggregates declared on a group reset when its key changes; their
-names are document-unique like every other aggregate.
+group; it is opt-in and defaults to `false`. Aggregates declared on a
+group reset when its key changes; their names are document-unique like
+every other aggregate.
+
+The engine stable sorts by group key first (outermost group first), then
+by the declared `sort` fields, which order records inside the innermost
+group. Equal keys retain source order. This guarantees that a group key
+never appears in two non-contiguous runs, even when the application
+supplies unsorted data.
 
 ### 4.6 `sections`
 
@@ -267,7 +283,10 @@ names are document-unique like every other aggregate.
 | `visible` | Expression, optional |
 
 Section order in the array is irrelevant; the engine orders by type, with
-groups resolved by declaration order. This keeps hand-edited files stable.
+groups resolved by declaration order. The emission order is ReportHeader,
+PageHeader, group headers (outermost first), Detail, group footers
+(innermost first), ReportFooter, PageFooter. Exactly one `Detail` section
+is allowed in 0.1. This keeps hand-edited files stable.
 
 ### 4.7 Elements
 
@@ -288,6 +307,12 @@ element only.
 binding, and a field must not silently render its expression string when
 a dataset is missing.
 
+A `field.value` is an interpolated string, not necessarily one expression:
+literal text and zero or more braced expressions may be mixed. A `line`
+element's `bounds` `[x, y, w, h]` are its endpoints: the line runs from
+`(x, y)` to `(x + w, y + h)`, so a horizontal rule has `h = 0`. An
+`image.fit` of `contain` is the default; `none` uses `dpi` when supplied.
+
 ### 4.8 Expressions
 
 Braced expressions are the only dynamic construct:
@@ -307,6 +332,9 @@ a bare name inside braces: aggregate, then section dataset field, then
 parameters, then functions. A dotted name is `Dataset.Field` or
 `Dataset.Aggregate`. Ambiguity is an error, not a guess.
 
+`{page.number}` and `{page.count}` are reserved fields supplied by layout.
+They must not be declared as parameters, dataset fields, or aggregates.
+
 Operators: `+ - * /`, comparison, `and or not`, `&` for concatenation,
 parentheses, and `if(cond, a, b)`. Functions for 1.0: `len`, `upper`,
 `lower`, `trim`, `round`, `abs`, `min`, `max`, `formatDate`. The grammar
@@ -320,7 +348,8 @@ implementation.
    exists.
 3. Section types required by the layout exist or are absent entirely;
    missing PageHeader is legal, two PageHeaders are not.
-4. A `Detail` section declares a `dataSet`; other sections may not repeat.
+4. Exactly one `Detail` section; it declares a `dataSet`. Other sections
+   may not repeat.
 5. PageHeader and PageFooter do not use `overflow: grow`.
 6. Resources resolve inside the template directory.
 7. No expression may reference a field not declared by its dataset.

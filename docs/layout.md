@@ -1,8 +1,8 @@
 # Layout Model
 
-Status: draft for M0 review. The layout model is the most expensive thing
-in this project to change later. Read this before touching the schema or
-the engine.
+Status: accepted 2026-10-31; M2 implementation is in progress. The layout
+model is the most expensive thing in this project to change later. Read
+this before touching the schema or the engine.
 
 ## 1. Coordinate system
 
@@ -126,6 +126,11 @@ text wrapping around images, and shrink-to-fit.
 - Vertical alignment inside a fixed box: top (default), middle, bottom.
 - Text is measured through the adapter, never guessed. A layout that
   assumes `chars * averageWidth` is a bug.
+- Runs of spaces and tabs between words collapse to one space at a
+  wrapping opportunity. Other whitespace is preserved inside a word.
+  This is the only text normalisation layout performs.
+- Measurement uses fractional metrics and unrounded point values. Only
+  render-document emission rounds to 0.01 pt.
 
 Rich text (mixed styles inside one element) is not in 1.0. Multiple text
 elements are the workaround, and the schema reserves a future `runs`
@@ -150,7 +155,7 @@ loop:
           close page (GroupFooter not yet emitted)
           new page
           emit PageHeader
-          re-emit all open GroupHeaders (repeatGroupHeaders)
+          re-emit open group headers whose repeatHeader is true
           continue
       emit Detail
       if last record of group: emit GroupFooter
@@ -163,8 +168,8 @@ Rules that fall out of it:
 
 - A page always has a PageHeader before content and a PageFooter after.
 - A group header is never orphaned at the bottom of a page: it moves to
-  the next page with at least one detail row. This is
-  `keepGroupHeaderWithDetail`, default true.
+  the next page with at least one detail row. This is always true in 0.1;
+  it is a layout rule, not a schema property.
 - Page footers reserve their height for the whole page. Layout computes
   the content box as `page height - top margin - bottom margin -
   pageFooterHeight` when a footer exists. It does not discover the
@@ -204,8 +209,10 @@ documented; reports without total-page fields run once.
 - Running totals accumulate across the group scope they are declared in.
 - Group keys are typed. `1` and `"1"` are different keys; null is its own
   key and groups together.
-- Sorting happens before grouping. Sort stability is guaranteed: equal
-  keys retain source order unless `stable: false` is requested.
+- The engine stable sorts by group key first (outermost group first), then
+  by the declared `sort` fields, which order records inside the innermost
+  group. Equal keys always retain source order; there is no
+  `stable: false` option in 0.1.
 
 ## 10. Fidelity contract
 

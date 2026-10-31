@@ -1,9 +1,9 @@
 # Architecture
 
-Status: draft for M0 review. The model, loader, validator, canonical writer
-and data binder described in the template/data layers are implemented in
-`source/Repot`. Adapter contracts, layout and the render document are not
-implemented yet; the signatures below remain proposals.
+Status: accepted for M0/M1; M2 layout is in progress. The model, loader,
+validator, canonical writer, data binder and render-document types are
+implemented in `source/Repot`. The adapter contracts are specified but not
+implemented; layout and exporters are not implemented yet.
 
 ## 1. Pipeline
 
@@ -66,41 +66,85 @@ only inside a platform adapter, together with the DPI that produced them.
 
 ## 4. Core contracts (conceptual)
 
-These are shapes, not final signatures. Signatures are frozen in M1.
+These are the adapter contracts layout depends on. They are internal
+contracts: B4X has no stable, portable interface mechanism, so a platform
+adapter is selected at build time (`RepotB4JAdapter`, later
+`RepotB4AAdapter`) and compiled against the same method signatures. The
+public API exposes the adapter object, not an abstract base class.
 
 ### 4.1 Measurement adapter
 
 ```vb
-' Returns the number of whole lines and the metrics needed for layout.
+' Returns laid-out lines and the metrics needed for pagination.
 Sub MeasureBlock(Text As String, Style As RepotTextStyle, MaxWidth As Double) As RepotTextMetrics
 ' Width of a single line without wrapping.
 Sub MeasureLine(Text As String, Style As RepotTextStyle) As Double
-' Nominal line height for the style.
+' Nominal line height for the resolved style.
 Sub LineHeight(Style As RepotTextStyle) As Double
 ```
 
-`RepotTextMetrics` carries `LineCount`, `Width`, `Height`, and the
-break positions used. The engine never asks the platform "how does this
-look"; it asks for numbers and lays out deterministically from them.
+`RepotTextStyle` is a resolved style, not a template style: family, size,
+bold, italic, underline, line spacing, and colour. `RepotTextMetrics`
+carries `Lines` and `Widths` (one entry per laid-out line), `Width`,
+`Height`, `Ascent`, `Descent`, and `LineHeight`. Line breaks are final;
+layout does not re-wrap measured text. `Height` is `Lines.Size *
+LineHeight`, and `LineHeight` is `font size * line spacing`; platform
+leading is reported separately and does not silently change the nominal
+line height.
+
+Implemented in M2 slice 1 as `RepotB4JMeasure`, with `RepotTextStyle`,
+`RepotTextMetrics` and `RepotFont`. It wraps at spaces and tabs, honours
+explicit line breaks, breaks an over-wide word by character, ignores
+trailing whitespace, and records a diagnostic if AWT cannot initialise
+or a string cannot be measured.
+
+The engine never asks the platform "how does this look"; it asks for
+numbers and lays out deterministically from them. A block that exceeds the
+maximum line count or depth is rejected with a diagnostic.
 
 ### 4.2 Font resolution
 
-`Resolve(Name, Bold, Italic, SizePt) As RepotFont` returns an opaque
-font handle plus a measurement identity string. Two platforms may return
-different metrics for the same logical font; that difference is contained
-here and documented as a tolerance.
+```vb
+Sub ResolveFont(Family As String, Bold As Boolean, Italic As Boolean, SizePt As Double) As RepotFont
+```
+
+`RepotFont` carries `Key` (measurement identity), resolved `Family`,
+`Bold`, `Italic`, `Size`, `Ascent`, `Descent`, `LineGap`, and an opaque
+`Handle`. Two platforms may return different metrics for the same logical
+font; that difference is contained here and documented as a tolerance.
+
+Fallback follows the family list declared in the template's `fonts`
+entry, then the platform default. A substitution is reported as a warning
+with the requested and chosen family. Falling back silently is forbidden.
+
+`RepotB4JMeasure` implements this for B4J. It measures with public AWT
+font APIs at a base size of 1000 pt and scales linearly, because AWT font
+sizes are integers and templates may use fractional point sizes. The
+resolved family and the `Substituted` flag are recorded on `RepotFont`, so
+a layout golden can state which font it actually used.
 
 ### 4.3 Image loading
 
-`Load(ResourceRef) As RepotImage` returns pixel dimensions and an
-opaque handle. Caching is the adapter's responsibility. The engine only
-needs intrinsic size and a way to hand the handle to a drawing backend.
+```vb
+Sub LoadImage(Path As String, MaxPixels As Long) As RepotImage
+```
+
+`RepotImage` carries `Path`, `PixelWidth`, `PixelHeight`, and an opaque
+`Handle`. Caching is the adapter's responsibility. Images larger than the
+configured pixel limit fail with a diagnostic. The engine needs intrinsic
+size and a way to hand the handle to a drawing backend; it does not decode
+pixels itself.
 
 ### 4.4 Resource resolution
 
-`Resolve(Ref, BaseDir) As String` maps a template resource reference to a
-readable path or identifier. Implementations must reject paths that escape
-the template's base directory.
+```vb
+Sub ResolveResource(Ref As String, BaseDir As String) As String
+```
+
+Maps a template resource reference to a readable path. Implementations
+must reject absolute paths, `..` escapes, and symlinks that leave the
+template's base directory. The normalised result uses `/` separators so
+goldens and diagnostics are platform-independent.
 
 ### 4.5 PDF canvas
 
@@ -108,12 +152,12 @@ An append-only drawing surface:
 
 ```text
 BeginPage(width, height)
-Text(font, x, y, text)
+Text(font, x, y, baseline, text, colour, underline)
 Image(handle, x, y, w, h)
 Line(x1, y1, x2, y2, width, colour, dash)
-Rect(x, y, w, h, stroke, fill, radius)
+Rect(x, y, w, h, strokeWidth, strokeColour, fillColour, radius)
 Clip(x, y, w, h) / Restore
-Link(x, y, w, h, url)        ' optional, ignored by formats without links
+Link(x, y, w, h, url, anchorName)   ' optional, ignored by formats without links
 EndPage
 ```
 
@@ -123,24 +167,29 @@ about content streams, fonts, or compression.
 
 ## 5. Render document
 
-The output of layout is an immutable document:
+The output of layout is an immutable-by-convention, versioned display
+list. The full contract is [render-document.md](render-document.md); the
+short form is:
 
 ```text
 RenderDocument
-  Pages[]            one per physical page
-    Width, Height, Index
-    Ops[]            text run | image | line | rect | clip | link
-    Anchors[]        optional named positions for links/bookmarks
+  Version = 1
+  Pages[]
+    Index, Width, Height
+    Ops[]            text | image | line | rect | clip | restore | link
+    Anchors[]        named positions for links/bookmarks
 ```
 
 Properties:
 
 - Fully resolved. No expressions, no bindings, no dataset references
   remain.
-- Deterministic. Same inputs, same bytes of structure.
+- Deterministic. Same inputs, same operations in the same order.
 - Exportable many times. `Build` once, then PDF, HTML, and DOCX from the
   same document.
 - Versioned. A schema version exists even though it is internal.
+- Geometry rounded to 0.01 pt at emission; text is one operation per
+  laid-out line.
 
 Data exports do not use the render document. They consume the processed
 data model directly.
