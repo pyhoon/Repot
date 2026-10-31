@@ -46,9 +46,12 @@ Module39=ReportHtmlExporter
 Module40=ReportDataExporter
 Module41=ReportDocxExporter
 Module42=ReportXlsxExporter
+Module43=ReportToken
+Module44=ReportEvalContext
+Module45=ReportExpressionEvaluator
 NumberOfFiles=0
 NumberOfLibraries=3
-NumberOfModules=42
+NumberOfModules=45
 Version=10.7
 @EndOfDesignText@
 #Region Project Attributes

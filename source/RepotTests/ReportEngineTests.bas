@@ -30,6 +30,7 @@ Public Sub Run (FixturesDir As String)
 	TestHtmlExport
 	TestDataExport
 	TestOfficeExport
+	TestExpressions
 	TestFixturesLoadAndRoundTrip
 	TestValidationFailures
 	TestExpressionScanner
@@ -854,6 +855,63 @@ Private Sub TestOfficeExport
 	Dim xlsxPath As String = File.Combine(File.DirApp, "test-items.xlsx")
 	Check(xlsx.Export("Items", xlsxPath), "xlsx export succeeds")
 	Check(File.Exists(File.DirApp, "test-items.xlsx"), "xlsx file exists")
+End Sub
+'--------------------------------------------------------------- expressions
+
+Private Sub TestExpressions
+	Dim ctx As ReportEvalContext
+	ctx.Initialize
+	ctx.Params.Put("X", 5)
+	ctx.Params.Put("Name", "  hello  ")
+	ctx.CurrentRecord.Initialize
+	ctx.CurrentRecord.Put("Qty", 3)
+	ctx.CurrentRecord.Put("Price", 10.5)
+	ctx.Aggregates.Put("Total", 100)
+
+	Dim ev As ReportExpressionEvaluator
+	ev.Initialize
+
+	CheckNear(13, ev.Eval("2 + 3 * 4 - 1", ctx), 0.0001, "arithmetic precedence")
+	CheckNear(15, ev.Eval("(2 + 3) * 3", ctx), 0.0001, "parentheses")
+	CheckNear(5, ev.Eval("10 / 2", ctx), 0.0001, "division")
+	CheckNear(1, ev.Eval("10 - 3 * 3", ctx), 0.0001, "subtraction")
+
+	Check(ev.Eval("2 + 3 = 5", ctx) = True, "equality")
+	Check(ev.Eval("2 + 3 <> 6", ctx) = True, "inequality")
+	Check(ev.Eval("3 > 2", ctx) = True, "greater than")
+	Check(ev.Eval("3 <= 2", ctx) = False, "less-or-equal false")
+
+	Check(ev.Eval("true and false", ctx) = False, "and")
+	Check(ev.Eval("true or false", ctx) = True, "or")
+	Check(ev.Eval("not false", ctx) = True, "not")
+	Check(ev.Eval("not (2 > 3)", ctx) = True, "not parenthesised")
+
+	Check(ev.Eval(Chr(34) & "a" & Chr(34) & " & " & Chr(34) & "b" & Chr(34), ctx) = "ab", "concatenation")
+
+	Dim r1 As Object = ev.Eval("if(2 > 3, 10, 20)", ctx)
+	Dim r2 As Object = ev.Eval("if(3 > 2, 10, 20)", ctx)
+	Check(r1 = 20 Or r1 = 20.0, "if false branch")
+	Check(r2 = 10 Or r2 = 10.0, "if true branch")
+
+	CheckNear(5, ev.Eval("len(" & Chr(34) & "hello" & Chr(34) & ")", ctx), 0.0001, "len")
+	Check(ev.Eval("upper(" & Chr(34) & "hi" & Chr(34) & ")", ctx) = "HI", "upper")
+	Check(ev.Eval("lower(" & Chr(34) & "HI" & Chr(34) & ")", ctx) = "hi", "lower")
+	Check(ev.Eval("trim(" & Chr(34) & "  x  " & Chr(34) & ")", ctx) = "x", "trim")
+	CheckNear(5, ev.Eval("round(4.6)", ctx), 0.0001, "round")
+	CheckNear(3, ev.Eval("abs(-3)", ctx), 0.0001, "abs")
+	CheckNear(1, ev.Eval("min(2, 5, 1)", ctx), 0.0001, "min")
+	CheckNear(5, ev.Eval("max(2, 5, 1)", ctx), 0.0001, "max")
+
+	' field and param resolution
+	CheckNear(3, ev.Eval("Qty", ctx), 0.0001, "bare field")
+	CheckNear(10.5, ev.Eval("Price", ctx), 0.0001, "bare decimal field")
+	CheckNear(100, ev.Eval("Total", ctx), 0.0001, "aggregate")
+	CheckNear(5, ev.Eval("param.X", ctx), 0.0001, "param dotted")
+	Check(ev.Eval("param.Name", ctx) = "  hello  ", "param string")
+
+	' formatDate
+	Dim fd As String = ev.Eval("formatDate(0, " & Chr(34) & "yyyy" & Chr(34) & ")", ctx)
+	Check(fd.Length = 4, "formatDate returns a year")
 End Sub
 '--------------------------------------------------------------- fixtures
 
