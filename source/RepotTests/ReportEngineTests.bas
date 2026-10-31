@@ -28,6 +28,7 @@ Public Sub Run (FixturesDir As String)
 	TestGoldens
 	TestPdfExport
 	TestHtmlExport
+	TestDataExport
 	TestFixturesLoadAndRoundTrip
 	TestValidationFailures
 	TestExpressionScanner
@@ -756,6 +757,61 @@ Private Sub TestHtmlExport
 		Check(content.IndexOf("INVOICE") >= 0, "invoice html contains INVOICE")
 		Check(content.IndexOf("page-break-after") >= 0, "invoice html has page break css")
 		Check(content.IndexOf("<!DOCTYPE html>") >= 0, "invoice html is a document")
+	End If
+End Sub
+'--------------------------------------------------------------- data export
+
+Private Sub TestDataExport
+	Dim invDir As String = File.Combine(mFixtures, "invoice-basic")
+	Dim loader As ReportTemplateLoader
+	loader.Initialize
+	Dim def As ReportDefinition = loader.LoadFromFile(invDir, "template.b4xr")
+	Check(loader.Diagnostics.HasErrors = False, "invoice loads for data export")
+
+	Dim binder As ReportDataBinder
+	binder.Initialize(def)
+	Dim params As Map = LoadJsonMap(invDir, "params.json")
+	For Each k As String In params.Keys
+		binder.SetParameter(k, params.Get(k))
+	Next
+	Dim data As Map = LoadJsonMap(invDir, "data.json")
+	For Each name As String In data.Keys
+		Dim o As Object = data.Get(name)
+		If o Is List Then
+			binder.SetDataSource(name, o)
+		Else If o Is Map Then
+			binder.SetDataSourceSingle(name, o)
+		End If
+	Next
+	Check(binder.Validate, "invoice binds for data export")
+
+	Dim diags As ReportDiagnostics
+	diags.Initialize
+	Dim exp As ReportDataExporter
+	exp.Initialize(def, binder, diags)
+
+	Dim csvPath As String = File.Combine(File.DirApp, "test-items.csv")
+	Check(exp.ExportCsv("Items", csvPath), "csv export succeeds")
+	If File.Exists(File.DirApp, "test-items.csv") Then
+		Dim csv As String = File.ReadString(File.DirApp, "test-items.csv")
+		Check(csv.IndexOf("Description") >= 0, "csv has header")
+		Check(csv.IndexOf("1200") >= 0 Or csv.IndexOf("1200.0") >= 0, "csv has data")
+	End If
+
+	Dim jsonPath As String = File.Combine(File.DirApp, "test-items.json")
+	Check(exp.ExportJson("Items", jsonPath), "json export succeeds")
+	If File.Exists(File.DirApp, "test-items.json") Then
+		Dim j As String = File.ReadString(File.DirApp, "test-items.json")
+		Check(j.StartsWith("["), "json is an array")
+		Check(j.IndexOf("Description") >= 0, "json has field name")
+	End If
+
+	Dim xmlPath As String = File.Combine(File.DirApp, "test-items.xml")
+	Check(exp.ExportXml("Items", xmlPath, "items"), "xml export succeeds")
+	If File.Exists(File.DirApp, "test-items.xml") Then
+		Dim x As String = File.ReadString(File.DirApp, "test-items.xml")
+		Check(x.IndexOf("<?xml") >= 0, "xml has declaration")
+		Check(x.IndexOf("<row>") >= 0, "xml has row elements")
 	End If
 End Sub
 '--------------------------------------------------------------- fixtures
