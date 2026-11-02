@@ -14,7 +14,7 @@ Module11=|relative|..\..\source\ReportDiagnostics
 Module12=|relative|..\..\source\ReportDocxExporter
 Module13=|relative|..\..\source\ReportDrawOp
 Module14=|relative|..\..\source\ReportElement
-Module15=|relative|..\ReportEngineTests
+Module15=|relative|ReportEngineTests
 Module16=|relative|..\..\source\ReportEvalContext
 Module17=|relative|..\..\source\ReportExpressionEvaluator
 Module18=|relative|..\..\source\ReportExpressionRefs
@@ -77,22 +77,18 @@ Version=14.2
 Sub Process_Globals
 	'These global variables will be declared once when the application starts.
 	'These variables can be accessed from all modules.
-	Private xui As XUI
 End Sub
 
 Sub Globals
-	'These global variables will be redeclared each time the activity is created.
-	Private ime As IME
-	Private root As B4XView
+	Private lbl As Label
 End Sub
 
 Sub Activity_Create(FirstTime As Boolean)
-	ime.Initialize("ime")
-	root = xui.CreatePanel("")
-	Dim Content As Rect = ime.GetContentRect
-	Activity.AddView(root, Content.Left, Content.Top, Content.Width, Content.Height)
-	ime.UpdatePercentageReference(root.Width, root.Height)
-	root.LoadLayout("Layout")
+	lbl.Initialize("")
+	lbl.Gravity = Gravity.TOP
+	lbl.TextColor = Colors.Black
+	Activity.AddView(lbl, 2dip, 2dip, 100%x - 4dip, 100%y - 4dip)
+	lbl.Text = RunSuite
 End Sub
 
 Sub Activity_Resume
@@ -103,6 +99,84 @@ Sub Activity_Pause (UserClosed As Boolean)
 
 End Sub
 
-Sub Button1_Click
-	xui.MsgboxAsync("Hello world!", "B4X")
+'Runs the fixture suites and the engine tests against the fixtures bundled
+'in the assets (Files/fixtures). Mirrors tests/B4J/tests.b4j AppStart.
+Sub RunSuite As String
+	'copy the bundled fixtures from the assets into internal storage
+	'(assets are read-only); the loader works on real files
+	Dim names As List
+	names.Initialize
+	names.AddAll(Array As String("invoice-basic", "listing-multipage", "statement-grouped"))
+	Dim commonFiles() As String = Array As String("template.repot", "data.json", "params.json")
+	For Each n As String In names
+		File.MakeDir(File.DirInternal, "fixtures")
+		File.MakeDir(File.DirInternal, File.Combine("fixtures", n))
+		For Each fl As String In commonFiles
+			Try
+				File.Copy(File.DirAssets, "fixtures/" & n & "/" & fl, File.DirInternal, "fixtures/" & n & "/" & fl)
+			Catch
+				Log("asset copy failed: " & n & "/" & fl & " : " & LastException.Message)
+			End Try
+		Next
+	Next
+	Try
+		File.Copy(File.DirAssets, "fixtures/invoice-basic/logo.png", File.DirInternal, "fixtures/invoice-basic/logo.png")
+	Catch
+		Log("asset copy failed: invoice-basic/logo.png: " & LastException.Message)
+	End Try
+
+	Dim root As String = File.Combine(File.DirInternal, "fixtures")
+	Dim OutDir As String = File.DirInternal
+
+	Dim dirNames As List
+	Try
+		dirNames = File.ListFiles(root)
+	Catch
+		Dim msg As String = "ERROR fixtures folder not found: " & root
+		File.WriteString(OutDir, "fixture-check.txt", "errors=1" & CRLF & msg & CRLF)
+		Log(msg)
+		Return msg
+	End Try
+
+	names.Clear
+	For Each n As String In dirNames
+		names.Add(n)
+	Next
+
+	names.Sort(True)
+	Dim summary As StringBuilder
+	summary.Initialize
+	Dim tested As Int = 0
+	Dim totalErrors As Int = 0
+	Dim totalChecks As Int = 0
+	'fixture-level validation currently runs on B4J only; the B4A run
+	'exercises the engine tests against the bundled fixtures
+	Dim fixtureLine As String = "(fixture validation: B4J only in M8)"
+	Log(fixtureLine)
+	summary.Append(fixtureLine).Append(CRLF)
+
+	Dim engine As ReportEngineTests
+	engine.Initialize
+	engine.Run(root)
+	totalChecks = totalChecks + engine.Checks
+	totalErrors = totalErrors + engine.Failures.Size
+	Dim engineLine As String
+	If engine.Failures.Size = 0 Then
+		engineLine = "PASS engine (" & engine.Checks & " checks)"
+	Else
+		engineLine = "FAIL engine (" & engine.Checks & " checks, " & engine.Failures.Size & " failures)"
+	End If
+	Log(engineLine)
+	summary.Append(engineLine).Append(CRLF)
+	For Each f As String In engine.Failures
+		Log("  engine: " & f)
+		summary.Append("  engine: ").Append(f).Append(CRLF)
+	Next
+
+	Dim result As String = "fixtures=" & tested & " checks=" & totalChecks & " errors=" & totalErrors
+	File.WriteString(OutDir, "fixture-check.txt", result & CRLF & summary.ToString)
+	Log("----")
+	Log(result)
+	Log("Result written to: " & File.Combine(OutDir, "fixture-check.txt"))
+	Return result & CRLF & summary.ToString
 End Sub

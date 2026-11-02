@@ -1,0 +1,844 @@
+{
+    "Sales":  [
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Widget A",
+                      "Quantity":  8,
+                      "Amount":  525
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Widget B",
+                      "Quantity":  15,
+                      "Amount":  987.5
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Gasket",
+                      "Quantity":  22,
+                      "Amount":  237.5
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Bracket",
+                      "Quantity":  6,
+                      "Amount":  700
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Fastener",
+                      "Quantity":  13,
+                      "Amount":  1162.5
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Cable 2 m",
+                      "Quantity":  20,
+                      "Amount":  412.5
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Cable 5 m",
+                      "Quantity":  4,
+                      "Amount":  875
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Adapter",
+                      "Quantity":  11,
+                      "Amount":  125
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Widget A",
+                      "Quantity":  18,
+                      "Amount":  587.5
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Widget B",
+                      "Quantity":  2,
+                      "Amount":  1050
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Gasket",
+                      "Quantity":  9,
+                      "Amount":  300
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Bracket",
+                      "Quantity":  16,
+                      "Amount":  762.5
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Fastener",
+                      "Quantity":  23,
+                      "Amount":  1225
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Cable 2 m",
+                      "Quantity":  7,
+                      "Amount":  475
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Cable 5 m",
+                      "Quantity":  14,
+                      "Amount":  937.5
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Adapter",
+                      "Quantity":  21,
+                      "Amount":  187.5
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Widget A",
+                      "Quantity":  5,
+                      "Amount":  650
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Widget B",
+                      "Quantity":  12,
+                      "Amount":  1112.5
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Gasket",
+                      "Quantity":  19,
+                      "Amount":  362.5
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Bracket",
+                      "Quantity":  3,
+                      "Amount":  825
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Fastener",
+                      "Quantity":  10,
+                      "Amount":  75
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Cable 2 m",
+                      "Quantity":  17,
+                      "Amount":  537.5
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Cable 5 m",
+                      "Quantity":  1,
+                      "Amount":  1000
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Adapter",
+                      "Quantity":  8,
+                      "Amount":  250
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Widget A",
+                      "Quantity":  15,
+                      "Amount":  712.5
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Widget B",
+                      "Quantity":  22,
+                      "Amount":  1175
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Gasket",
+                      "Quantity":  6,
+                      "Amount":  425
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Bracket",
+                      "Quantity":  13,
+                      "Amount":  887.5
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Fastener",
+                      "Quantity":  20,
+                      "Amount":  137.5
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Cable 2 m",
+                      "Quantity":  4,
+                      "Amount":  600
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Cable 5 m",
+                      "Quantity":  11,
+                      "Amount":  1062.5
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Adapter",
+                      "Quantity":  18,
+                      "Amount":  312.5
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Widget A",
+                      "Quantity":  2,
+                      "Amount":  775
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Widget B",
+                      "Quantity":  9,
+                      "Amount":  1237.5
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Gasket",
+                      "Quantity":  16,
+                      "Amount":  487.5
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Bracket",
+                      "Quantity":  23,
+                      "Amount":  950
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Fastener",
+                      "Quantity":  7,
+                      "Amount":  200
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Cable 2 m",
+                      "Quantity":  14,
+                      "Amount":  662.5
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Cable 5 m",
+                      "Quantity":  21,
+                      "Amount":  1125
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Adapter",
+                      "Quantity":  5,
+                      "Amount":  375
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Widget A",
+                      "Quantity":  12,
+                      "Amount":  837.5
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Widget B",
+                      "Quantity":  19,
+                      "Amount":  87.5
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Gasket",
+                      "Quantity":  3,
+                      "Amount":  550
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Bracket",
+                      "Quantity":  10,
+                      "Amount":  1012.5
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Fastener",
+                      "Quantity":  17,
+                      "Amount":  262.5
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Cable 2 m",
+                      "Quantity":  1,
+                      "Amount":  725
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Cable 5 m",
+                      "Quantity":  8,
+                      "Amount":  1187.5
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Adapter",
+                      "Quantity":  15,
+                      "Amount":  437.5
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Widget A",
+                      "Quantity":  22,
+                      "Amount":  900
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Widget B",
+                      "Quantity":  6,
+                      "Amount":  150
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Gasket",
+                      "Quantity":  13,
+                      "Amount":  612.5
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Bracket",
+                      "Quantity":  20,
+                      "Amount":  1075
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Fastener",
+                      "Quantity":  4,
+                      "Amount":  325
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Cable 2 m",
+                      "Quantity":  11,
+                      "Amount":  787.5
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Cable 5 m",
+                      "Quantity":  18,
+                      "Amount":  1250
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Adapter",
+                      "Quantity":  2,
+                      "Amount":  500
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Widget A",
+                      "Quantity":  9,
+                      "Amount":  962.5
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Widget B",
+                      "Quantity":  16,
+                      "Amount":  212.5
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Gasket",
+                      "Quantity":  23,
+                      "Amount":  675
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Bracket",
+                      "Quantity":  7,
+                      "Amount":  1137.5
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Fastener",
+                      "Quantity":  14,
+                      "Amount":  387.5
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Cable 2 m",
+                      "Quantity":  21,
+                      "Amount":  850
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Cable 5 m",
+                      "Quantity":  5,
+                      "Amount":  100
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Adapter",
+                      "Quantity":  12,
+                      "Amount":  562.5
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Widget A",
+                      "Quantity":  19,
+                      "Amount":  1025
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Widget B",
+                      "Quantity":  3,
+                      "Amount":  275
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Gasket",
+                      "Quantity":  10,
+                      "Amount":  737.5
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Bracket",
+                      "Quantity":  17,
+                      "Amount":  1200
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Fastener",
+                      "Quantity":  1,
+                      "Amount":  450
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Cable 2 m",
+                      "Quantity":  8,
+                      "Amount":  912.5
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Cable 5 m",
+                      "Quantity":  15,
+                      "Amount":  162.5
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Adapter",
+                      "Quantity":  22,
+                      "Amount":  625
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Widget A",
+                      "Quantity":  6,
+                      "Amount":  1087.5
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Widget B",
+                      "Quantity":  13,
+                      "Amount":  337.5
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Gasket",
+                      "Quantity":  20,
+                      "Amount":  800
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Bracket",
+                      "Quantity":  4,
+                      "Amount":  1262.5
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Fastener",
+                      "Quantity":  11,
+                      "Amount":  512.5
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Cable 2 m",
+                      "Quantity":  18,
+                      "Amount":  975
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Cable 5 m",
+                      "Quantity":  2,
+                      "Amount":  225
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Adapter",
+                      "Quantity":  9,
+                      "Amount":  687.5
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Widget A",
+                      "Quantity":  16,
+                      "Amount":  1150
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Widget B",
+                      "Quantity":  23,
+                      "Amount":  400
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Gasket",
+                      "Quantity":  7,
+                      "Amount":  862.5
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Bracket",
+                      "Quantity":  14,
+                      "Amount":  112.5
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Fastener",
+                      "Quantity":  21,
+                      "Amount":  575
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Cable 2 m",
+                      "Quantity":  5,
+                      "Amount":  1037.5
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Cable 5 m",
+                      "Quantity":  12,
+                      "Amount":  287.5
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Adapter",
+                      "Quantity":  19,
+                      "Amount":  750
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Widget A",
+                      "Quantity":  3,
+                      "Amount":  1212.5
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Widget B",
+                      "Quantity":  10,
+                      "Amount":  462.5
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Gasket",
+                      "Quantity":  17,
+                      "Amount":  925
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Bracket",
+                      "Quantity":  1,
+                      "Amount":  175
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Fastener",
+                      "Quantity":  8,
+                      "Amount":  637.5
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Cable 2 m",
+                      "Quantity":  15,
+                      "Amount":  1100
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Cable 5 m",
+                      "Quantity":  22,
+                      "Amount":  350
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Adapter",
+                      "Quantity":  6,
+                      "Amount":  812.5
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Widget A",
+                      "Quantity":  13,
+                      "Amount":  62.5
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Widget B",
+                      "Quantity":  20,
+                      "Amount":  525
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Gasket",
+                      "Quantity":  4,
+                      "Amount":  987.5
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Bracket",
+                      "Quantity":  11,
+                      "Amount":  237.5
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Fastener",
+                      "Quantity":  18,
+                      "Amount":  700
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Cable 2 m",
+                      "Quantity":  2,
+                      "Amount":  1162.5
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Cable 5 m",
+                      "Quantity":  9,
+                      "Amount":  412.5
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Adapter",
+                      "Quantity":  16,
+                      "Amount":  875
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Widget A",
+                      "Quantity":  23,
+                      "Amount":  125
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Widget B",
+                      "Quantity":  7,
+                      "Amount":  587.5
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Gasket",
+                      "Quantity":  14,
+                      "Amount":  1050
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "E. Fong",
+                      "Item":  "Bracket",
+                      "Quantity":  21,
+                      "Amount":  300
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Fastener",
+                      "Quantity":  5,
+                      "Amount":  762.5
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Cable 2 m",
+                      "Quantity":  12,
+                      "Amount":  1225
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Cable 5 m",
+                      "Quantity":  19,
+                      "Amount":  475
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "G. Haas",
+                      "Item":  "Adapter",
+                      "Quantity":  3,
+                      "Amount":  937.5
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Widget A",
+                      "Quantity":  10,
+                      "Amount":  187.5
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Widget B",
+                      "Quantity":  17,
+                      "Amount":  650
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Gasket",
+                      "Quantity":  1,
+                      "Amount":  1112.5
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "A. Bell",
+                      "Item":  "Bracket",
+                      "Quantity":  8,
+                      "Amount":  362.5
+                  },
+                  {
+                      "Region":  "North",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Fastener",
+                      "Quantity":  15,
+                      "Amount":  825
+                  },
+                  {
+                      "Region":  "South",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Cable 2 m",
+                      "Quantity":  22,
+                      "Amount":  75
+                  },
+                  {
+                      "Region":  "East",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Cable 5 m",
+                      "Quantity":  6,
+                      "Amount":  537.5
+                  },
+                  {
+                      "Region":  "West",
+                      "Salesperson":  "C. Diaz",
+                      "Item":  "Adapter",
+                      "Quantity":  13,
+                      "Amount":  1000
+                  }
+              ]
+}

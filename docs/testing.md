@@ -94,11 +94,12 @@ The first three fixtures are defined in M0, before the schema is frozen:
 
 ### The headless harness (M0–M1)
 
-`source/RepotTests` is a B4J console project with two jobs:
+`tests/B4J` is a B4J console project (originally `source/RepotTests`)
+with two jobs:
 
 1. **Fixture lint.** It validates every fixture against the draft schema.
 2. **Engine unit tests.** It compiles the engine modules from
-   `source/Repot` through relative module references and runs the M1 and
+   `source/` through relative module references and runs the M1 and
    M2 tests: units, render-document construction/ordering/rounding,
    text measurement, loading, validation, canonical round-trip,
    expression reference scanning and dataset/parameter binding.
@@ -138,7 +139,7 @@ Run both with:
 .\tools\run-fixtures.ps1 -NoBuild   # reuse the existing jar
 ```
 
-To run from the B4J IDE, open `source\RepotTests\RepotTests.b4j` and
+To run from the B4J IDE, open `tests\B4J\tests.b4j` and
 press F5. With no command-line arguments the harness probes
 `..\..\fixtures`, `..\fixtures`, `fixtures`, then a deeper fallback, and
 uses the first folder that exists. The PASS/FAIL lines appear in the IDE
@@ -227,7 +228,50 @@ A golden change is a behaviour change and must be reviewed as such:
    rendered page in the pull request, even though the test itself is
    geometry-based.
 
-## 7. Export-specific checks
+## 7. Cross-platform (B4A) — verified M8
+
+The same engine modules compile and run on B4A. The suite lives in
+`tests/B4A` (previously `source/B4ATest`), with a per-platform test
+module copy (`tests/B4A/ReportEngineTests.bas`, compiled with a
+`B4A=true` header). Fixture assets are bundled under
+`tests/B4A/Files/fixtures/` and copied to internal storage at runtime,
+because asset folders cannot be listed or read directly.
+
+Capability matrix (2026-11-02, B4ABuilder v14.20, emulator-5554,
+API 36):
+
+| Capability | B4J | B4A |
+|------------|-----|-----|
+| Loading, validation, parameters, binding | pass | pass |
+| Layout + pagination (HTML/CSV/JSON/XML exports) | pass | pass |
+| DOCX / XLSX export | pass | pass |
+| PDF export, extracted text, goldens | pass | not applicable (`E-PDF-001` guard) |
+| Layout goldens (AWT baselines) | pass | not applicable |
+| Fixture-level validation | pass | not applicable |
+
+This accounts for the check-count delta between platforms:
+**B4J 382 checks, B4A 305 checks, 0 errors on both.** PDF remains
+B4J-only for v1.x; on B4A the HTML print path is the documented
+rendering route, and `ReportPdfExporter.Export` returns `False` with
+diagnostic `E-PDF-001`.
+
+Emulator workflow:
+
+```text
+build:   cd tests\B4A; "C:\Program Files\B4X\B4A\B4ABuilder.exe" -task=Build -obfuscate=False
+install: C:\android\sdk\platform-tools\adb.exe install -r Objects\tests.apk
+restart: adb shell am force-stop b4a.example; adb logcat -c
+run:     adb shell am start -n b4a.example/.main
+read:    adb logcat -d   →  PASS engine (305 checks), errors=0
+```
+
+The suite's pass/fail status is written to `fixture-check.txt` in
+`File.DirInternal` and echoed to the log; the B4A test app also renders
+the summary in a `TextView`. There is no skip helper: tests that cannot
+apply to B4A log a skip line and return, which is why the check count
+is lower while `errors=0`.
+
+## 8. Export-specific checks
 
 - **PDF:** page count, page size, extracted text order, embedded font
   count, file opens in two independent readers. Optionally `qpdf
@@ -244,7 +288,7 @@ A golden change is a behaviour change and must be reviewed as such:
 - **XLSX:** open with an independent parser, assert cell types, number
   formats, and sheet names.
 
-## 8. What is not tested automatically
+## 9. What is not tested automatically
 
 - Print dialogs and printer drivers.
 - WebView rendering on real Android devices.
@@ -253,7 +297,7 @@ A golden change is a behaviour change and must be reviewed as such:
 
 These are recorded as manual checks in the release notes.
 
-## 9. Acceptance rule
+## 10. Acceptance rule
 
 A milestone is complete when its fixtures pass, the build is green from
 the command line, and the example in `demo/` runs. Not before.

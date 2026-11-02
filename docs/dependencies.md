@@ -1,6 +1,6 @@
 # Dependency Audit
 
-Last reviewed: 2026-10-31.
+Last reviewed: 2026-11-02.
 
 Policy: no dependency enters the repository until it has an entry here.
 Every entry records version, licence, platform support, size impact,
@@ -16,9 +16,10 @@ write code that assumes it.
 | Item | Version | Notes | Status |
 |------|---------|-------|--------|
 | B4J | 10.7 (`B4J.exe` 10.7.0.0) | Development target | verified locally |
-| B4A | author's installed IDE version (record exact build) | v1.1 target | required later |
+| B4A | builder reports `B4ABuilder v14.20` | Android target, verified with SDK build-tools for android-36 | verified locally |
 | `B4JBuilder.exe` | reports `B4JBuilder v10.70` | Headless build: `-Task=Build`, `-Task=BuildLibrary`, `-BaseFolder`, `-Project`, `-Configuration`, `-Output`, `-NoClean`, `-Obfuscate`; exit code 0 on success | verified locally |
-| `B4ABuilder.exe` | ships with B4A | Android build, needs SDK | verify |
+| `B4ABuilder.exe` | reports `B4ABuilder v14.20` | Headless build: run with cwd = the project folder, `-task=Build -obfuscate=False`; `-Project` mis-parses as an error and must not be passed; builder auto-finds the single `.b4a` in BaseFolder; exit 0 on success | verified locally |
+| Android SDK + emulator | android-36, emulator-5554 | Only needed to run the B4A suite; `adb` at `C:\android\sdk\platform-tools\adb.exe` on this machine | verified locally |
 
 `-Task=BuildLibrary` requires `#LibraryName` in the project file. It writes
 the library jar and XML metadata to the B4J Additional folder
@@ -37,8 +38,9 @@ enough because B4JBuilder is Windows-only.
 | `Regex` | part of B4X | B4A/B4J | use for expressions and identifiers |
 | `DateTime` / ticks | part of B4X | B4A/B4J | use for date formatting |
 | `StringUtils` | part of B4X | B4A/B4J | evaluate; avoid if trivial to implement |
-| `JavaObject` (B4J library) | part of B4J | B4J | use only in `ReportB4JMeasure`; required by consumers because it is not merged into the engine library jar |
+| `JavaObject` (B4X library) | part of B4X | B4A/B4J | use in `ReportB4JMeasure` (AWT on B4J, `android.graphics.Paint` on B4A) and the DOCX/XLSX zip helpers; required by consumers because it is not merged into the engine library jar |
 | `java.desktop` / AWT fonts | JDK 19 | B4J, headless | use public `java.awt.font` APIs for measurement; no `sun.*` access, no `Graphics2D`, no UI thread |
+| `android.graphics.Paint` / `Typeface` / `BitmapFactory` | platform API, no extra library | B4A | used by the measurement adapter and image decoding; no new dependency, platform tier versioned with the SDK |
 | `XmlBuilder` | part of B4X | B4J / B4A | verify API and availability per platform |
 | `Archiver` / zip support | part of B4X | verify per platform | needed for DOCX/XLSX/ODF; verify |
 
@@ -54,11 +56,18 @@ AWT font sizes are integers, so the adapter measures at 1000 pt and
 scales advances and vertical metrics linearly to the requested size.
 This keeps fractional point sizes without rounding the template.
 
+The shared `ReportB4JMeasure` module also carries the B4A branch
+(verified 2026-11-02 on emulator-5554, API 36): `android.graphics.Paint`
+measured at a base size of 1000 and scaled linearly, `Typeface` family
+resolution with `sans-serif` substitution for unknown families, and
+`Paint.FontMetrics` with ascent negated (Android reports ascent as
+negative). See [b4x-notes.md](b4x-notes.md) for the verified B4A facts.
+
 ## 3. PDF
 
 | Candidate | Licence | Android | Size | Decision |
 |-----------|---------|---------|------|----------|
-| Apache PDFBox 3.0.8 | Apache-2.0 | no | moderate (fontbox, commons-logging) | **primary for B4J** |
+| Apache PDFBox 3.0.8 | Apache-2.0 | no | moderate (fontbox, commons-logging) | **primary for B4J**; all PDFBox code is `#If B4J`-gated so the B4A build never touches it |
 | Apache PDFBox 2.0.x | Apache-2.0 | no | moderate | fallback if 3.x misbehaves |
 | OpenPDF | LGPL-2.1 / MPL-2.0 dual | no | moderate | acceptable alternative; LGPL caveat applies |
 | iText 5 / 7 | AGPL-3.0 or commercial | no | small | **rejected**, licence incompatible |

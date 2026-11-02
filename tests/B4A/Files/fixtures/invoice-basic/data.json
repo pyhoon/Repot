@@ -1,0 +1,32 @@
+{
+  "Customer": {
+    "Name": "Northwind Traders",
+    "Address": "12 Harbour Road, Bristol BS1 4RN, United Kingdom"
+  },
+  "Items": [
+    {
+      "Description": "Annual support, standard tier",
+      "Quantity": 1,
+      "UnitPrice": 1200,
+      "Amount": 1200
+    },
+    {
+      "Description": "On-site installation and configuration",
+      "Quantity": 2,
+      "UnitPrice": 175,
+      "Amount": 350
+    },
+    {
+      "Description": "Extended warranty covering parts, labour and next-business-day replacement for the licensed hardware, including remote diagnostics",
+      "Quantity": 1,
+      "UnitPrice": 800,
+      "Amount": 800
+    },
+    {
+      "Description": "Consumables pack",
+      "Quantity": 1,
+      "UnitPrice": 99.95,
+      "Amount": 99.95
+    }
+  ]
+}

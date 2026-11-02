@@ -29,6 +29,12 @@ End Sub
 Public Sub Export (Doc As ReportRenderDocument, OutputPath As String) As Boolean
 	mDoc = Doc
 	mOutPath = OutputPath
+	#If B4A
+	'PDFBox is a desktop (JVM) library and is not available on Android.
+	'Record a clear diagnostic instead of a reflection crash.
+	Diagnostics.AddError("E-PDF-001", "PDF export is not available on this platform; the PDFBox renderer runs on B4J only", "")
+	Return False
+	#End If
 	Dim jo As JavaObject
 	jo.InitializeStatic("b4j.example.reportpdfexporter")
 
@@ -89,17 +95,24 @@ Private Sub DrawOp (jo As JavaObject, cs As Object, op As ReportDrawOp)
 End Sub
 
 Public Sub PageCount (Path As String) As Int
+	#If B4A
+	Return 0
+	#End If
 	Dim jo As JavaObject
 	jo.InitializeStatic("b4j.example.reportpdfexporter")
 	Return jo.RunMethod("pageCount", Array(Path))
 End Sub
 
 Public Sub ExtractText (Path As String) As String
+	#If B4A
+	Return ""
+	#End If
 	Dim jo As JavaObject
 	jo.InitializeStatic("b4j.example.reportpdfexporter")
 	Return jo.RunMethod("extractText", Array(Path))
 End Sub
 
+#If B4J
 #If Java
 import org.apache.pdfbox.pdmodel.*;
 import org.apache.pdfbox.pdmodel.common.*;
@@ -224,4 +237,5 @@ public static void drawImage(Object cs, Object doc, String resourcePath, double 
     PDPageContentStream s = (PDPageContentStream)cs;
     s.drawImage(img, (float)x, (float)y, (float)w, (float)h);
 }
+#End If
 #End If

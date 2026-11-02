@@ -660,28 +660,23 @@ Private Sub TestPdfExport
 	Dim doc As ReportRenderDocument = pag.Render
 
 	#If B4A
-		Dim outPath As String = File.Combine(File.DirApp, "test-invoice.pdf")
+	Dim outDir As String = File.DirInternal
 	#Else
-		Dim outPath As String = File.Combine(File.DirAppData, "test-invoice.pdf")
+	Dim outDir As String = File.DirApp
 	#End If
+	Dim outPath As String = File.Combine(outDir, "test-invoice.pdf")
 	Dim pdf As ReportPdfExporter
 	pdf.Initialize(diags)
 	pdf.SourceDir = def.SourceDir
 	Dim ok As Boolean = pdf.Export(doc, outPath)
-	#If B4A
-		Check(File.Exists(File.DirApp, "test-invoice.pdf"), "invoice pdf file exists")
-		If File.Exists(File.DirApp, "test-invoice.pdf") Then
-			Check(pdf.PageCount(outPath) = 1, "invoice pdf has one page")
-			Dim txt As String = pdf.ExtractText(outPath)
-			Check(txt.IndexOf("INVOICE") >= 0, "invoice pdf contains INVOICE")
-			Check(txt.IndexOf("Page 1 of 1") >= 0, "invoice pdf contains page number")
-		End If
-	#Else
-		Check(File.Exists(File.DirAppData, "test-invoice.pdf"), "invoice pdf file exists")
-		If File.Exists(File.DirAppData, "test-invoice.pdf") Then
-			Check(pdf.PageCount(outPath) = 1, "invoice pdf has one page")
-		End If
-	#End If
+	Check(ok, "invoice pdf exports successfully")
+	Check(File.Exists(outDir, "test-invoice.pdf"), "invoice pdf file exists")
+	If File.Exists(outDir, "test-invoice.pdf") Then
+		Check(pdf.PageCount(outPath) = 1, "invoice pdf has one page")
+		Dim txt As String = pdf.ExtractText(outPath)
+		Check(txt.IndexOf("INVOICE") >= 0, "invoice pdf contains INVOICE")
+		Check(txt.IndexOf("Page 1 of 1") >= 0, "invoice pdf contains page number")
+	End If
 
 	' listing
 	Dim listDir As String = File.Combine(mFixtures, "listing-multipage")
@@ -716,23 +711,19 @@ Private Sub TestPdfExport
 	Dim ldoc As ReportRenderDocument = lpag.Render
 
 	#If B4A
-		Dim loutPath As String = File.Combine(File.DirApp, "test-listing.pdf")
+	Dim loutDir As String = File.DirInternal
 	#Else
-		Dim loutPath As String = File.Combine(File.DirAppData, "test-listing.pdf")
+	Dim loutDir As String = File.DirApp
 	#End If
+	Dim loutPath As String = File.Combine(loutDir, "test-listing.pdf")
 	Dim lpdf As ReportPdfExporter
 	lpdf.Initialize(ldiags)
 	lpdf.SourceDir = ldef.SourceDir
 	Dim lok As Boolean = lpdf.Export(ldoc, loutPath)
-	#If B4A
-		If File.Exists(File.DirApp, "test-listing.pdf") Then
-			Check(lpdf.PageCount(loutPath) = ldoc.PageCount, "listing pdf page count matches layout")
-		End If
-	#Else
-		If File.Exists(File.DirAppData, "test-listing.pdf") Then
-			Check(lpdf.PageCount(loutPath) = ldoc.PageCount, "listing pdf page count matches layout")
-		End If
-	#End If
+	Check(lok, "listing pdf exports successfully")
+	If File.Exists(loutDir, "test-listing.pdf") Then
+		Check(lpdf.PageCount(loutPath) = ldoc.PageCount, "listing pdf page count matches layout")
+	End If
 End Sub
 '--------------------------------------------------------------- html export
 
@@ -769,17 +760,22 @@ Private Sub TestHtmlExport
 	Dim doc As ReportRenderDocument = pag.Render
 
 	#If B4A
-	Dim outPath As String = File.Combine(File.DirInternal, "test-invoice.html")
-	Check(File.Exists(File.DirInternal, "test-invoice.html"), "invoice html file exists")
-	Dim content As String = File.ReadString(File.DirInternal, "test-invoice.html")
+	Dim outDir As String = File.DirInternal
 	#Else
-	Dim outPath As String = File.Combine(File.DirAppData, "test-invoice.html")
-	Check(File.Exists(File.DirAppData, "test-invoice.html"), "invoice html file exists")
-	Dim content As String = File.ReadString(File.DirAppData, "test-invoice.html")
+	Dim outDir As String = File.DirApp
 	#End If
-	Check(content.IndexOf("INVOICE") >= 0, "invoice html contains INVOICE")
-	Check(content.IndexOf("page-break-after") >= 0, "invoice html has page break css")
-	Check(content.IndexOf("<!DOCTYPE html>") >= 0, "invoice html is a document")
+	Dim outPath As String = File.Combine(outDir, "test-invoice.html")
+	Dim html As ReportHtmlExporter
+	html.Initialize(diags)
+	Dim ok As Boolean = html.Export(doc, outPath)
+	Check(ok, "invoice html exports successfully")
+	Check(File.Exists(outDir, "test-invoice.html"), "invoice html file exists")
+	If File.Exists(outDir, "test-invoice.html") Then
+		Dim content As String = File.ReadString(outDir, "test-invoice.html")
+		Check(content.IndexOf("INVOICE") >= 0, "invoice html contains INVOICE")
+		Check(content.IndexOf("page-break-after") >= 0, "invoice html has page break css")
+		Check(content.IndexOf("<!DOCTYPE html>") >= 0, "invoice html is a document")
+	End If
 End Sub
 '--------------------------------------------------------------- data export
 
@@ -814,6 +810,7 @@ Private Sub TestDataExport
 
 	#If B4A
 	Dim csvPath As String = File.Combine(File.DirInternal, "test-items.csv")
+	Check(exp.ExportCsv("Items", csvPath), "csv export succeeds")
 	If File.Exists(File.DirInternal, "test-items.csv") Then
 		Dim csv As String = File.ReadString(File.DirInternal, "test-items.csv")
 		Check(csv.IndexOf("Description") >= 0, "csv has header")
@@ -835,6 +832,7 @@ Private Sub TestDataExport
 	End If
 	#Else
 	Dim csvPath As String = File.Combine(File.DirApp, "test-items.csv")
+	Check(exp.ExportCsv("Items", csvPath), "csv export succeeds")
 	If File.Exists(File.DirApp, "test-items.csv") Then
 		Dim csv As String = File.ReadString(File.DirApp, "test-items.csv")
 		Check(csv.IndexOf("Description") >= 0, "csv has header")

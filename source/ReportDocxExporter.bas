@@ -108,8 +108,7 @@ Public Sub Export (DataSetName As String, OutputPath As String) As Boolean
 		File.WriteString(File.Combine(tmp, "word"), "document.xml", docx.ToString)
 
 		' zip
-		Dim jo As JavaObject
-		jo.InitializeStatic("b4j.example.reportdocxexporter")
+		Dim jo As JavaObject = Me
 		jo.RunMethod("zipFolder", Array(tmp, OutputPath))
 
 		DeleteFolder(tmp)
@@ -150,18 +149,33 @@ import java.nio.file.*;
 import java.util.zip.*;
 
 public static void zipFolder(String srcDir, String zipPath) throws Exception {
-    Path src = Paths.get(srcDir);
+    // Lambda-free: Android's dexer cannot desugar invokedynamic from B4A-generated code.
     ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipPath));
-    Files.walk(src).filter(p -> !Files.isDirectory(p)).forEach(p -> {
-        try {
-            String rel = src.relativize(p).toString().replace("\\", "/");
-            zos.putNextEntry(new ZipEntry(rel));
-            Files.copy(p, zos);
+    try {
+        java.util.ArrayList<File> files = new java.util.ArrayList<File>();
+        java.util.ArrayList<String> rels = new java.util.ArrayList<String>();
+        collect(new File(srcDir), "", files, rels);
+        for (int i = 0; i < files.size(); i++) {
+            zos.putNextEntry(new ZipEntry(rels.get(i)));
+            FileInputStream fis = new FileInputStream(files.get(i));
+            byte[] buf = new byte[8192];
+            int n;
+            while ((n = fis.read(buf)) > 0) zos.write(buf, 0, n);
+            fis.close();
             zos.closeEntry();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
-    });
-    zos.close();
+    } finally {
+        zos.close();
+    }
+}
+
+private static void collect(File dir, String prefix, java.util.ArrayList<File> files, java.util.ArrayList<String> rels) {
+    File[] items = dir.listFiles();
+    if (items == null) return;
+    for (int i = 0; i < items.length; i++) {
+        String rel = prefix.length() == 0 ? items[i].getName() : prefix + "/" + items[i].getName();
+        if (items[i].isDirectory()) collect(items[i], rel, files, rels);
+        else { files.add(items[i]); rels.add(rel); }
+    }
 }
 #End If

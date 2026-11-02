@@ -20,6 +20,10 @@ project requirement.
 | Java used by B4J | 19, `C:\Java\jdk-19.0.2\bin` (from `b4xV5.ini`) |
 | B4J install | `C:\Program Files\B4X\B4J` |
 | Additional libraries | `C:\B4X\Additional` |
+| B4ABuilder | reports `B4ABuilder v14.20` |
+| B4A install | `C:\Program Files\B4X\B4A` |
+| Android SDK | android-36 (verified on emulator-5554) |
+| adb | `C:\android\sdk\platform-tools\adb.exe` |
 
 ## Building without the IDE
 
@@ -60,7 +64,87 @@ cd <project folder>
 - `-Output` did not change where the library files were written in this
   verification.
 
-## Modules and relative references
+## Building for B4A without the IDE
+
+Verified in M8 against the engine library project and the B4A test suite:
+
+```text
+cd <project folder>
+"C:\Program Files\B4X\B4A\B4ABuilder.exe" -task=Build -obfuscate=False
+```
+
+- Exit code `0` on success, `1` on failure.
+- The APK is written to `Objects\<ProjectName>.apk`.
+- The builder auto-finds the single `.b4a` file in the current folder;
+  there is no need to name the project file.
+- **Do not pass `-Project`.** B4JBuilder accepts it; on B4ABuilder it
+  mis-parses and the run fails before the build starts. Passing extra
+  switches such as `-xmaxerrs` is also rejected.
+- When run from PowerShell, error output appears twice (PowerShell
+  echoes the error stream); filtering with `Select-String` for
+  `Error description` / `Word:` finds the real diagnostics.
+- Failures include the module and line number, as on B4J.
+
+## B4A facts verified in M8
+
+- **`|relative|` paths resolve against the project folder** (BaseFolder),
+  not against the folder of the file that contains the reference. A
+  module reference `|relative|..\ReportEngineTests` inside a file in
+  `tests\B4A\` resolves to `tests\ReportEngineTests`, one level up from
+  the project folder.
+- **`#If B4A` / `#If B4J` are evaluated by the builder target, per
+  module.** The platform flag in a `.bas` file header (`B4J=true` etc.)
+  does not suppress target conditionals inside that file's code; only
+  the file's own inclusion in a project decides whether its header flag
+  applies. Write conditionals in the module body and expect both builder
+  targets to process each included module.
+- **`#If Java` lambdas break the Android dexer.** Java code containing
+  lambda expressions compiles but fails at dexing ("cannot desugar").
+  All inline Java helpers must be lambda-free — use explicit
+  anonymous inner classes, or avoid the construct.
+- **`File` member gaps on B4A** (exist on B4J): `GetFileParent`,
+  `GetName`, `DirApp`, `DirAppData`. Do not use them in shared modules;
+  on B4A use `File.DirInternal` for test/output files. If the full path
+  of a written file is needed, derive it by string splitting from the
+  output path, not from a `File` helper.
+- **`File.ListFiles` fails on an asset folder.** To read bundled fixture
+  assets, copy a known, hardcoded list of asset names to internal
+  storage (`File.Copy(AssetsDir, name, True, DirInternal, name)`) and
+  read from internal storage.
+- `File.Combine(Dir, Name)` returns the literal
+  `"AssetsDir/fixtures/name"` for an asset path — it is a display-style
+  string, not a usable absolute path.
+- **`JavaObject` and derived class names.** Wrapping a class whose
+  runtime package is rewritten by the B4A compiler (e.g.
+  `b4j.example.*`) with `JavaObject.InitializeStatic` or a literal class
+  name throws `ClassNotFoundException` on B4A. Wrap the calling module
+  itself with `jo.Initialize(Me)` and let the runtime resolve the own
+  class.
+- **JavaObject float argument matching.** When calling a Java method
+  that takes a `float`, pass a value held in a `Dim x As Float`
+  variable; a raw literal may arrive as a `Double` and fail the
+  reflection lookup.
+- **`android.graphics.Paint` measurement**: `Paint.setTextSize` needs
+  the explicit-float treatment above; measure at a base size of 1000 and
+  scale linearly (same trick as AWT integers, but here it avoids float
+  rounding); `Paint.FontMetrics` reports **ascent as a negative value**
+  — negate it to get a positive ascent.
+- **Typeface family resolution is silent on B4A.**
+  `Typeface.create(family, style)` falls back to the default family for
+  any unknown name; no warning is printed. The engine maps unknown
+  families to `sans-serif` and raises its own `W-MEA-001` warning. The
+  builtin family set includes `sans-serif`, `serif`, `monospace`,
+  `cursive`, `sans-serif-condensed` and legacy aliases `sansserif` /
+  `monospaced` (B4J uses `Dialog` as the substitution target).
+- **Log viewer truncates long lines.** `Log` output needed for diagnostics
+  is padded/prefix-limited in the logs; write detailed results to a file
+  (`File.WriteString(DirInternal, ...)`) and mirror a short summary to
+  the log.
+- Deployment loop (emulator-5554): build →
+  `<adb> install -r Tests.apk` → `am force-stop` → `logcat -c` →
+  `am start -n b4a.example/.main` → wait for the run → `logcat -d` and
+  filter for the PASSED/FAILED summary lines.
+
 
 - A module file is a `.bas` file next to the project file, listed as
   `ModuleN=Name`.
@@ -182,8 +266,9 @@ verified section:
 - Zip/`Archiver` support for the office-document writer.
 - XUI image loading and bitmap access from a headless B4J app.
 - PDFBox classes and the B4J wrapper jar layout.
-- Anything Android-specific: `WebView` printing, `PrintDocumentAdapter`,
-  `PdfDocument`, minimum API level.
+- Android WebView printing, `PrintDocumentAdapter`, and
+  `PdfDocument`: the B4A print path for HTML/PDF output (planned).
+- PDFBox on Android (`PdfBox-Android`): not planned for v1.x.
 - `ExitApplication` semantics in a console app.
 
 ## Language gotchas found in M1

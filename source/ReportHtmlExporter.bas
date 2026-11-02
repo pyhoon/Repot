@@ -28,16 +28,11 @@ Public Sub Export (Doc As ReportRenderDocument, OutputPath As String) As Boolean
 		Dim html As String = BuildHtml(Doc)
 		#If B4A
 		Dim fp As String = OutputPath
-		Dim i As Int = fp.LastIndexOf("/")
-		If i > -1 Then
-			fp = fp.SubString2(0, i)
-		Else
-			fp = ""
-		End If
 		Dim fn As String = OutputPath
-		i = fp.LastIndexOf("/")
+		Dim i As Int = OutputPath.LastIndexOf("/")
 		If i > -1 Then
-			fn = fn.SubString(i + 1)
+			fp = OutputPath.SubString2(0, i)
+			fn = OutputPath.SubString(i + 1)
 		End If
 		File.WriteString(fp, fn, html)
 		#Else

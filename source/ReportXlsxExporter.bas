@@ -117,8 +117,7 @@ Public Sub Export (DataSetName As String, OutputPath As String) As Boolean
 		sh.Append("</worksheet>").Append(CRLF)
 		File.WriteString(File.Combine(tmp, "xl/worksheets"), "sheet1.xml", sh.ToString)
 
-		Dim jo As JavaObject
-		jo.InitializeStatic("b4j.example.reportdocxexporter")
+		Dim jo As JavaObject = Me
 		jo.RunMethod("zipFolder", Array(tmp, OutputPath))
 
 		DeleteFolder(tmp)
@@ -153,3 +152,39 @@ Private Sub XmlEscape (s As String) As String
 	out = out.Replace(">", "&gt;")
 	Return out
 End Sub
+
+#If Java
+import java.io.*;
+import java.util.zip.*;
+
+public static void zipFolder(String srcDir, String zipPath) throws Exception {
+    // Lambda-free: Android's dexer cannot desugar invokedynamic from B4A-generated code.
+    ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipPath));
+    try {
+        java.util.ArrayList<File> files = new java.util.ArrayList<File>();
+        java.util.ArrayList<String> rels = new java.util.ArrayList<String>();
+        collect(new File(srcDir), "", files, rels);
+        for (int i = 0; i < files.size(); i++) {
+            zos.putNextEntry(new ZipEntry(rels.get(i)));
+            FileInputStream fis = new FileInputStream(files.get(i));
+            byte[] buf = new byte[8192];
+            int n;
+            while ((n = fis.read(buf)) > 0) zos.write(buf, 0, n);
+            fis.close();
+            zos.closeEntry();
+        }
+    } finally {
+        zos.close();
+    }
+}
+
+private static void collect(File dir, String prefix, java.util.ArrayList<File> files, java.util.ArrayList<String> rels) {
+    File[] items = dir.listFiles();
+    if (items == null) return;
+    for (int i = 0; i < items.length; i++) {
+        String rel = prefix.length() == 0 ? items[i].getName() : prefix + "/" + items[i].getName();
+        if (items[i].isDirectory()) collect(items[i], rel, files, rels);
+        else { files.add(items[i]); rels.add(rel); }
+    }
+}
+#End If

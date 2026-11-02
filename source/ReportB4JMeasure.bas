@@ -55,12 +55,18 @@ Public Sub Initialize (Diags As ReportDiagnostics)
 	mTooLong = False
 
 	Try
+		#If B4A
+		Dim p As JavaObject
+		p.InitializeNewInstance("android.graphics.Paint", Null)
+		p.RunMethod("setAntiAlias", Array(True))
+		#Else
 		Dim empty As JavaObject
 		empty.InitializeNewInstance("java.util.HashMap", Null)
 		mHintSource.InitializeNewInstance("java.awt.RenderingHints", Array(empty))
 		Dim aaOn As Object = mHintSource.GetField("VALUE_TEXT_ANTIALIAS_ON")
 		Dim fmOn As Object = mHintSource.GetField("VALUE_FRACTIONALMETRICS_ON")
 		mFrc.InitializeNewInstance("java.awt.font.FontRenderContext", Array(Null, aaOn, fmOn))
+		#End If
 		IsAvailable = True
 	Catch
 		Log(LastException.Message)
@@ -162,7 +168,11 @@ Private Sub ResolveList (Families As List, Bold As Boolean, Italic As Boolean, S
 
 	Dim substituted As Boolean = False
 	If chosen.Length = 0 Then
+		#If B4A
+		chosen = "sans-serif"
+		#Else
 		chosen = "Dialog"
+		#End If
 		substituted = (rf.RequestedFamily.Length > 0)
 	Else If rf.RequestedFamily.Length > 0 Then
 		substituted = (chosen.ToLowerCase <> rf.RequestedFamily.ToLowerCase)
@@ -209,12 +219,26 @@ Private Sub FlagKey (Bold As Boolean, Italic As Boolean) As String
 End Sub
 
 Private Sub IsFamilyAvailable (Family As String, Bold As Boolean, Italic As Boolean) As Boolean
+	#If B4A
+	'Android's typeface registry is a fixed set; Typeface.create silently
+	'falls back to the default for anything else, matching the desktop
+	'behaviour of recording a substitution.
+	Dim name As String = Family.Trim
+	If name.Length = 0 Then Return False
+	Select Case name.ToLowerCase
+		Case "sans-serif", "sansserif", "serif", "monospace", "monospaced", "cursive", "sans-serif-condensed", "casual", "fancy", "dialog", "dialoginput"
+			Return True
+		Case Else
+			Return False
+	End Select
+	#Else
 	Dim name As String = Family.Trim
 	If name.Length = 0 Then Return False
 	If IsLogicalFamily(name) Then Return True
 	Dim handle As JavaObject = BaseFont(name, Bold, Italic)
 	Dim actual As String = BaseFamily(handle, name)
 	Return actual.ToLowerCase = name.ToLowerCase
+	#End If
 End Sub
 
 Private Sub IsLogicalFamily (Name As String) As Boolean
@@ -232,13 +256,42 @@ Private Sub BaseFont (Family As String, Bold As Boolean, Italic As Boolean) As J
 	Dim style As Int = 0
 	If Bold Then style = style + 1
 	If Italic Then style = style + 2
+	#If B4A
+	Dim f As JavaObject
+	f.InitializeNewInstance("android.graphics.Paint", Null)
+	f.RunMethod("setAntiAlias", Array(True))
+	Dim bs As Float = mBaseSize
+	f.RunMethod("setTextSize", Array(bs))
+	Dim tf As JavaObject
+	tf.InitializeStatic("android.graphics.Typeface")
+	Dim tface As JavaObject = tf.RunMethod("create", Array(AndroidFamily(Family), style))
+	f.RunMethod("setTypeface", Array(tface))
+	#Else
 	Dim f As JavaObject
 	f.InitializeNewInstance("java.awt.Font", Array(Family, style, mBaseSize))
+	#End If
 	mBaseFonts.Put(key, f)
 	Return f
 End Sub
 
+'Maps template family names to Android typeface families.
+Private Sub AndroidFamily (Family As String) As String
+	Select Case Family.ToLowerCase
+		Case "sansserif", "dialog", "sans-serif"
+			Return "sans-serif"
+		Case "monospaced", "dialoginput", "monospace"
+			Return "monospace"
+		Case "serif"
+			Return "serif"
+		Case Else
+			Return "sans-serif"
+	End Select
+End Sub
+
 Private Sub BaseFamily (Handle As JavaObject, Fallback As String) As String
+	#If B4A
+	Return Fallback
+	#Else
 	Try
 		Dim fam As String = Handle.RunMethod("getFamily", Null)
 		If fam.Length = 0 Then Return Fallback
@@ -247,20 +300,32 @@ Private Sub BaseFamily (Handle As JavaObject, Fallback As String) As String
 		Log(LastException.Message)
 		Return Fallback
 	End Try
+	#End If
 End Sub
 
 Private Sub ReadMetrics (F As ReportFont)
 	Try
 		Dim base As JavaObject = F.Handle
+		Dim scale As Double = F.Size / mBaseSize
+		#If B4A
+		Dim fm As JavaObject = base.RunMethod("getFontMetrics", Null)
+		Dim a As Double = fm.GetField("ascent")
+		Dim d As Double = fm.GetField("descent")
+		Dim g As Double = fm.GetField("leading")
+		'Android ascent is stored negative; AWT ascent is positive
+		F.Ascent = -a * scale
+		F.Descent = d * scale
+		F.LineGap = g * scale
+		#Else
 		Dim tl As JavaObject
 		tl.InitializeNewInstance("java.awt.font.TextLayout", Array("Mg", base, mFrc))
-		Dim scale As Double = F.Size / mBaseSize
 		Dim a As Double = tl.RunMethod("getAscent", Null)
 		Dim d As Double = tl.RunMethod("getDescent", Null)
 		Dim g As Double = tl.RunMethod("getLeading", Null)
 		F.Ascent = a * scale
 		F.Descent = d * scale
 		F.LineGap = g * scale
+		#End If
 	Catch
 		Log(LastException.Message)
 		F.Ascent = 0
@@ -289,12 +354,19 @@ Private Sub MeasureWithFont (Text As String, F As ReportFont) As Double
 
 	Try
 		Dim base As JavaObject = F.Handle
+		#If B4A
+		Dim raw As Double = base.RunMethod("measureText", Array(Text))
+		Dim w As Double = raw * F.Size / mBaseSize
+		mWidths.Put(key, w)
+		Return w
+		#Else
 		Dim tl As JavaObject
 		tl.InitializeNewInstance("java.awt.font.TextLayout", Array(Text, base, mFrc))
 		Dim raw As Double = tl.RunMethod("getAdvance", Null)
 		Dim w As Double = raw * F.Size / mBaseSize
 		mWidths.Put(key, w)
 		Return w
+		#End If
 	Catch
 		Log(LastException.Message)
 		Dim shortText As String = Text
@@ -389,11 +461,17 @@ Public Sub LoadImage (Path As String, MaxPixels As Long) As ReportImage
 		Return img
 	End If
 	Try
+		#If B4A
+		Dim bf As JavaObject
+		bf.InitializeStatic("android.graphics.BitmapFactory")
+		Dim bi As JavaObject = bf.RunMethod("decodeFile", Array(Path))
+		#Else
 		Dim f As JavaObject
 		f.InitializeNewInstance("java.io.File", Array(Path))
 		Dim iio As JavaObject
 		iio.InitializeStatic("javax.imageio.ImageIO")
 		Dim bi As JavaObject = iio.RunMethod("read", Array(f))
+		#End If
 		If bi = Null Then
 			Diagnostics.AddError("E-IO-001", "cannot read image '" & Path & "'", "")
 			Return img

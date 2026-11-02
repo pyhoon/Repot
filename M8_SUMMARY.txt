@@ -1,6 +1,6 @@
 M8 Porting Summary - FINAL
 
-M8 Status: ACTIVE - Foundation Complete
+M8 Status: RUNTIME VERIFIED - engine suite passes on both platforms
 
 M8 Kickoff:
   - Committed: 3a1215c - M8 kickoff: B4A adapter, HTML print path, cross-platform comparison next

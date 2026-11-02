@@ -1,7 +1,7 @@
 # M8: B4A Adapter, HTML Print Path, Cross-Platform Comparison
 
 ## Milestone: M8 (2–3 weeks)
-**Current stage:** M8 B4A adapter, HTML print path, cross-platform comparison next
+**Current stage:** M8 RUNTIME VERIFIED — engine suite passes on both platforms. M9 examples, docs, packaging, CI hardening, release next.
 
 ## Task 1: B4A Module Mapping — COMPLETE
 
@@ -15,10 +15,10 @@
 |---|---|---|---|---|---|
 | 1 | ReportExpressionEvaluator.bas | 4310 | None (pure B4X grammar) | **1 — High** | ✅ Mapped — pure B4X, no Java deps |
 | 2 | ReportEvalContext.bas | 639 | #1 (expressions use this context) | **1 — High** | ✅ Mapped — pure structure |
-| 3 | ReportB4JMeasure.bas | 14336 | Text measurement (AWT) | **2 — Medium** | ⬛ Not started — needs Android graphics equivalent |
-| 4 | ReportBandLayout.bas | 6902 | #2 (measurement), #4 (pagination) | **2 — Medium** | ⬛ Not started |
-| 5 | ReportPaginator.bas | 28170 | #3, #5 (band layout), #6 (render doc) | **3 — Lower** | ⬛ Not started |
-| 6 | ReportTemplateLoader.bas | 26417 | #7 (schema validation) | **3 — Lower** | ⬛ Not started |
+| 3 | ReportB4JMeasure.bas | 14336 | Text measurement (AWT) | **2 — Medium** | ✅ Done — shared module, `#If B4A` branch uses `android.graphics.Paint` (verified on emulator) |
+| 4 | ReportBandLayout.bas | 6902 | #2 (measurement), #4 (pagination) | **2 — Medium** | ✅ Done — pure B4X, verified on both platforms |
+| 5 | ReportPaginator.bas | 28170 | #3, #5 (band layout), #6 (render doc) | **3 — Lower** | ✅ Done — pure B4X, verified on both platforms |
+| 6 | ReportTemplateLoader.bas | 26417 | #7 (schema validation) | **3 — Lower** | ✅ Done — pure B4X, verified on both platforms |
 | 6 | ReportHtmlExporter.bas | 4306 | Render-document output | **3 — Lower** | ✅ Already pure B4X |
 | 8 | ReportRenderDocument.bas | 1242 | Render doc types (unchanged) | **4 — Minimal** | ✅ Mapped — pure type definitions |
 
@@ -39,25 +39,25 @@
 | B4J build | B4JBuilder.exe -Task=Build | Exit 0 ✅ (verified) |
 | B4J BuildLibrary | B4JBuilder.exe -Task=BuildLibrary | Exit 0 ✅ (verified) |
 | Fixture checks | run-fixtures.ps1 | 382 checks, 0 errors ✅ (verified) |
-| B4A build | (To be established when B4A env available) | Exit 0 (Target) |
-| B4A fixture checks | (To be established when B4A env available) | ≥58 checks pass (Target) |
+| B4A build | B4ABuilder.exe -task=Build -obfuscate=False (cwd = project folder) | Exit 0 ✅ (verified: library and suite) |
+| B4A fixture checks | emulator run via adb | 305 checks, 0 errors ✅ (verified on emulator-5554) |
 
 ### Task 1 Deliverables — STATUS:
 
 - [x] Module map document listing all .bas files with port priority and B4A considerations ✅
-- [ ] B4A project setup — ensure B4A development environment is accessible
-- [ ] Dependency map — identify which modules require Java bridge vs. pure B4X port
-- [ ] Baseline verification — confirm B4J builds still exit 0 after any changes
-- [ ] Task 1 sign-off — proceed to Task 2 (core engine port)
+- [x] B4A project setup — B4A development environment verified (builder v14.20, SDK android-36, emulator) ✅
+- [x] Dependency map — measurement is the only Java-bridge module; all other core modules are pure B4X ✅
+- [x] Baseline verification — B4J builds still exit 0, 382 fixture checks unchanged ✅
+- [x] Task 1 sign-off — proceeded to Task 2 (core engine port), which is also complete ✅
 
 ### Success Criteria for M8 Task 1:
 
 | Criterion | Requirement | Status |
 |---|---|---|
 | Module map complete | All core .bas files identified and prioritized | ✅ Complete |
-| B4A environment verified | B4A builder accessible; basic "Hello World" style project compiles | ⬜ Not started (B4A not installed on this system) |
+| B4A environment verified | B4A builder accessible; library and test projects compile and run | ✅ Complete (runtime verified on emulator-5554) |
 | No regressions | Existing B4J builds and 382 fixture checks still pass | ✅ Verified (382/382 checks pass) |
-| Go/No-Go decision | Green light to proceed to Task 2 (core engine port) | ⬜ Pending B4A env setup |
+| Go/No-Go decision | Green light to proceed to Task 2 (core engine port) | ✅ Task 2 complete — engine runs on B4A |
 
 ### Entry Criteria (from PLAN.md Phase Gates):
 
@@ -67,7 +67,7 @@
 | Gate B | One-page report renders correctly to PDF and HTML | ✅ Complete (M4) |
 | Gate C | Multi-page pagination passes fixture suite | ✅ Complete (M6) |
 | Gate D | Template produces useful HTML, CSV, JSON, XML | ✅ Complete (M5) |
-| Gate E | Same template works through B4J and B4A paths | ⬜ M8 target |
+| Gate E | Same template works through B4J and B4A paths | ✅ Complete (M8: 382 B4J / 305 B4A checks, 0 errors) |
 | Gate F | API and schema stable enough for 1.0 | ✅ Complete |
 
 ### Success Criteria:
@@ -75,9 +75,9 @@
 | Criterion | Requirement | Status |
 |---|---|---|
 | Module map complete | All core .bas files identified and prioritized | ✅ Complete |
-| B4A environment verified | B4A builder accessible; basic "Hello World" style project compiles | ⬜ Not started |
+| B4A environment verified | B4A builder accessible; library and test projects compile and run | ✅ Complete |
 | No regressions | Existing B4J builds and 382 fixture checks still pass | ✅ Verified |
-| Go/No-Go decision | Proceed to Task 2 with confidence | ⬜ Pending B4A env |
+| Go/No-Go decision | Proceed to Task 2 with confidence | ✅ Taken — Task 2 complete |
 
 ### Notes
 
@@ -107,4 +107,7 @@ When B4A development environment is available, begin porting core modules in pri
 | Go/No-Go decision | Proceed to Task 2 with confidence |
 
 ---
-*M8 Task 1 Complete. Ready to begin Task 2 when B4A environment is available.*
+*M8 Task 1 Complete. Task 2 (core engine port) also complete: the full engine suite passes on B4A.
+Final status: fixtures=3 checks=382 errors=0 (B4J, via tools\run-fixtures.ps1);
+PASS engine (305 checks), errors=0 (B4A, emulator-5554). PDF export, layout
+goldens and fixture-level validation remain B4J-only by design.*
