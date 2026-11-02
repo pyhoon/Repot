@@ -10,9 +10,15 @@ NumberOfLibraries=4
 NumberOfModules=0
 Version=10.7
 @EndOfDesignText@
+#Region Project Attributes
+	#CommandLineArgs: ..\..\..\fixtures\invoice-basic out print
+	#MergeLibraries: True
+#End Region
+
 ' Example: render the invoice-basic fixture through the Repot facade and
 ' export HTML + PDF.
 ' Run: java -jar Objects\example.jar [fixtureFolder] [outputFolder]
+
 Sub Process_Globals
 
 End Sub

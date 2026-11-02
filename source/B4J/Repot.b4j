@@ -1,4 +1,4 @@
-AppType=StandardJava
+﻿AppType=StandardJava
 Build1=Default,b4j.example
 Group=Default Group
 Library1=jcore
@@ -29,25 +29,25 @@ Module29=|relative|..\ReportPaginator
 Module3=|relative|..\ReportB4JOpen
 Module30=|relative|..\ReportParameterDef
 Module31=|relative|..\ReportPdfExporter
-Module32=|relative|..\ReportRenderAnchor
-Module33=|relative|..\ReportRenderDocument
-Module34=|relative|..\ReportRenderJsonWriter
-Module35=|relative|..\ReportRenderPage
-Module36=|relative|..\ReportSection
-Module37=|relative|..\ReportSortDef
-Module38=|relative|..\ReportStyle
-Module39=|relative|..\ReportTemplateLoader
+Module32=|relative|..\ReportPrint
+Module33=|relative|..\ReportRenderAnchor
+Module34=|relative|..\ReportRenderDocument
+Module35=|relative|..\ReportRenderJsonWriter
+Module36=|relative|..\ReportRenderPage
+Module37=|relative|..\ReportResult
+Module38=|relative|..\ReportSection
+Module39=|relative|..\ReportSortDef
 Module4=|relative|..\ReportBand
-Module40=|relative|..\ReportTextMetrics
-Module41=|relative|..\ReportTextStyle
-Module42=|relative|..\ReportToken
-Module43=|relative|..\ReportUnits
-Module44=|relative|..\ReportValidator
-Module45=|relative|..\ReportVersion
-Module46=|relative|..\ReportXlsxExporter
-Module47=|relative|..\Repot
-Module48=|relative|..\ReportResult
-Module49=|relative|..\ReportPrint
+Module40=|relative|..\ReportStyle
+Module41=|relative|..\ReportTemplateLoader
+Module42=|relative|..\ReportTextMetrics
+Module43=|relative|..\ReportTextStyle
+Module44=|relative|..\ReportToken
+Module45=|relative|..\ReportUnits
+Module46=|relative|..\ReportValidator
+Module47=|relative|..\ReportVersion
+Module48=|relative|..\ReportXlsxExporter
+Module49=|relative|..\Repot
 Module5=|relative|..\ReportBandLayout
 Module6=|relative|..\ReportDataBinder
 Module7=|relative|..\ReportDataExporter
@@ -59,9 +59,9 @@ NumberOfModules=49
 Version=10.7
 @EndOfDesignText@
 #Region Project Attributes
-	#AdditionalJar: C:\B4X\Additional\B4J\pdfbox-app-3.0.8.jar
 	#CommandLineArgs:
 	#MergeLibraries: True
+	#AdditionalJar: pdfbox-app-3.0.8.jar
 #End Region
 #Region Project Copyright
 #LibraryName: Repot
