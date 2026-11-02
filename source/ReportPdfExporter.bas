@@ -10,6 +10,9 @@ Version=10.7
 Sub Class_Globals
 	Public Diagnostics As ReportDiagnostics
 	Public SourceDir As String
+	'Optional TrueType fonts to embed (empty = Standard 14, Latin-1 only).
+	Public FontFile As String
+	Public FontFileBold As String
 	Private mDoc As ReportRenderDocument
 	Private mOutPath As String
 	Private mJavaDoc As Object
@@ -24,6 +27,8 @@ Public Sub Initialize (Diags As ReportDiagnostics)
 		Diagnostics = fresh
 	End If
 	SourceDir = ""
+	FontFile = ""
+	FontFileBold = ""
 End Sub
 
 Public Sub Export (Doc As ReportRenderDocument, OutputPath As String) As Boolean
@@ -38,6 +43,9 @@ Public Sub Export (Doc As ReportRenderDocument, OutputPath As String) As Boolean
 
 	Try
 		mJavaDoc = jo.RunMethod("createDocument", Null)
+		If FontFile <> "" Then
+			jo.RunMethod("loadFonts", Array(mJavaDoc, FontFile, FontFileBold))
+		End If
 		Dim i As Int
 		For i = 0 To Doc.PageCount - 1
 			Dim page As ReportRenderPage = Doc.PageAt(i + 1)
@@ -143,8 +151,25 @@ public static void save(Object doc, String path) throws Exception {
     ((PDDocument)doc).save(path);
 }
 
+private static org.apache.pdfbox.pdmodel.font.PDType0Font sRegular = null;
+private static org.apache.pdfbox.pdmodel.font.PDType0Font sBold = null;
+
+public static void loadFonts(Object doc, String regular, String bold) throws Exception {
+    PDDocument d = (PDDocument)doc;
+    sRegular = null;
+    sBold = null;
+    if (regular != null && regular.length() > 0) {
+        sRegular = org.apache.pdfbox.pdmodel.font.PDType0Font.load(d, new File(regular));
+    }
+    if (bold != null && bold.length() > 0) {
+        sBold = org.apache.pdfbox.pdmodel.font.PDType0Font.load(d, new File(bold));
+    }
+}
+
 public static void close(Object doc) throws Exception {
     ((PDDocument)doc).close();
+    sRegular = null;
+    sBold = null;
 }
 
 public static int pageCount(String path) throws Exception {
@@ -163,6 +188,9 @@ public static String extractText(String path) throws Exception {
 }
 
 public static Object resolveFont(String family, boolean bold, boolean italic) {
+    if (sRegular != null) {
+        return (bold && sBold != null) ? sBold : sRegular;
+    }
     String f = family == null ? "" : family.toLowerCase();
     boolean serif = f.contains("serif") || f.contains("times");
     boolean mono = f.contains("mono") || f.contains("courier");
@@ -186,12 +214,31 @@ public static Object resolveFont(String family, boolean bold, boolean italic) {
     return new org.apache.pdfbox.pdmodel.font.PDType1Font(name);
 }
 
+private static String safeText(PDFont font, String text) {
+    if (text == null) return "";
+    if (!(font instanceof org.apache.pdfbox.pdmodel.font.PDType0Font)) return text;
+    org.apache.pdfbox.pdmodel.font.PDType0Font f = (org.apache.pdfbox.pdmodel.font.PDType0Font)font;
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < text.length(); ) {
+        int cp = text.codePointAt(i);
+        i += Character.charCount(cp);
+        String ch = new String(Character.toChars(cp));
+        try {
+            f.encode(ch);
+            sb.append(ch);
+        } catch (Exception e) {
+            sb.append('?');
+        }
+    }
+    return sb.toString();
+}
+
 public static void drawText(Object cs, Object font, double size, double x, double y, String text, String colour) throws Exception {
     PDPageContentStream s = (PDPageContentStream)cs;
     s.beginText();
     s.setFont((PDFont)font, (float)size);
     s.newLineAtOffset((float)x, (float)y);
-    s.showText(text == null ? "" : text);
+    s.showText(safeText((PDFont)font, text));
     s.endText();
 }
 

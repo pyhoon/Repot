@@ -113,7 +113,7 @@ Verifier tools are never linked into the library.
 |-----------|---------|----------------|-----------|-------|
 | DejaVu Sans / Sans Mono | Bitstream Vera derivative, permissive | yes | verify | default candidate for fixtures and demos |
 | Liberation Sans | SIL OFL 1.1 | yes | verify | metric-compatible with Arial |
-| Noto Sans | SIL OFL 1.1 | yes | verify | wide coverage, large files |
+| Noto Sans | SIL OFL 1.1 | yes | yes (TTF) | bundled in `fixtures/_fonts` (Regular/Bold, ~570 KB each) for the B4J embedded-font PDF test; Latin/Greek/Cyrillic coverage. CJK/Arabic/Hebrew need separate Noto builds, supplied by the host |
 | Arial / Calibri | proprietary | no | no | referenced by name only, never shipped |
 
 Fixtures use redistributable fonts only, so tests are reproducible and

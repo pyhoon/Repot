@@ -257,7 +257,7 @@ API 36):
 | Fixture-level validation | pass | not applicable |
 
 This accounts for the check-count delta between platforms:
-**B4J 395 checks, B4A 318 checks, 0 errors on both.** PDF remains
+**B4J 400 checks, B4A 318 checks, 0 errors on both.** PDF remains
 B4J-only for v1.x; on B4A the HTML print path is the documented
 rendering route, and `ReportPdfExporter.Export` returns `False` with
 diagnostic `E-PDF-001`.

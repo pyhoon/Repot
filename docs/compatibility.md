@@ -82,10 +82,12 @@ the canvas is abstract. See
 - B4A PDF uses Android system fonts, so those scripts render (subject to
   the device's installed fonts). The B4A suite exports the `multilang`
   fixture to PDF.
-- B4J PDF uses the PDFBox Standard 14 fonts (WinAnsi), so only Latin-1
-  text is guaranteed. Non-Latin scripts require an embedded TrueType
-  font, which is not implemented. Use HTML/DOCX/XLSX for multi-language
-  output on B4J until font embedding ships.
+- B4J PDF uses the PDFBox Standard 14 fonts (WinAnsi) by default, so
+  only Latin-1 text is guaranteed. Setting `ReportPdfExporter.FontFile`
+  (and optionally `FontFileBold`) embeds a TrueType font and renders any
+  script the font contains; the `multilang` test embeds Noto Sans
+  (Latin/Greek/Cyrillic). CJK and Arabic/Hebrew need a font with those
+  glyphs; unsupported glyphs are replaced with `?` rather than failing.
 - Bidi and complex-script shaping are not implemented; RTL text is
   rendered in logical order.
 
