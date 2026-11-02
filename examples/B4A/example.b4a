@@ -1,13 +1,12 @@
-Build1=Default,b4a.example
+﻿Build1=Default,b4a.example
 Group=Default Group
 Library1=core
 Library2=repot
 Library3=json
 Library4=javaobject
-Library5=fileprovider
 ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="36"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~CreateResourceFromFile(Macro, Themes.LightTheme)~\n~AddApplicationText(~\n~<provider android:name="android.support.v4.content.FileProvider" android:authorities="$PACKAGE$.provider" android:exported="false" android:grantUriPermissions="true">~\n~    <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/provider_paths" />~\n~</provider>)~\n~CreateResource(xml, provider_paths,~\n~<files-path name="name" path="shared" />)~\n~'End of default text.~\n~
 NumberOfFiles=0
-NumberOfLibraries=5
+NumberOfLibraries=4
 NumberOfModules=0
 Version=14.2
 @EndOfDesignText@
@@ -27,7 +26,6 @@ Version=14.2
 #End Region
 
 Sub Process_Globals
-	Private provider As FileProvider
 End Sub
 
 Sub Globals
@@ -38,7 +36,6 @@ Sub Activity_Create(FirstTime As Boolean)
 	lbl.Initialize("")
 	lbl.TextSize = 14
 	Activity.AddView(lbl, 10dip, 10dip, 100%x - 20dip, 100%y - 20dip)
-	provider.Initialize
 	RunExample
 End Sub
 
@@ -97,7 +94,7 @@ Sub RunExample
 		Log("PDF(vector) -> " & vPath & " ok=" & vok)
 		If vok Then
 			lbl.Text = lbl.Text & CRLF & "PDF exported:" & CRLF & vPath
-			OpenPDF(outDir, "invoice-vector.pdf")
+			ReportB4AOpen.OpenPdf(outDir, "invoice-vector.pdf")
 		End If
 	Else
 		lbl.Text = "HTML export failed"
@@ -117,21 +114,4 @@ Private Sub LoadJsonMap(dir As String, name As String) As Map
 	Dim parser As JSONParser
 	parser.Initialize(File.ReadString(dir, name))
 	Return parser.NextObject
-End Sub
-Sub OpenPDF(dirFile As String, nameFile As String)
-	Try
-		Wait For (File.CopyAsync(dirFile, nameFile, provider.SharedFolder, nameFile)) Complete (Success As Boolean)
-		If Success = False Then
-			Log("OpenPDF: copy failed")
-			Return
-		End If
-		Dim docIntent As Intent
-		docIntent.Initialize(docIntent.ACTION_VIEW, "")
-		provider.SetFileUriAsIntentData(docIntent, nameFile)
-		docIntent.SetType("application/pdf")
-		docIntent.Flags = Bit.Or(1, 2)
-		StartActivity(docIntent)
-	Catch
-		Log("OpenPDF error: " & LastException)
-	End Try
 End Sub
