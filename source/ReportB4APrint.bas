@@ -1,4 +1,4 @@
-﻿B4A=true
+B4A=true
 Group=Export
 ModulesStructureVersion=1
 Type=Code
@@ -62,14 +62,14 @@ Private Sub DrawOp (canvas As Canvas, op As ReportDrawOp, pageHeight As Double)
 				base = Typeface.SANS_SERIF
 			End If
 			tf = Typeface.CreateNew(base, style)
-			Dim pdfBaseline As Double = pageHeight - op.Y - op.Baseline
-			canvas.DrawText(op.Text, op.X, pdfBaseline, tf, op.FontSize, ParseColor(op.Colour), op.Align.ToUpperCase)
+			Dim baseline As Double = op.Y + op.Baseline
+			canvas.DrawText(op.Text, op.X, baseline, tf, op.FontSize, ParseColor(op.Colour), op.Align.ToUpperCase)
 		Case "line"
-			Dim y1 As Double = pageHeight - op.Y
-			Dim y2 As Double = pageHeight - op.Y2
+			Dim y1 As Double = op.Y
+			Dim y2 As Double = op.Y2
 			canvas.DrawLine(op.X, y1, op.X2, y2, ParseColor(op.Colour), op.LineWidth)
 		Case "rect"
-			Dim ry As Double = pageHeight - op.Y - op.Height
+			Dim ry As Double = op.Y
 			Dim c As Int = ParseColor(op.FillColour)
 			Dim r As Rect
 			r.Initialize(op.X, ry, op.X + op.Width, ry + op.Height)
