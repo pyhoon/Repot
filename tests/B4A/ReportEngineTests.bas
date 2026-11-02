@@ -1,4 +1,4 @@
-﻿B4A=true
+B4A=true
 Group=Tests
 ModulesStructureVersion=1
 Type=Class
@@ -34,6 +34,7 @@ Public Sub Run (FixturesDir As String)
 	#End If
 	TestPdfExport
 	TestMultilangPdf
+	TestFacade
 	TestHtmlExport
 	TestDataExport
 	TestOfficeExport
@@ -813,6 +814,34 @@ Private Sub TestMultilangPdf
 	If File.Exists(outDir, "test-multilang.pdf") Then
 		Check(File.Size(outDir, "test-multilang.pdf") > 0, "multilang pdf is non-empty")
 	End If
+End Sub
+
+Private Sub TestFacade
+	Dim dir As String = File.Combine(mFixtures, "invoice-basic")
+	Dim r As Repot
+	r.Initialize
+	Check(r.LoadTemplate(dir, "template.repot"), "facade loads template")
+	Dim params As Map = LoadJsonMap(dir, "params.json")
+	For Each k As String In params.Keys
+		r.SetParameter(k, params.Get(k))
+	Next
+	Dim data As Map = LoadJsonMap(dir, "data.json")
+	For Each name As String In data.Keys
+		Dim o As Object = data.Get(name)
+		If o Is List Then
+			r.SetDataSource(name, o)
+		Else If o Is Map Then
+			r.SetDataSourceSingle(name, o)
+		End If
+	Next
+	Dim res As ReportResult = r.Build
+	Check(res.Success, "facade build succeeds")
+	Check(res.PageCount = 1, "facade reports one page")
+	Check(res.RecordCount > 0, "facade counts records")
+	Dim outDir As String = File.DirInternal
+	Check(r.ExportHtml(File.Combine(outDir, "facade.html")), "facade exports html")
+	Check(r.ExportPdf(File.Combine(outDir, "facade.pdf")), "facade exports pdf")
+	Check(r.ExportCsv(File.Combine(outDir, "facade.csv")), "facade exports csv")
 End Sub
 
 Private Sub TestHtmlExport

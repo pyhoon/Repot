@@ -1,4 +1,4 @@
-﻿AppType=StandardJava
+AppType=StandardJava
 Build1=Default,b4j.example
 Group=Default Group
 Library1=jcore
@@ -45,6 +45,8 @@ Module43=|relative|..\ReportUnits
 Module44=|relative|..\ReportValidator
 Module45=|relative|..\ReportVersion
 Module46=|relative|..\ReportXlsxExporter
+Module47=|relative|..\Repot
+Module48=|relative|..\ReportResult
 Module5=|relative|..\ReportBandLayout
 Module6=|relative|..\ReportDataBinder
 Module7=|relative|..\ReportDataExporter
@@ -52,7 +54,7 @@ Module8=|relative|..\ReportDataSet
 Module9=|relative|..\ReportDataSetDef
 NumberOfFiles=0
 NumberOfLibraries=3
-NumberOfModules=46
+NumberOfModules=48
 Version=10.7
 @EndOfDesignText@
 #Region Project Attributes

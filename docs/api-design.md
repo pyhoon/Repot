@@ -1,11 +1,11 @@
 # API Design
 
-Status: proposal for the unified `Repot` facade. The underlying modules it
-would wrap are shipped: template model, loader, validator, data binder,
-measurement adapter, band layout, paginator, render-document types, and
-the PDF/HTML/CSV/JSON/XML/DOCX/XLSX exporters (M1-M9). The facade itself
-is not implemented; consumers use the modules directly (see
-`examples/`). Names are not yet frozen.
+Status: the facade is implemented in `source/Repot.bas` and
+`source/ReportResult.bas` (v1.1). `Build` is synchronous, and exports are
+methods on `Repot` rather than separate exporter classes. The advanced
+parts below (streaming providers, per-format options, adapters,
+programmatic construction, cancellation) remain planned. Underlying
+modules stay public for advanced use.
 
 ## 1. Principles
 
@@ -33,16 +33,18 @@ Report.SetDataSource("Items", LineItems)          ' List
 Report.SetDataSourceSingle("Customer", Customer)  ' Map
 Report.SetParameter("InvoiceNumber", "INV-1042")
 Report.SetParameterDate("IssuedOn", DateTime.Now)
-Report.SetTimestamp(Now)        ' explicit clock for date/time fields
-Report.SetLocale("en-GB")       ' explicit culture for formatting
 
-Wait For (Report.Build) Complete (Result As ReportResult)
+Dim Result As ReportResult = Report.Build
 If Result.Success = False Then
     For Each D As ReportDiagnostic In Result.Errors
         Log(D.Code & " " & D.ElementId & ": " & D.Message)
     Next
     Return
 End If
+Report.ExportHtml("invoice.html")
+Report.ExportPdf("invoice.pdf")
+Report.ExportCsv("invoice.csv")        ' uses DefaultDataSet
+Report.ExportCsvOf("Items", "items.csv")
 ```
 
 `Build` performs parse, bind, process, layout, and returns a reusable
@@ -50,14 +52,27 @@ result. `Result` is immutable.
 
 Named variants exist because B4X lacks overloads:
 
+Implemented in v1.1:
+
 | Method | Purpose |
 |--------|---------|
-| `SetParameter(Name, Value)` | String or object parameter |
+| `LoadTemplate(Dir, FileName)` | Load and validate a `.repot` |
+| `LoadTemplateText(Text, BaseDir)` | Load from a string |
+| `SetParameter(Name, Value)` | Object parameter |
 | `SetParameterInt`, `SetParameterDouble`, `SetParameterBool`, `SetParameterDate` | Typed parameters |
 | `SetDataSource(Name, List)` | Row dataset |
 | `SetDataSourceSingle(Name, Map)` | Single-record dataset |
+| `Build As ReportResult` | Bind, measure, paginate once |
+| `ExportPdf`, `ExportHtml` | Render-document exporters |
+| `ExportCsv`, `ExportJson`, `ExportXml`, `ExportDocx`, `ExportXlsx` | Data exporters (`DefaultDataSet`) |
+| `ExportCsvOf(DataSet, Path)` | Explicit dataset |
+
+Planned:
+
+| Method | Purpose |
+|--------|---------|
 | `SetDataSourceProvider(Name, Provider)` | Streaming/lazy provider |
-| `SetTimestamp(Ticks)` | Clock used by date/time fields |
+| `SetTimestamp(Ticks)` | Explicit clock (currently supplied by data) |
 | `SetLocale(Tag)` | Culture for number/date formatting |
 | `SetLimits(Limits)` | Page/record/depth limits |
 | `Cancel` | Cooperative cancellation between pages/records |

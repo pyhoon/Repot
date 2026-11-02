@@ -257,7 +257,7 @@ API 36):
 | Fixture-level validation | pass | not applicable |
 
 This accounts for the check-count delta between platforms:
-**B4J 400 checks, B4A 318 checks, 0 errors on both.** PDF remains
+**B4J 407 checks, B4A 325 checks, 0 errors on both.** PDF remains
 B4J-only for v1.x; on B4A the HTML print path is the documented
 rendering route, and `ReportPdfExporter.Export` returns `False` with
 diagnostic `E-PDF-001`.
@@ -269,7 +269,7 @@ build:   cd tests\B4A; "C:\Program Files\B4X\B4A\B4ABuilder.exe" -task=Build -ob
 install: C:\android\sdk\platform-tools\adb.exe install -r Objects\tests.apk
 restart: adb shell am force-stop b4a.example; adb logcat -c
 run:     adb shell am start -n b4a.example/.main
-read:    adb logcat -d   →  PASS engine (318 checks), errors=0
+read:    adb logcat -d   →  PASS engine (325 checks), errors=0
 ```
 
 The suite's pass/fail status is written to `fixture-check.txt` in

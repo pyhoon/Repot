@@ -1,4 +1,4 @@
-﻿Build1=Default,b4a.example
+Build1=Default,b4a.example
 File1=Layout.bal
 FileGroup1=Default Group
 Group=Default Group
@@ -52,6 +52,8 @@ Module44=|relative|..\ReportUnits
 Module45=|relative|..\ReportValidator
 Module46=|relative|..\ReportVersion
 Module47=|relative|..\ReportXlsxExporter
+Module48=|relative|..\Repot
+Module49=|relative|..\ReportResult
 Module5=|relative|..\ReportBand
 Module6=|relative|..\ReportBandLayout
 Module7=|relative|..\ReportDataBinder
@@ -59,7 +61,7 @@ Module8=|relative|..\ReportDataExporter
 Module9=|relative|..\ReportDataSet
 NumberOfFiles=1
 NumberOfLibraries=7
-NumberOfModules=47
+NumberOfModules=49
 Version=14.2
 @EndOfDesignText@
 #Region  Project Attributes 
