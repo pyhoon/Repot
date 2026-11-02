@@ -138,6 +138,8 @@ public static void closeContent(Object cs) throws Exception {
 }
 
 public static void save(Object doc, String path) throws Exception {
+    java.io.File f = new java.io.File(path);
+    if (f.exists()) f.delete();
     ((PDDocument)doc).save(path);
 }
 
