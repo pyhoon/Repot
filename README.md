@@ -8,7 +8,7 @@ by the host application into paginated documents and structured exports.
 The same template is intended to work from B4J desktop, B4J server, and
 B4A, and to render to HTML for browsers.
 
-> **Project status: v1.0.0 (M9 complete). Tag pending.**
+> **Project status: v1.1.0 (M10 complete). B4A PDF now vector (sync). Tag pending.**
 >
 > M8 complete: the B4A adapter runs the full engine suite (305 checks, 0
 > errors on emulator-5554), matching the B4J suite (382 checks, 0 errors).

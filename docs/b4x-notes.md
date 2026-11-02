@@ -140,6 +140,16 @@ cd <project folder>
   is padded/prefix-limited in the logs; write detailed results to a file
   (`File.WriteString(DirInternal, ...)`) and mirror a short summary to
   the log.
+- **B4A vector PDF uses the `Printing` library's `PdfDocument`.**
+  `PdfDocument.StartPage(w,h)` (points, 1/72"), `pdf.Canvas` (CanvasWrapper),
+  `DrawText(text, x, y, typeface, size, color, align)`,
+  `DrawRect(Rect, color, filled, strokeWidth)`,
+  `DrawLine(x1,y1,x2,y2,color,strokeWidth)`, `WriteToStream`.
+  Coordinate origin is top-left; flip Y for the engine's bottom-left
+  render doc (baseline = pageHeight - op.Y - op.Baseline).
+  `Typeface.CreateNew(baseTypeface, style)` takes a base Typeface (not a
+  family string); map family name to `Typeface.SANS_SERIF`/`SERIF`/
+  `MONOSPACE` first.
 - **`.b4xlib` manifest `Version` must be a two-part numeric value**
   (e.g. `1.0`). A three-part value (`1.0.0`) is rejected with
   `Input string was not in a correct format` when the library is used.

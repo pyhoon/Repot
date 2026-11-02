@@ -62,7 +62,7 @@ Version=10.7
 #Region Project Copyright
 #LibraryName: Repot
 #LibraryAuthor: Repot contributors
-#LibraryVersion: 1.0
+#LibraryVersion: 1.1
 'This project builds the engine library. It also runs as a small console
 'smoke test so the command-line build proves the modules link.
 #End Region

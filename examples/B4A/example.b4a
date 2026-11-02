@@ -85,12 +85,11 @@ Sub RunExample
 	If html.Export(doc, htmlPath) Then
 		Log("HTML -> " & htmlPath)
 		lbl.Text = "HTML exported:" & CRLF & htmlPath
-		Dim htmlContent As String = File.ReadString(outDir, "invoice.html")
-		Dim pdfPath As String = File.Combine(outDir, "invoice.pdf")
-		ReportB4APrint.PrintHtmlToPdf(htmlContent, pdfPath, 800, 1200)
-		Wait For ReportB4APrint_PrintComplete (Success As Boolean, Path As String)
-		Log("PDF -> " & Path & " ok=" & Success)
-		If Success Then lbl.Text = lbl.Text & CRLF & "PDF exported:" & CRLF & Path
+		' Vector PDF via Printing library (sync)
+		Dim vPath As String = File.Combine(outDir, "invoice-vector.pdf")
+		Dim vok As Boolean = ReportB4APrint.PrintVectorPdf(doc, vPath)
+		Log("PDF(vector) -> " & vPath & " ok=" & vok)
+		If vok Then lbl.Text = lbl.Text & CRLF & "PDF exported:" & CRLF & vPath
 	Else
 		lbl.Text = "HTML export failed"
 	End If

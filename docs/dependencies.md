@@ -41,6 +41,7 @@ enough because B4JBuilder is Windows-only.
 | `JavaObject` (B4X library) | part of B4X | B4A/B4J | use in `ReportB4JMeasure` (AWT on B4J, `android.graphics.Paint` on B4A) and the DOCX/XLSX zip helpers; required by consumers because it is not merged into the engine library jar |
 | `java.desktop` / AWT fonts | JDK 19 | B4J, headless | use public `java.awt.font` APIs for measurement; no `sun.*` access, no `Graphics2D`, no UI thread |
 | `android.graphics.Paint` / `Typeface` / `BitmapFactory` | platform API, no extra library | B4A | used by the measurement adapter and image decoding; no new dependency, platform tier versioned with the SDK |
+| `Printing` (B4A library, `Printing.jar`) | B4A built-in | B4A | canvas-based `PdfDocument` for the B4A vector PDF exporter (M10); no new external dependency |
 | `XmlBuilder` | part of B4X | B4J / B4A | verify API and availability per platform |
 | `Archiver` / zip support | part of B4X | verify per platform | needed for DOCX/XLSX/ODF; verify |
 

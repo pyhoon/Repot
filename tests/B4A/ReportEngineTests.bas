@@ -32,12 +32,7 @@ Public Sub Run (FixturesDir As String)
 	#Else
 	TestGoldens
 	#End If
-	#If B4A
-	'PDF export depends on the B4J PDFBox renderer; skipped on this platform.
-	Log("pdf export: B4J only (skipped)")
-	#Else
 	TestPdfExport
-	#End If
 	TestHtmlExport
 	TestDataExport
 	TestOfficeExport
@@ -708,10 +703,14 @@ Private Sub TestPdfExport
 	Check(ok, "invoice pdf exports successfully")
 	Check(File.Exists(outDir, "test-invoice.pdf"), "invoice pdf file exists")
 	If File.Exists(outDir, "test-invoice.pdf") Then
+		#If B4A
+		Check(File.Size(outDir, "test-invoice.pdf") > 0, "invoice pdf is non-empty")
+		#Else
 		Check(pdf.PageCount(outPath) = 1, "invoice pdf has one page")
 		Dim txt As String = pdf.ExtractText(outPath)
 		Check(txt.IndexOf("INVOICE") >= 0, "invoice pdf contains INVOICE")
 		Check(txt.IndexOf("Page 1 of 1") >= 0, "invoice pdf contains page number")
+		#End If
 	End If
 
 	' listing
@@ -758,7 +757,11 @@ Private Sub TestPdfExport
 	Dim lok As Boolean = lpdf.Export(ldoc, loutPath)
 	Check(lok, "listing pdf exports successfully")
 	If File.Exists(loutDir, "test-listing.pdf") Then
+		#If B4A
+		Check(File.Size(loutDir, "test-listing.pdf") > 0, "listing pdf is non-empty")
+		#Else
 		Check(lpdf.PageCount(loutPath) = ldoc.PageCount, "listing pdf page count matches layout")
+		#End If
 	End If
 End Sub
 '--------------------------------------------------------------- html export

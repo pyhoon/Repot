@@ -30,10 +30,8 @@ Public Sub Export (Doc As ReportRenderDocument, OutputPath As String) As Boolean
 	mDoc = Doc
 	mOutPath = OutputPath
 	#If B4A
-	'PDFBox is a desktop (JVM) library and is not available on Android.
-	'Record a clear diagnostic instead of a reflection crash.
-	Diagnostics.AddError("E-PDF-001", "PDF export is not available on this platform; the PDFBox renderer runs on B4J only", "")
-	Return False
+	'Android uses the vector canvas path (Printing library) instead of PDFBox.
+	Return ReportB4APrint.PrintVectorPdf(Doc, OutputPath)
 	#End If
 	Dim jo As JavaObject
 	jo.InitializeStatic("b4j.example.reportpdfexporter")

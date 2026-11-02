@@ -12,6 +12,90 @@ Version=10.7
 Sub Process_Globals
 End Sub
 
+' Vector PDF via the Printing library's PdfDocument canvas (synchronous).
+Public Sub PrintVectorPdf(Doc As ReportRenderDocument, OutputPath As String) As Boolean
+	Dim pdf As PdfDocument
+	pdf.Initialize
+	Dim i As Int
+	For i = 0 To Doc.PageCount - 1
+		Dim page As ReportRenderPage = Doc.PageAt(i + 1)
+		pdf.StartPage(page.Width, page.Height)
+		Dim canvas As Canvas = pdf.Canvas
+		Dim k As Int
+		For k = 0 To page.Ops.Size - 1
+			Dim op As ReportDrawOp = page.Ops.Get(k)
+			DrawOp(canvas, op, page.Height)
+		Next
+		pdf.FinishPage
+	Next
+	Dim idx As Int = OutputPath.LastIndexOf("\")
+	Dim idx2 As Int = OutputPath.LastIndexOf("/")
+	If idx2 > idx Then idx = idx2
+	Dim dir As String = OutputPath.SubString2(0, idx)
+	Dim name As String = OutputPath.SubString(idx + 1)
+	Dim out As OutputStream = File.OpenOutput(dir, name, False)
+	pdf.WriteToStream(out)
+	out.Close
+	pdf.Close
+	Return File.Exists(dir, name)
+End Sub
+
+Private Sub DrawOp (canvas As Canvas, op As ReportDrawOp, pageHeight As Double)
+	Select Case op.OpType
+		Case "text"
+			Dim tf As Typeface
+			Dim style As Int = Typeface.STYLE_NORMAL
+			If op.Bold And op.Italic Then
+				style = Typeface.STYLE_BOLD_ITALIC
+			Else If op.Bold Then
+				style = Typeface.STYLE_BOLD
+			Else If op.Italic Then
+				style = Typeface.STYLE_ITALIC
+			End If
+			Dim base As Typeface
+			Dim f As String = op.FontName.ToLowerCase
+			If f.Contains("serif") Or f.Contains("times") Then
+				base = Typeface.SERIF
+			Else If f.Contains("mono") Or f.Contains("courier") Then
+				base = Typeface.MONOSPACE
+			Else
+				base = Typeface.SANS_SERIF
+			End If
+			tf = Typeface.CreateNew(base, style)
+			Dim pdfBaseline As Double = pageHeight - op.Y - op.Baseline
+			canvas.DrawText(op.Text, op.X, pdfBaseline, tf, op.FontSize, ParseColor(op.Colour), op.Align.ToUpperCase)
+		Case "line"
+			Dim y1 As Double = pageHeight - op.Y
+			Dim y2 As Double = pageHeight - op.Y2
+			canvas.DrawLine(op.X, y1, op.X2, y2, ParseColor(op.Colour), op.LineWidth)
+		Case "rect"
+			Dim ry As Double = pageHeight - op.Y - op.Height
+			Dim c As Int = ParseColor(op.FillColour)
+			Dim r As Rect
+			r.Initialize(op.X, ry, op.X + op.Width, ry + op.Height)
+			If op.FillColour <> "" And op.FillColour <> "transparent" Then
+				canvas.DrawRect(r, c, True, 0)
+			End If
+			If op.LineWidth > 0 Then
+				canvas.DrawRect(r, ParseColor(op.Colour), False, op.LineWidth)
+			End If
+		Case "restore"
+			' no-op on canvas
+	End Select
+End Sub
+
+Private Sub ParseColor (hex As String) As Int
+	If hex = "" Then Return Colors.Black
+	If hex.StartsWith("#") Then hex = hex.SubString(1)
+	If hex.Length = 6 Then
+		Dim r As Int = Bit.ParseInt(hex.SubString2(0,2), 16)
+		Dim g As Int = Bit.ParseInt(hex.SubString2(2,4), 16)
+		Dim b As Int = Bit.ParseInt(hex.SubString2(4,6), 16)
+		Return Colors.RGB(r,g,b)
+	End If
+	Return Colors.Black
+End Sub
+
 Public Sub PrintHtmlToPdf(Html As String, OutputPath As String, Width As Int, Height As Int)
 	Dim jo As JavaObject
 	jo.InitializeStatic("b4a.example.reportb4aprint")

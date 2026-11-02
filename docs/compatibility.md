@@ -14,7 +14,7 @@ and what is explicitly best-effort. It is the contract behind the phrase
 | Parse and validate `.repot` | 0.1 | 0.1 | 1.0 | -- |
 | Data binding, expressions, grouping | 0.1 / 0.2 | 0.1 / 0.2 | 1.0 | -- |
 | Layout and pagination | 0.1 | 0.1 | 1.0 | -- |
-| PDF export | 0.1 | 0.1 | 1.0 (HTML print path, rasterised, verified) | -- |
+| PDF export | 0.1 | 0.1 | 1.0 (Printing library, vector canvas, sync, verified) | -- |
 | HTML export (layout mode) | 0.1 | 0.1 | 1.0 | n/a |
 | HTML export (flow mode) | 0.2 | 0.2 | 1.0 | n/a |
 | CSV / JSON export | 0.1 | 0.1 | 1.0 | -- |

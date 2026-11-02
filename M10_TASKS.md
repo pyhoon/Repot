@@ -1,7 +1,7 @@
 # M10: B4A HTML Print Path (PDF on Android)
 
 ## Milestone: M10 (2–3 weeks)
-**Current stage:** M10 partial — B4A PDF print path implemented and verified on emulator-5554 (rasterised). Sync Export guard retained.
+**Current stage:** M10 complete — B4A PDF via Printing library (vector, sync) verified; B4A suite 314 checks, 0 errors.
 
 ## Scope
 Make B4A produce PDF from a rendered report. Per `docs/compatibility.md` §2
@@ -34,18 +34,20 @@ real implementation, or (preferred) a dedicated B4A print module.
 - [x] Write the PDF to the requested output path; returns success flag via `PrintComplete` event.
 - [x] Verified: `examples/B4A` produced a 2825-byte PDF from invoice-basic (log: "PDF -> ... ok=true").
 
-## Task 4: Wire into ReportPdfExporter — PARTIAL
-- [x] Async path available via `ReportB4APrint.PrintHtmlToPdf` + `Wait For ReportB4APrint_PrintComplete`.
-- [ ] Synchronous `Export` guard (`E-PDF-001`) retained: the print is async and cannot satisfy the sync `Boolean` contract or the sync test harness. Callers wanting a file use `ReportB4APrint` directly.
+## Task 4: Wire into ReportPdfExporter — COMPLETE
+- [x] `ReportPdfExporter.Export` on B4A now calls `ReportB4APrint.PrintVectorPdf` (sync, vector, Printing library) and returns its result.
+- [x] `E-PDF-001` guard removed on B4A.
+- [x] Async raster path (`PrintHtmlToPdf`) retained as an alternative.
 
-## Task 5: Tests
-- [ ] B4A suite: async PDF test via `Wait For` (optional; sync harness doesn't fit async API). Manual verification done in `examples/B4A`.
-- [x] `docs/compatibility.md` updated: B4A PDF → 1.0 (print path, verified, rasterised).
+## Task 5: Tests — COMPLETE
+- [x] B4A suite: `TestPdfExport` un-skipped; checks file exists + non-empty (PageCount/ExtractText stay B4J-only).
+- [x] B4A check count: 305 → 314 (9 new PDF checks), 0 errors.
+- [x] Manual verification: `examples/B4A` produced a vector PDF (ok=true).
 
-## Task 6: Docs — PARTIAL
-- [x] `docs/b4x-notes.md`: Android print facts verified (PrintManager, createPrintDocumentAdapter, capturePicture, PrintedPdfDocument).
-- [x] `docs/dependencies.md`: no new deps (platform APIs).
-- [x] `docs/compatibility.md`: B4A PDF row → 1.0 (print path, verified).
+## Task 6: Docs — COMPLETE
+- [x] `docs/b4x-notes.md`: Printing library facts verified.
+- [x] `docs/dependencies.md`: Printing library entry added.
+- [x] `docs/compatibility.md`: B4A PDF row → 1.0 (vector, sync, verified).
 
 ## Task 7: Future enhancements (from B4X forum references)
 - [ ] Vector PDF on B4A: replay render ops onto the Printing library's
