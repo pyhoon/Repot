@@ -73,6 +73,22 @@ the canvas is abstract. See
 - Text that depends on exact metrics is a documented risk, not a bug
   report.
 
+### Multi-language text
+
+- The template format, loader, binder and structured exporters
+  (HTML/CSV/JSON/XML/DOCX/XLSX) are UTF-8 and preserve every script the
+  host can supply. The `multilang` fixture covers Latin, Greek, Cyrillic,
+  Japanese, Chinese, Arabic, Hebrew and Korean.
+- B4A PDF uses Android system fonts, so those scripts render (subject to
+  the device's installed fonts). The B4A suite exports the `multilang`
+  fixture to PDF.
+- B4J PDF uses the PDFBox Standard 14 fonts (WinAnsi), so only Latin-1
+  text is guaranteed. Non-Latin scripts require an embedded TrueType
+  font, which is not implemented. Use HTML/DOCX/XLSX for multi-language
+  output on B4J until font embedding ships.
+- Bidi and complex-script shaping are not implemented; RTL text is
+  rendered in logical order.
+
 ## 4. Fidelity tiers
 
 **Tier 1 — identical and tested**
