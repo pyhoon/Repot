@@ -4,7 +4,7 @@ Group=Default Group
 Library1=jcore
 Library2=json
 Library3=javaobject
-Library4=Repot
+Library4=repot
 NumberOfFiles=0
 NumberOfLibraries=4
 NumberOfModules=0
@@ -32,8 +32,12 @@ Sub AppStart (Args() As String)
     Next
     If fixtureDir = "" Then fixtureDir = "..\..\..\fixtures\invoice-basic"
     Dim outDir As String = "."
+    Dim doPrint As Boolean = False
     If Args.Length > 0 Then fixtureDir = Args(0)
     If Args.Length > 1 Then outDir = Args(1)
+    For Each a As String In Args
+        If a.ToLowerCase = "print" Then doPrint = True
+    Next
 
     Dim r As Repot
     r.Initialize
@@ -76,7 +80,11 @@ Sub AppStart (Args() As String)
     Dim pdfPath As String = File.Combine(outDir, "invoice.pdf")
     If r.ExportPdf(pdfPath) Then
         Log("PDF  -> " & pdfPath)
-        ReportB4JOpen.OpenPdf(outDir, "invoice.pdf")
+        If doPrint Then
+            Log("print: " & r.PrintPdf(outDir, "invoice.pdf", "Repot invoice"))
+        Else
+            ReportB4JOpen.OpenPdf(outDir, "invoice.pdf")
+        End If
     Else
         Log("PDF export failed")
     End If

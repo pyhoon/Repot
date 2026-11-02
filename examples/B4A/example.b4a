@@ -1,4 +1,4 @@
-﻿Build1=Default,b4a.example
+Build1=Default,b4a.example
 Group=Default Group
 Library1=core
 Library2=repot
@@ -30,23 +30,34 @@ End Sub
 
 Sub Globals
 	Private lbl As Label
+	Private btnPrint As Button
+	Private mReport As Repot
+	Private mOutDir As String
 End Sub
 
 Sub Activity_Create(FirstTime As Boolean)
 	lbl.Initialize("")
 	lbl.TextSize = 14
-	Activity.AddView(lbl, 10dip, 10dip, 100%x - 20dip, 100%y - 20dip)
+	Activity.AddView(lbl, 10dip, 10dip, 100%x - 20dip, 100%y - 80dip)
+	btnPrint.Initialize("btnPrint")
+	btnPrint.Text = "Print PDF"
+	Activity.AddView(btnPrint, 10dip, 100%y - 60dip, 100%x - 20dip, 50dip)
 	RunExample
+End Sub
+
+Sub btnPrint_Click
+	If mReport = Null Then Return
+	Log("print: " & mReport.PrintPdf(mOutDir, "invoice.pdf", "Repot invoice"))
 End Sub
 
 Sub RunExample
 	Dim fixDir As String = File.DirInternal & "/fixtures/invoice-basic"
 	CopyAssets
 	Dim outDir As String = File.DirInternal
+	mOutDir = outDir
 
-	Dim r As Repot
-	r.Initialize
-	If r.LoadTemplate(fixDir, "template.repot") = False Then
+	mReport.Initialize
+	If mReport.LoadTemplate(fixDir, "template.repot") = False Then
 		Log("Load errors")
 		lbl.Text = "Load failed"
 		Return
@@ -54,19 +65,19 @@ Sub RunExample
 
 	Dim params As Map = LoadJsonMap(fixDir, "params.json")
 	For Each k As String In params.Keys
-		r.SetParameter(k, params.Get(k))
+		mReport.SetParameter(k, params.Get(k))
 	Next
 	Dim data As Map = LoadJsonMap(fixDir, "data.json")
 	For Each name As String In data.Keys
 		Dim o As Object = data.Get(name)
 		If o Is List Then
-			r.SetDataSource(name, o)
+			mReport.SetDataSource(name, o)
 		Else If o Is Map Then
-			r.SetDataSourceSingle(name, o)
+			mReport.SetDataSourceSingle(name, o)
 		End If
 	Next
 
-	Dim res As ReportResult = r.Build
+	Dim res As ReportResult = mReport.Build
 	If res.Success = False Then
 		lbl.Text = "Build failed"
 		Return
@@ -74,14 +85,14 @@ Sub RunExample
 	Log("Rendered " & res.PageCount & " page(s), " & res.RecordCount & " record(s)")
 
 	Dim htmlPath As String = File.Combine(outDir, "invoice.html")
-	If r.ExportHtml(htmlPath) = False Then
+	If mReport.ExportHtml(htmlPath) = False Then
 		lbl.Text = "HTML export failed"
 		Return
 	End If
 	Log("HTML -> " & htmlPath)
 
 	Dim vPath As String = File.Combine(outDir, "invoice.pdf")
-	If r.ExportPdf(vPath) Then
+	If mReport.ExportPdf(vPath) Then
 		Log("PDF -> " & vPath)
 		lbl.Text = "HTML + PDF exported:" & CRLF & vPath
 		ReportB4AOpen.OpenPdf(outDir, "invoice.pdf")
