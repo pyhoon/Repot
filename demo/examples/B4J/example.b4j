@@ -1,10 +1,10 @@
-AppType=StandardJava
+﻿AppType=StandardJava
 Build1=Default,b4j.example
 Group=Default Group
 Library1=jcore
 Library2=json
 Library3=javaobject
-Library4=Repot
+Library4=repot
 NumberOfFiles=0
 NumberOfLibraries=4
 NumberOfModules=0
@@ -16,7 +16,19 @@ Sub Process_Globals
 End Sub
 
 Sub AppStart (Args() As String)
-    Dim fixtureDir As String = "..\..\..\fixtures\invoice-basic"
+    Dim fixtureDir As String = ""
+    Dim candidates() As String = Array As String( _
+        "..\..\..\fixtures\invoice-basic", _
+        "..\..\..\..\fixtures\invoice-basic", _
+        "..\..\fixtures\invoice-basic", _
+        "fixtures\invoice-basic")
+    For Each c As String In candidates
+        If File.Exists(c, "template.repot") Then
+            fixtureDir = c
+            Exit
+        End If
+    Next
+    If fixtureDir = "" Then fixtureDir = "..\..\..\fixtures\invoice-basic"
     Dim outDir As String = "."
     If Args.Length > 0 Then fixtureDir = Args(0)
     If Args.Length > 1 Then outDir = Args(1)
