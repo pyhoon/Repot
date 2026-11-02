@@ -1,9 +1,11 @@
 # Architecture
 
-Status: accepted for M0/M1; M2 layout is in progress. The model, loader,
-validator, canonical writer, data binder and render-document types are
-implemented in `source/Repot`. The adapter contracts are specified but not
-implemented; layout and exporters are not implemented yet.
+Status: accepted; implemented through M9. The model, loader, validator,
+canonical writer, data binder, measurement adapter, band layout, paginator,
+render-document types and all exporters (PDF, HTML, CSV, JSON, XML, DOCX,
+XLSX) are implemented in `source/`. The B4A adapter shares the same
+modules with `#If` branches. See `docs/compatibility.md` for the
+platform matrix.
 
 ## 1. Pipeline
 

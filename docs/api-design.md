@@ -1,8 +1,11 @@
 # API Design
 
-Status: proposal. The underlying definition model, loader, validator and
-data binder exist in M1, but the public facade and exporters below are not
-implemented and their names are not yet frozen.
+Status: proposal for the unified `Repot` facade. The underlying modules it
+would wrap are shipped: template model, loader, validator, data binder,
+measurement adapter, band layout, paginator, render-document types, and
+the PDF/HTML/CSV/JSON/XML/DOCX/XLSX exporters (M1-M9). The facade itself
+is not implemented; consumers use the modules directly (see
+`demo/examples/`). Names are not yet frozen.
 
 ## 1. Principles
 
