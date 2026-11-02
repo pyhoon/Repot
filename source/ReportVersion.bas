@@ -11,7 +11,7 @@ Sub Process_Globals
 End Sub
 
 Public Sub LibraryVersion As String
-	Return "0.12"
+	Return "1.0.0"
 End Sub
 
 Public Sub SupportedSchemaVersion As String

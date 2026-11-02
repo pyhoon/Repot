@@ -138,7 +138,18 @@ export time. Fonts that forbid embedding are rejected with a diagnostic.
 - Anything that would have to be bundled solely for Android and then
   forked for B4J.
 
-## 8. Change process
+## 9. Jar requirements per exporter
+
+The `.b4xlib` itself carries no jars. Consumers add only what their
+chosen exporters need:
+
+| Exporter | Extra jars required |
+|----------|---------------------|
+| PDF (`ReportPdfExporter`) | Apache PDFBox 3.0.8 + fontbox + commons-logging (B4J only; B4A uses the HTML print path) |
+| DOCX, XLSX, HTML, CSV, JSON, XML | none |
+
+This keeps a PDF-only application from depending on spreadsheet
+libraries, and vice versa, at the jar layer (see ADR 0006).
 
 1. Propose the dependency in an issue, naming version and licence.
 2. Add the row here with size, platform support, and reason.

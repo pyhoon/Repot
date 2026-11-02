@@ -140,6 +140,11 @@ cd <project folder>
   is padded/prefix-limited in the logs; write detailed results to a file
   (`File.WriteString(DirInternal, ...)`) and mirror a short summary to
   the log.
+- **`.b4xlib` manifest `Version` must be a two-part numeric value**
+  (e.g. `1.0`). A three-part value (`1.0.0`) is rejected with
+  `Input string was not in a correct format` when the library is used.
+  The in-code `ReportVersion.LibraryVersion` string is unaffected and may
+  use three parts.
 - Deployment loop (emulator-5554): build →
   `<adb> install -r Tests.apk` → `am force-stop` → `logcat -c` →
   `am start -n b4a.example/.main` → wait for the run → `logcat -d` and

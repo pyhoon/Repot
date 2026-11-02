@@ -5,7 +5,7 @@
 **Ecosystem:** B4X (B4J first, B4A second)\
 **Template format:** Versioned JSON, `.repot` extension\
 **License:** MIT, all components\
-**Current stage:** M9 examples, docs, packaging, CI hardening, release next
+**Current stage:** v1.0.0 released (M9 complete); tag pending user action
 
 ---
 
@@ -165,7 +165,7 @@ per week. They are planning ranges, not commitments.
 | M6 | Expressions, grouping, aggregates, conditional rules | done |
 | M7 | DOCX and XLSX export | done |
 | M8 | B4A adapter, HTML print path, cross-platform comparison | done |
-| M9 | Examples, docs, packaging, CI hardening, release | 1–2 weeks |
+| M9 | Examples, docs, packaging, CI hardening, release | done |
 
 Indicative: v0.1 at M0–M5 (about 10–13 weeks); v1.0 at M0–M9 (about
 17–24 weeks). B4A depth is the largest source of variance.

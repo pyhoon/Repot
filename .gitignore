@@ -10,3 +10,8 @@ Desktop.ini
 
 # Test run output
 fixture-check.txt
+
+# M9 build artifacts
+dist/
+**/out/
+

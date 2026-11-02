@@ -19,8 +19,8 @@ and what is explicitly best-effort. It is the contract behind the phrase
 | HTML export (flow mode) | 0.2 | 0.2 | 1.0 | n/a |
 | CSV / JSON export | 0.1 | 0.1 | 1.0 | -- |
 | XML export | 0.2 | 0.2 | 1.0 | -- |
-| DOCX export | 1.0 | 1.0 | -- | -- |
-| XLSX export | 1.x | 1.x | -- | -- |
+| DOCX export | 1.0 | 1.0 | 1.0 (verified) | -- |
+| XLSX export | 1.x | 1.x | 1.0 (verified) | -- |
 | Native preview | 1.0 (WebView) | n/a | 1.0 | n/a |
 | Print | 1.0 | n/a | 1.0 | browser |
 | B4i | -- | -- | -- | -- |

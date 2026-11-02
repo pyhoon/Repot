@@ -8,16 +8,14 @@ by the host application into paginated documents and structured exports.
 The same template is intended to work from B4J desktop, B4J server, and
 B4A, and to render to HTML for browsers.
 
-> **Project status: M8 B4A adapter, HTML print path, cross-platform comparison next.**
+> **Project status: v1.0.0 (M9 complete). Tag pending.**
 >
-> The repository contains design documentation, the fixture set with layout
-> goldens, a B4J fixture checker, and the engine modules: template model,
-> `.b4xr` loader, canonical writer, validation, dataset/parameter binding,
-> render-document types, a headless text measurement adapter, band layout,
-> pagination with render-document emission, and unit tests. The adapter and
-> render-document contracts are accepted and the fixture-driven schema
-> review is signed off. There is **no exporter yet**; PDF, HTML and data
-> exporters are planned and must not be read as implemented.
+> M8 complete: the B4A adapter runs the full engine suite (305 checks, 0
+> errors on emulator-5554), matching the B4J suite (382 checks, 0 errors).
+> Exporters (PDF, HTML, CSV, JSON, XML, DOCX, XLSX) shipped in M3–M7 and
+> run on both platforms except PDF, which is B4J-only for v1.x (B4A uses
+> the HTML print path). `tools/ci.ps1 -RunEmulator` is the cross-platform
+> gate and exits 0.
 
 ## Why this exists
 

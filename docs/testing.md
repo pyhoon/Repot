@@ -212,6 +212,11 @@ The harness is a B4J console application; it does not need the IDE. Tests
 are plain assertion subs and a small runner, so the project does not need
 JUnit or any test framework.
 
+`tools/ci.ps1` wraps the whole pipeline: B4J library build, fixture
+suite, B4A library build, and (with `-RunEmulator`) the B4A suite on a
+connected device. It exits 0 only when every enabled gate passes. Run
+`tools/ci.ps1 -RunEmulator` for the full cross-platform gate.
+
 Windows-only CI is acceptable and documented. B4A builds need the Android
 SDK and a keystore, so they are a manual gate, not a CI job, initially.
 
