@@ -10,10 +10,12 @@ Version=10.7
 ' fires on completion. Use with B4A Wait For.
 
 Sub Process_Globals
+	Private mSourceDir As String
 End Sub
 
 ' Vector PDF via the Printing library's PdfDocument canvas (synchronous).
-Public Sub PrintVectorPdf(Doc As ReportRenderDocument, OutputPath As String) As Boolean
+Public Sub PrintVectorPdf(Doc As ReportRenderDocument, OutputPath As String, SourceDir As String) As Boolean
+	mSourceDir = SourceDir
 	Dim pdf As PdfDocument
 	pdf.Initialize
 	Dim i As Int
@@ -24,7 +26,7 @@ Public Sub PrintVectorPdf(Doc As ReportRenderDocument, OutputPath As String) As 
 		Dim k As Int
 		For k = 0 To page.Ops.Size - 1
 			Dim op As ReportDrawOp = page.Ops.Get(k)
-			DrawOp(canvas, op, page.Height)
+			DrawOp(canvas, op)
 		Next
 		pdf.FinishPage
 	Next
@@ -40,7 +42,7 @@ Public Sub PrintVectorPdf(Doc As ReportRenderDocument, OutputPath As String) As 
 	Return File.Exists(dir, name)
 End Sub
 
-Private Sub DrawOp (canvas As Canvas, op As ReportDrawOp, pageHeight As Double)
+Private Sub DrawOp (canvas As Canvas, op As ReportDrawOp)
 	Select Case op.OpType
 		Case "text"
 			Dim tf As Typeface
@@ -63,24 +65,62 @@ Private Sub DrawOp (canvas As Canvas, op As ReportDrawOp, pageHeight As Double)
 			End If
 			tf = Typeface.CreateNew(base, style)
 			Dim baseline As Double = op.Y + op.Baseline
-			canvas.DrawText(op.Text, op.X, baseline, tf, op.FontSize, ParseColor(op.Colour), op.Align.ToUpperCase)
+			' CanvasWrapper treats TextSize as dp; the PDF canvas is 72 dpi.
+			Dim ptSize As Double = op.FontSize / GetDeviceLayoutValues.Scale
+			Dim anchorX As Double = op.X
+			Dim al As String = op.Align.ToUpperCase
+			If al = "RIGHT" Then
+				anchorX = op.X + op.Width
+			Else If al = "CENTER" Then
+				anchorX = op.X + op.Width / 2
+			End If
+			' Clip to the element box so small font-metric differences cannot
+			' spill into the next column (the layout engine already wrapped).
+			Dim clipTop As Double = op.Y - 2
+			Dim clipBottom As Double = op.Y + op.Height + 2
+			Dim clipRight As Double = op.X + op.Width
+			Dim clipPath As Path
+			clipPath.Initialize(op.X, clipTop)
+			clipPath.LineTo(clipRight, clipTop)
+			clipPath.LineTo(clipRight, clipBottom)
+			clipPath.LineTo(op.X, clipBottom)
+			clipPath.LineTo(op.X, clipTop)
+			canvas.ClipPath(clipPath)
+			canvas.DrawText(op.Text, anchorX, baseline, tf, ptSize, ParseColor(op.Colour), al)
+			canvas.RemoveClip
 		Case "line"
-			Dim y1 As Double = op.Y
-			Dim y2 As Double = op.Y2
-			canvas.DrawLine(op.X, y1, op.X2, y2, ParseColor(op.Colour), op.LineWidth)
+			canvas.DrawLine(op.X, op.Y, op.X2, op.Y2, ParseColor(op.Colour), op.LineWidth)
 		Case "rect"
-			Dim ry As Double = op.Y
 			Dim c As Int = ParseColor(op.FillColour)
 			Dim r As Rect
-			r.Initialize(op.X, ry, op.X + op.Width, ry + op.Height)
+			r.Initialize(op.X, op.Y, op.X + op.Width, op.Y + op.Height)
 			If op.FillColour <> "" And op.FillColour <> "transparent" Then
 				canvas.DrawRect(r, c, True, 0)
 			End If
 			If op.LineWidth > 0 Then
 				canvas.DrawRect(r, ParseColor(op.Colour), False, op.LineWidth)
 			End If
+		Case "image"
+			Try
+				Dim bmp As Bitmap = LoadBitmap(mSourceDir, op.ResourcePath)
+				Dim dr As Rect
+				dr.Initialize(op.X, op.Y, op.X + op.Width, op.Y + op.Height)
+				canvas.DrawBitmap(bmp, Null, dr)
+			Catch
+				Log("image err: " & LastException.Message)
+			End Try
+		Case "clip"
+			Dim clipR2 As Double = op.X + op.Width
+			Dim clipB2 As Double = op.Y + op.Height
+			Dim cp As Path
+			cp.Initialize(op.X, op.Y)
+			cp.LineTo(clipR2, op.Y)
+			cp.LineTo(clipR2, clipB2)
+			cp.LineTo(op.X, clipB2)
+			cp.LineTo(op.X, op.Y)
+			canvas.ClipPath(cp)
 		Case "restore"
-			' no-op on canvas
+			canvas.RemoveClip
 	End Select
 End Sub
 

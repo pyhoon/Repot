@@ -31,7 +31,7 @@ Public Sub Export (Doc As ReportRenderDocument, OutputPath As String) As Boolean
 	mOutPath = OutputPath
 	#If B4A
 	'Android uses the vector canvas path (Printing library) instead of PDFBox.
-	Return ReportB4APrint.PrintVectorPdf(Doc, OutputPath)
+	Return ReportB4APrint.PrintVectorPdf(Doc, OutputPath, SourceDir)
 	#End If
 	Dim jo As JavaObject
 	jo.InitializeStatic("b4j.example.reportpdfexporter")

@@ -145,11 +145,21 @@ cd <project folder>
   `DrawText(text, x, y, typeface, size, color, align)`,
   `DrawRect(Rect, color, filled, strokeWidth)`,
   `DrawLine(x1,y1,x2,y2,color,strokeWidth)`, `WriteToStream`.
-  Coordinate origin is top-left; flip Y for the engine's bottom-left
-  render doc (baseline = pageHeight - op.Y - op.Baseline).
-  `Typeface.CreateNew(baseTypeface, style)` takes a base Typeface (not a
-  family string); map family name to `Typeface.SANS_SERIF`/`SERIF`/
-  `MONOSPACE` first.
+  The canvas origin is top-left, so no Y flip is needed for a top-left
+  render document. `Typeface.CreateNew(baseTypeface, style)` takes a base
+  Typeface (not a family string); map family name to
+  `Typeface.SANS_SERIF`/`SERIF`/`MONOSPACE` first.
+  **Text size is density-scaled.** `Canvas.DrawText` treats `TextSize` as
+  dp, while the PDF canvas is 72 dpi: divide the point size by
+  `GetDeviceLayoutValues.Scale`, or text renders ~2-3x too large and
+  overlaps. Coordinates are not density-scaled.
+  **Alignment:** the render document's `x` is the left edge of the box.
+  `DrawText` with `"RIGHT"`/`"CENTER"` anchors at that x, so pass
+  `x + width` for right and `x + width/2` for centre.
+  **Clipping:** `CanvasWrapper` has no `Save`/`Restore`/`ClipRect`; use
+  `ClipPath` with a rectangular `Path` (4 × `LineTo`) and `RemoveClip`.
+  **Images:** `LoadBitmap(SourceDir, ResourcePath)` then
+  `DrawBitmap(bitmap, Null, DestRect)`.
 - **`.b4xlib` manifest `Version` must be a two-part numeric value**
   (e.g. `1.0`). A three-part value (`1.0.0`) is rejected with
   `Input string was not in a correct format` when the library is used.

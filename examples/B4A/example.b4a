@@ -1,4 +1,4 @@
-﻿Build1=Default,b4a.example
+Build1=Default,b4a.example
 Group=Default Group
 Library1=core
 Library2=repot
@@ -89,12 +89,12 @@ Sub RunExample
 		Log("HTML -> " & htmlPath)
 		lbl.Text = "HTML exported:" & CRLF & htmlPath
 		' Vector PDF via Printing library (sync)
-		Dim vPath As String = File.Combine(outDir, "invoice-vector.pdf")
-		Dim vok As Boolean = ReportB4APrint.PrintVectorPdf(doc, vPath)
+		Dim vPath As String = File.Combine(outDir, "invoice.pdf")
+		Dim vok As Boolean = ReportB4APrint.PrintVectorPdf(doc, vPath, def.SourceDir)
 		Log("PDF(vector) -> " & vPath & " ok=" & vok)
 		If vok Then
-			lbl.Text = lbl.Text & CRLF & "PDF exported:" & CRLF & vPath
-			ReportB4AOpen.OpenPdf(outDir, "invoice-vector.pdf")
+			lbl.Text = lbl.Text & CRLF & "Vector PDF:" & CRLF & vPath
+			ReportB4AOpen.OpenPdf(outDir, "invoice.pdf")
 		End If
 	Else
 		lbl.Text = "HTML export failed"
