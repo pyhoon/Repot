@@ -1,4 +1,4 @@
-B4A=true
+﻿B4A=true
 Group=Export
 ModulesStructureVersion=1
 Type=Code
