@@ -1,12 +1,13 @@
-﻿AppType=StandardJava
+AppType=StandardJava
 Build1=Default,b4j.example
 Group=Default Group
 Library1=jcore
 Library2=json
 Library3=javaobject
 Library4=repot
+Library5=jfx
 NumberOfFiles=0
-NumberOfLibraries=4
+NumberOfLibraries=5
 NumberOfModules=0
 Version=10.7
 @EndOfDesignText@
@@ -82,7 +83,13 @@ Sub AppStart (Args() As String)
     Dim pdfPath As String = File.Combine(outDir, "invoice.pdf")
     Dim pdf As ReportPdfExporter
     pdf.Initialize(diags)
-    If pdf.Export(doc, pdfPath) Then Log("PDF  -> " & pdfPath) Else Log("PDF export failed (B4J only)")
+    If pdf.Export(doc, pdfPath) Then
+        Log("PDF  -> " & pdfPath)
+        Dim fx As JFX
+        fx.ShowExternalDocument(File.GetUri(outDir, "invoice.pdf"))
+    Else
+        Log("PDF export failed (B4J only)")
+    End If
 
     For Each d As ReportDiagnostic In diags.Items
         Log("diag: " & d.Code & " " & d.Message)
