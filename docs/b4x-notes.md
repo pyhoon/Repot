@@ -271,8 +271,16 @@ verified section:
 - Zip/`Archiver` support for the office-document writer.
 - XUI image loading and bitmap access from a headless B4J app.
 - PDFBox classes and the B4J wrapper jar layout.
-- Android WebView printing, `PrintDocumentAdapter`, and
-  `PdfDocument`: the B4A print path for HTML/PDF output (planned).
+- Android WebView printing: verified on API 36 (emulator-5554):
+  - `Context.getSystemService("print")` returns a non-null
+    `android.print.PrintManager`.
+  - `WebView.createPrintDocumentAdapter(String)` returns a non-null
+    `PrintDocumentAdapter` (verified via JavaObject).
+  - `android.print.PrintAttributes.Builder` is a nested class, not a
+    static method: instantiate with
+    `jo.InitializeNewInstance("android.print.PrintAttributes$Builder", ...)`.
+  - Driving the adapter to a file programmatically requires calling
+    `onLayout`/`onWrite` with callback interfaces (see M10).
 - PDFBox on Android (`PdfBox-Android`): not planned for v1.x.
 - `ExitApplication` semantics in a console app.
 

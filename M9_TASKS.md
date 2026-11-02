@@ -18,13 +18,13 @@ is complete (B4J: 382 checks / 0 errors; B4A: 305 checks / 0 errors).
 ## Task 2: Packaging (.b4xlib) — COMPLETE
 - [x] tools/package-b4xlib.ps1: builds + packages 45 modules + jar/xml + manifest.
 - [x] manifest.txt: Version=1.0.0, DependsOn rows.
-- [x] Verified: demo/examples/B4J builds against installed Repot library (HTML+PDF produced).
-- [x] Verified: demo/examples/B4A builds and runs against installed Repot .b4xlib on emulator-5554 ("Rendered 1 page(s)", HTML exported).
+- [x] Verified: examples/B4J builds against installed Repot library (HTML+PDF produced).
+- [x] Verified: examples/B4A builds and runs against installed Repot .b4xlib on emulator-5554 ("Rendered 1 page(s)", HTML exported).
 - [x] Output: dist/Repot.b4xlib.
 
 ## Task 3: Example application — COMPLETE
-- [x] demo/examples/B4J: console example using installed Repot library; loads invoice fixture, exports HTML + PDF, verified (1 page, PDF produced).
-- [x] demo/examples/B4A: example app bundling invoice fixture, exports HTML to internal storage, verified on emulator-5554 ("Rendered 1 page(s)", HTML path logged).
+- [x] examples/B4J: console example using installed Repot library; loads invoice fixture, exports HTML + PDF, verified (1 page, PDF produced).
+- [x] examples/B4A: example app bundling invoice fixture, exports HTML to internal storage, verified on emulator-5554 ("Rendered 1 page(s)", HTML path logged).
 
 ## Task 4: CI hardening — COMPLETE
 - [x] tools/ci.ps1: B4J build + fixtures + B4A build + optional emulator run; exit 0 gate. Verified end-to-end (exit 0, including emulator run).

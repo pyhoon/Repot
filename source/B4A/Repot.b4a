@@ -48,6 +48,7 @@ Module42=|relative|..\ReportUnits
 Module43=|relative|..\ReportValidator
 Module44=|relative|..\ReportVersion
 Module45=|relative|..\ReportXlsxExporter
+Module46=|relative|..\ReportB4APrint
 Module5=|relative|..\ReportDataBinder
 Module6=|relative|..\ReportDataExporter
 Module7=|relative|..\ReportDataSet
@@ -55,7 +56,7 @@ Module8=|relative|..\ReportDataSetDef
 Module9=|relative|..\ReportDefinition
 NumberOfFiles=1
 NumberOfLibraries=5
-NumberOfModules=45
+NumberOfModules=46
 Version=14.2
 @EndOfDesignText@
 #Region  Project Attributes 
