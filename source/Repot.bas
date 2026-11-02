@@ -146,11 +146,41 @@ Public Sub ExportPdf (OutputPath As String) As Boolean
 	Return ex.Export(Result.RenderDocument, OutputPath)
 End Sub
 
-Public Sub ExportHtml (OutputPath As String) As Boolean
-	Dim ex As ReportHtmlExporter
-	ex.Initialize(Diagnostics)
-	Return ex.Export(Result.RenderDocument, OutputPath)
+'SaveAs: open the system file picker and copy the PDF to the user-chosen location.
+'Returns the new path, or empty string if cancelled.
+'Must be called from Activity_Result (B4A) or has no effect (B4J).
+Public Sub SaveAsPdf (OriginalPath As String = "") As String
+	#If B4A
+	'TODO: B4A activity should start an Android SAF CreateDocument intent:
+	'  Dim intent As Intent
+	'  intent.Initialize("android.intent.action.CreateDocument", "")
+	'  intent.PutExtra("android.intent.extra.MIME_TYPE", "application/pdf")
+	'  intent.PutExtra("android.intent.extra.TITLE", "report.pdf")
+	'  Activity.StartActivityForResult(intent, 1)
+	'The Activity_Result sub should then call SaveAsPdf_Result(RequestCode, ResultCode, Data)
+	Log("SaveAs: B4A - implement SAF CreateDocument intent in Activity_Result")
+	Return ""
+	#Else If B4J
+	'B4J: return the original path (the user can use the IDE file save dialog)
+	Log("SaveAs: B4J - use the existing path or IDE save dialog")
+	Return OriginalPath
+	#End If
 End Sub
+
+'B4A activity result handler for the SaveAs file picker.
+'Must be called from Activity_Result sub.
+'The B4A activity should implement the SAF CreateDocument intent and
+'call SaveAsPdf_Result from its Activity_Result event. This sub is not
+'included in the engine module because the Activity object is not available
+'in code modules. The B4A activity code should be:
+'
+'Sub Activity_Result (RequestCode As Int, ResultCode As Int, IntentData As Object)
+'  If RequestCode = 1 And ResultCode = Activity.RESULT_OK Then
+'    If IntentData Is Map Then
+'      SaveAsPdf_Result(RequestCode, ResultCode, IntentData)
+'    End If
+'  End If
+'End Sub
 
 Public Sub ExportCsv (OutputPath As String) As Boolean
 	Dim ex As ReportDataExporter
@@ -186,6 +216,12 @@ Public Sub ExportXlsx (OutputPath As String) As Boolean
 	Dim ex As ReportXlsxExporter
 	ex.Initialize(mDef, mBinder, Diagnostics)
 	Return ex.Export(DefaultDataSet, OutputPath)
+End Sub
+
+Public Sub ExportHtml (OutputPath As String) As Boolean
+	Dim ex As ReportHtmlExporter
+	ex.Initialize(Diagnostics)
+	Return ex.Export(Result.RenderDocument, OutputPath)
 End Sub
 
 'Prints an already exported PDF (B4A: system dialog; B4J: opens the viewer).
