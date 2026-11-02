@@ -1,4 +1,5 @@
 # B4J build output
+**/AutoBackups/
 **/Objects/
 *.class
 

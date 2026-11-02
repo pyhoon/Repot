@@ -50,7 +50,7 @@ Public Sub ExportCsv (DataSetName As String, OutputPath As String) As Boolean
 				sb.Append(CsvValue(v))
 			Next
 			sb.Append(CRLF)
-#If B4A
+			#If B4A
 			Dim fp As String = OutputPath
 			Dim i As Int = fp.LastIndexOf("/")
 			If i > -1 Then
@@ -64,9 +64,9 @@ Public Sub ExportCsv (DataSetName As String, OutputPath As String) As Boolean
 				fn = fn.SubString(i + 1)
 			End If
 			File.WriteString(fp, fn, sb.ToString)
-#Else
+			#Else
 			File.WriteString(File.GetFileParent(OutputPath), File.GetName(OutputPath), sb.ToString)
-#End If
+			#End If
 			Return True
 		Next
 	Catch
@@ -102,7 +102,7 @@ Public Sub ExportJson (DataSetName As String, OutputPath As String) As Boolean
 			sb.Append("}")
 		Next
 		sb.Append("]")
-#If B4A
+		#If B4A
 		Dim fp As String = OutputPath
 		Dim i As Int = fp.LastIndexOf("/")
 		If i > -1 Then
@@ -116,9 +116,9 @@ Public Sub ExportJson (DataSetName As String, OutputPath As String) As Boolean
 			fn = fn.SubString(i + 1)
 		End If
 		File.WriteString(fp, fn, sb.ToString)
-#Else
+		#Else
 		File.WriteString(File.GetFileParent(OutputPath), File.GetName(OutputPath), sb.ToString)
-#End If
+		#End If
 		Return True
 	Catch
 		Log(LastException.Message)
@@ -150,7 +150,7 @@ Public Sub ExportXml (DataSetName As String, OutputPath As String, RootName As S
 			sb.Append("  </row>").Append(CRLF)
 		Next
 		sb.Append("</").Append(RootName).Append(">").Append(CRLF)
-#If B4A
+		#If B4A
 		Dim fp As String = OutputPath
 		Dim i As Int = fp.LastIndexOf("/")
 		If i > -1 Then
@@ -164,9 +164,9 @@ Public Sub ExportXml (DataSetName As String, OutputPath As String, RootName As S
 			fn = fn.SubString(i + 1)
 		End If
 		File.WriteString(fp, fn, sb.ToString)
-#Else
+		#Else
 		File.WriteString(File.GetFileParent(OutputPath), File.GetName(OutputPath), sb.ToString)
-#End If
+		#End If
 		Return True
 	Catch
 		Log(LastException.Message)
