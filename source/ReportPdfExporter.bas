@@ -79,7 +79,7 @@ Private Sub DrawOp (jo As JavaObject, cs As Object, op As ReportDrawOp)
 		Case "text"
 			Dim font As Object = jo.RunMethod("resolveFont", Array(op.FontName, op.Bold, op.Italic))
 			Dim pdfBaseline As Double = mPageHeight - op.Y - op.Baseline
-			jo.RunMethod("drawText", Array(cs, font, op.FontSize, op.X, pdfBaseline, op.Text, op.Colour))
+			jo.RunMethod("drawText", Array(cs, font, op.FontSize, op.X, pdfBaseline, op.Text, op.Colour, op.Align, op.Width))
 		Case "image"
 			Dim pdfY As Double = mPageHeight - op.Y - op.Height
 			jo.RunMethod("drawImage", Array(cs, mJavaDoc, op.ResourcePath, op.X, pdfY, op.Width, op.Height, op.Fit, SourceDir))
@@ -233,12 +233,26 @@ private static String safeText(PDFont font, String text) {
     return sb.toString();
 }
 
-public static void drawText(Object cs, Object font, double size, double x, double y, String text, String colour) throws Exception {
+public static void drawText(Object cs, Object font, double size, double x, double y, String text, String colour, String align, double boxWidth) throws Exception {
     PDPageContentStream s = (PDPageContentStream)cs;
+    String safe = safeText((PDFont)font, text);
+    float drawX = (float)x;
+    if (align != null && align.length() > 0) {
+        try {
+            float textWidth = ((PDFont)font).getStringWidth(safe) / 1000f * (float)size;
+            if (align.equalsIgnoreCase("right")) {
+                drawX = (float)(x + boxWidth - textWidth);
+            } else if (align.equalsIgnoreCase("center")) {
+                drawX = (float)(x + (boxWidth - textWidth) / 2.0);
+            }
+        } catch (Exception ignored) {
+            // keep left alignment if the font cannot measure the string
+        }
+    }
     s.beginText();
     s.setFont((PDFont)font, (float)size);
-    s.newLineAtOffset((float)x, (float)y);
-    s.showText(safeText((PDFont)font, text));
+    s.newLineAtOffset(drawX, (float)y);
+    s.showText(safe);
     s.endText();
 }
 

@@ -24,7 +24,8 @@
       "overflow": "grow",
       "format": { "type": "number", "decimals": 2, "grouping": true }
     },
-    "total": { "font": "body", "size": 11, "bold": true, "align": "right" }
+    "total": { "font": "body", "size": 11, "bold": true, "align": "right" },
+    "totalValue": { "font": "body", "size": 11, "bold": true, "align": "right", "format": { "type": "number", "decimals": 2, "grouping": true } }
   },
   "parameters": [
     { "name": "ReportTitle", "type": "string", "required": true },
@@ -98,7 +99,7 @@
       "elements": [
         { "type": "field", "id": "rowcount", "bounds": [0, 8, 240, 16], "style": "label", "value": "Rows: {RowCount}" },
         { "type": "text", "id": "total-label", "bounds": [300, 8, 80, 16], "style": "total", "text": "Total" },
-        { "type": "field", "id": "total-value", "bounds": [380, 8, 130, 16], "style": "total", "value": "{TotalAmount}" }
+        { "type": "field", "id": "total-value", "bounds": [380, 8, 130, 16], "style": "totalValue", "value": "{TotalAmount}" }
       ]
     },
     {

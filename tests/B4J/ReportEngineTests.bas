@@ -1,4 +1,4 @@
-B4A=false
+﻿B4A=false
 Group=Tests
 ModulesStructureVersion=1
 Type=Class

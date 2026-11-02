@@ -23,7 +23,8 @@
       "overflow": "grow",
       "format": { "type": "number", "decimals": 2, "grouping": true }
     },
-    "total": { "font": "body", "size": 11, "bold": true, "align": "right" }
+    "total": { "font": "body", "size": 11, "bold": true, "align": "right" },
+    "totalValue": { "font": "body", "size": 11, "bold": true, "align": "right", "format": { "type": "number", "decimals": 2, "grouping": true } }
   },
   "parameters": [
     { "name": "InvoiceNumber", "type": "string", "required": true },
@@ -112,7 +113,7 @@
       "elements": [
         { "type": "field", "id": "lbl-lines", "bounds": [0, 6, 240, 16], "style": "label", "value": "Items: {LineCount}" },
         { "type": "text", "id": "lbl-total", "bounds": [300, 6, 100, 16], "style": "total", "text": "Total" },
-        { "type": "field", "id": "fld-total", "bounds": [410, 6, 100, 16], "style": "total", "value": "{NetTotal}" }
+        { "type": "field", "id": "fld-total", "bounds": [410, 6, 100, 16], "style": "totalValue", "value": "{NetTotal}" }
       ]
     },
     {
