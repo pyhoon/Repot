@@ -5,7 +5,7 @@
 **Ecosystem:** B4X (B4J first, B4A second)\
 **Template format:** Versioned JSON, `.repot` extension\
 **License:** MIT, all components\
-**Current stage:** v1.1.0 (M10 complete); B4A vector PDF, B4A suite 314 checks
+**Current stage:** v1.1.0 (M10 complete); B4A vector PDF, B4A suite 318 checks
 
 ---
 
