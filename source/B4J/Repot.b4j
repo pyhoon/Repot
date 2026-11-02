@@ -51,8 +51,7 @@ Module7=|relative|..\ReportDataSet
 Module8=|relative|..\ReportDataSetDef
 Module9=|relative|..\ReportDefinition
 NumberOfFiles=0
-Library4=jfx
-NumberOfLibraries=4
+NumberOfLibraries=3
 NumberOfModules=46
 Version=10.7
 @EndOfDesignText@
