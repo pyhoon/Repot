@@ -66,6 +66,8 @@ Implemented in v1.1:
 | `ExportPdf`, `ExportHtml` | Render-document exporters |
 | `ExportCsv`, `ExportJson`, `ExportXml`, `ExportDocx`, `ExportXlsx` | Data exporters (`DefaultDataSet`) |
 | `ExportCsvOf(DataSet, Path)` | Explicit dataset |
+| `PrintPdf(Dir, File, Job)` | B4A system print dialog; B4J opens the viewer |
+| `PrintHtml(Job)` | B4A prints the rendered HTML |
 
 Planned:
 

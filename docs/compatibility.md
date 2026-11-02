@@ -21,8 +21,8 @@ and what is explicitly best-effort. It is the contract behind the phrase
 | XML export | 0.2 | 0.2 | 1.0 | -- |
 | DOCX export | 1.0 | 1.0 | 1.0 (verified) | -- |
 | XLSX export | 1.x | 1.x | 1.0 (verified) | -- |
-| Native preview | planned (WebView) | n/a | planned | n/a |
-| Print | planned | n/a | planned | browser |
+| Native preview | host WebView (`ReportHtmlExporter.ToHtml`) | n/a | host WebView (`ToHtml`) | n/a |
+| Print | opens the PDF in the system viewer | n/a | 1.0 (system print dialog, `ReportPrint`) | browser |
 | B4i | -- | -- | -- | -- |
 
 B4i is not claimed. Nothing in the design forbids it, but no support is

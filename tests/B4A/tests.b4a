@@ -1,13 +1,10 @@
-﻿Build1=Default,b4a.example
-File1=Layout.bal
-FileGroup1=Default Group
+Build1=Default,b4a.example
 Group=Default Group
 Library1=core
-Library2=ime
+Library2=javaobject
 Library3=json
-Library4=xui
-Library5=javaobject
-Library6=printing
+Library4=printing
+Library5=ime
 ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="36"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~CreateResourceFromFile(Macro, Themes.LightTheme)~\n~'End of default text.~\n~
 Module1=|relative|..\..\source\ReportAggregateDef
 Module10=|relative|..\..\source\ReportDefinition
@@ -55,13 +52,14 @@ Module48=|relative|..\..\source\ReportXlsxExporter
 Module49=|relative|..\..\source\Repot
 Module5=|relative|..\..\source\ReportBandLayout
 Module50=|relative|..\..\source\Utility
+Module51=|relative|..\..\source\ReportPrint
 Module6=|relative|..\..\source\ReportDataBinder
 Module7=|relative|..\..\source\ReportDataExporter
 Module8=|relative|..\..\source\ReportDataSet
 Module9=|relative|..\..\source\ReportDataSetDef
-NumberOfFiles=1
-NumberOfLibraries=6
-NumberOfModules=50
+NumberOfFiles=0
+NumberOfLibraries=5
+NumberOfModules=51
 Version=14.2
 @EndOfDesignText@
 #Region  Project Attributes 
@@ -71,6 +69,9 @@ Version=14.2
 	'SupportedOrientations possible values: unspecified, landscape or portrait.
 	#SupportedOrientations: unspecified
 	#EdgeToEdgeOldDevices: True
+	#if AAB
+	#R8Optimizer: True
+	#End If	
 #End Region
 
 #Region  Activity Attributes 

@@ -187,3 +187,15 @@ Public Sub ExportXlsx (OutputPath As String) As Boolean
 	ex.Initialize(mDef, mBinder, Diagnostics)
 	Return ex.Export(DefaultDataSet, OutputPath)
 End Sub
+
+'Prints an already exported PDF (B4A: system dialog; B4J: opens the viewer).
+Public Sub PrintPdf (Dir As String, FileName As String, JobName As String) As Boolean
+	Return ReportPrint.PrintPdf(Dir, FileName, JobName)
+End Sub
+
+'B4A only: prints the rendered report as HTML.
+Public Sub PrintHtml (JobName As String) As Boolean
+	Dim ex As ReportHtmlExporter
+	ex.Initialize(Diagnostics)
+	Return ReportPrint.PrintHtml(JobName, ex.ToHtml(Result.RenderDocument))
+End Sub
