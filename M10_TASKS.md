@@ -47,6 +47,16 @@ real implementation, or (preferred) a dedicated B4A print module.
 - [x] `docs/dependencies.md`: no new deps (platform APIs).
 - [x] `docs/compatibility.md`: B4A PDF row → 1.0 (print path, verified).
 
+## Task 7: Future enhancements (from B4X forum references)
+- [ ] Vector PDF on B4A: replay render ops onto the Printing library's
+  `PdfDocument` canvas (`Printing.jar`, already installed) instead of
+  rasterising the WebView. Would give vector text and sync `Export`.
+  References: Printing and Pdf creation (Erel), B4X PDF Generator (spsp).
+- [ ] SaveAs support: let the user choose the output folder via the
+  Storage Access Framework (SaveAs thread). Currently writes to the
+  provided path (internal/external storage).
+- [ ] B4X Open PDF: open the generated file in a viewer.
+
 ## Exit criteria
 - [ ] B4A exports a non-empty PDF from invoice-basic on emulator-5554.
 - [ ] `tools/ci.ps1 -RunEmulator` still exits 0 (B4A suite gains PDF checks, 0 errors).
