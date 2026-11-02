@@ -4,15 +4,21 @@ Group=Default Group
 Library1=jcore
 Library2=json
 Library3=javaobject
-Library4=repot
-Library5=jfx
+Library4=Repot
 NumberOfFiles=0
-NumberOfLibraries=5
+NumberOfLibraries=4
 NumberOfModules=0
 Version=10.7
 @EndOfDesignText@
 ' Example: render the invoice-basic fixture and export HTML + PDF.
 ' Run: java -jar Objects\example.jar [fixtureFolder] [outputFolder]
+#If Java
+public static void OpenPdf(String path) {
+    try { java.awt.Desktop.getDesktop().open(new java.io.File(path)); }
+    catch (Exception e) { System.out.println("open err: " + e); }
+}
+#End If
+
 Sub Process_Globals
 End Sub
 
@@ -85,8 +91,9 @@ Sub AppStart (Args() As String)
     pdf.Initialize(diags)
     If pdf.Export(doc, pdfPath) Then
         Log("PDF  -> " & pdfPath)
-        Dim fx As JFX
-        fx.ShowExternalDocument(File.GetUri(outDir, "invoice.pdf"))
+        Dim jo As JavaObject
+        jo.InitializeStatic("b4j.example.main")
+        jo.RunMethod("OpenPdf", Array(File.Combine(outDir, "invoice.pdf")))
     Else
         Log("PDF export failed (B4J only)")
     End If

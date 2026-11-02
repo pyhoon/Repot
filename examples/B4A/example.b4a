@@ -4,9 +4,9 @@ Library1=core
 Library2=repot
 Library3=json
 Library4=javaobject
-ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="36"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~CreateResourceFromFile(Macro, Themes.LightTheme)~\n~'End of default text.~\n~
+Library5=fileprovider
+ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="36"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~CreateResourceFromFile(Macro, Themes.LightTheme)~\n~AddApplicationText(~\n~<provider android:name="android.support.v4.content.FileProvider" android:authorities="$PACKAGE$.provider" android:exported="false" android:grantUriPermissions="true">~\n~    <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/provider_paths" />~\n~</provider>)~\n~CreateResource(xml, provider_paths,~\n~<files-path name="name" path="shared" />)~\n~'End of default text.~\n~
 NumberOfFiles=0
-Library5=FileProvider
 NumberOfLibraries=5
 NumberOfModules=0
 Version=14.2
@@ -16,6 +16,9 @@ Version=14.2
 	#ApplicationLabel: Repot Example
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
+	#if AAB
+	#R8Optimizer: True
+	#End If
 #End Region
 
 #Region  Activity Attributes
