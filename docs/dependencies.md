@@ -71,13 +71,15 @@ negative). See [b4x-notes.md](b4x-notes.md) for the verified B4A facts.
 |-----------|---------|---------|------|----------|
 | Apache PDFBox 3.0.8 | Apache-2.0 | no | moderate (fontbox, commons-logging) | **primary for B4J**; all PDFBox code is `#If B4J`-gated so the B4A build never touches it |
 | Apache PDFBox 2.0.x | Apache-2.0 | no | moderate | fallback if 3.x misbehaves |
-| OpenPDF | LGPL-2.1 / MPL-2.0 dual | no | moderate | acceptable alternative; LGPL caveat applies |
+| OpenPDF | LGPL-2.1 / MPL-2.0 dual | no | moderate | not adopted: B4J-only, and PDFBox 3 already embeds TrueType via `PDType0Font`; avoids LGPL overhead |
+| PDFjet (jPDFjet / PDFjetB4A) | commercial; evaluation watermarked; OS edition feature-limited | B4A wrapper exists | moderate | **rejected**: paid/proprietary licence conflicts with MIT-only policy |
+| Printing library (`PdfDocument`) | B4A built-in | yes | none | **adopted for B4A** vector PDF (M10) |
 | iText 5 / 7 | AGPL-3.0 or commercial | no | small | **rejected**, licence incompatible |
 | Apache FOP | Apache-2.0 | no | large | rejected: XSL-FO pipeline, not a canvas |
 | openhtmltopdf / Flying Saucer | LGPL | no | large | rejected: HTML-to-PDF is a second layout engine |
 | Headless Chromium | various | no | huge, external process | rejected: process, deployment, licence surface |
-| PdfBox-Android | Apache-2.0 | yes | large | not planned; v1.1 uses the HTML print path |
-| `android.graphics.pdf.PdfDocument` | platform API | yes | none | evaluated for B4A drawing backend later |
+| PdfBox-Android | Apache-2.0 | yes | large | not planned; B4A uses the Printing library vector canvas |
+| `android.graphics.pdf.PdfDocument` | platform API | yes | none | **adopted**: B4A vector PDF via the Printing library canvas (M10) |
 
 The PDF backend sits behind the canvas interface in
 [architecture.md](architecture.md), so this table can change without
