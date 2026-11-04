@@ -331,6 +331,8 @@ The office-formats family is complete:
 
 MIT. Everything in this repository. See [LICENSE](LICENSE).
 
+*Note on Dependencies: This library dynamically links to Apache PDFBox at runtime. Apache PDFBox is governed by the Apache License 2.0.*
+
 There is no paid tier and no plan to close any source. Funding, if it
 happens at all, will be in the form of sponsorship or paid integration
 work under separate agreement, never by withholding capability. See
