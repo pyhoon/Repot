@@ -12,6 +12,6 @@ Desktop.ini
 fixture-check.txt
 
 # M9 build artifacts
-dist/
+#dist/
 **/out/
 
