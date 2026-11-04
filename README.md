@@ -1,3 +1,17 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/repot-logo-transparent.png">
+    <img src="docs/assets/repot-logo-darkbg.png" alt="Repot logo" width="360">
+  </picture>
+</p>
+
+<p align="center">
+  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.5.0-blue" alt="version 1.5.0"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license"></a>
+  <img src="https://img.shields.io/badge/B4J-500%20checks%20%2F%200%20errors-success" alt="B4J 500 checks, 0 errors">
+  <img src="https://img.shields.io/badge/B4A-346%20checks%20%2F%200%20errors-success" alt="B4A 346 checks, 0 errors">
+</p>
+
 # Repot
 
 A cross-platform reporting and document-generation engine for the B4X
