@@ -51,6 +51,8 @@ Module49=|relative|..\..\source\ReportXlsxExporter
 Module5=|relative|..\..\source\ReportBandLayout
 Module50=|relative|..\..\source\Repot
 Module51=|relative|..\..\source\ReportPdfIntrospection
+Module53=|relative|..\..\source\ReportOdtExporter
+Module54=|relative|..\..\source\ReportOdsExporter
 Module52=|relative|..\..\source\ReportSaveAs
 Module6=|relative|..\..\source\ReportDataBinder
 Module7=|relative|..\..\source\ReportDataExporter
@@ -58,7 +60,7 @@ Module8=|relative|..\..\source\ReportDataSet
 Module9=|relative|..\..\source\ReportDataSetDef
 NumberOfFiles=0
 NumberOfLibraries=3
-NumberOfModules=52
+NumberOfModules=54
 Version=10.7
 @EndOfDesignText@
 'Repot fixture checker and engine unit-test harness.

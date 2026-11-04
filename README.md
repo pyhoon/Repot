@@ -8,7 +8,7 @@ by the host application into paginated documents and structured exports.
 The same template works from B4J desktop, B4J server, and B4A, and
 renders to HTML for browsers.
 
-> **Project status: v1.4.0 (M10–M13 complete). A `Repot` facade
+> **Project status: v1.5.0 (M10–M14 complete). A `Repot` facade
 > (load → bind → build → export/print) is implemented. B4A produces
 > vector PDF synchronously through the `Printing` library, can verify
 > exported PDFs (`GetPdfPageCount` via `PdfRenderer`), prints through
@@ -16,13 +16,14 @@ renders to HTML for browsers.
 > the Storage Access Framework (`ReportSaveAs`). The B4J PDF embeds
 > TrueType fonts, renders right-to-left text (bidi reordering + Arabic
 > shaping), and accepts a set of embedded fonts for mixed-script
-> documents. Tagged `v1.4.0`.**
+> documents. Office export covers DOCX, XLSX, ODT and ODS. Tagged
+> `v1.5.0`.**
 >
-> The full engine suite runs on both platforms: **B4J 480 checks,
-> B4A 342 checks, 0 errors on both** (emulator-5554, API 36).
-> Exporters (PDF, HTML, CSV, JSON, XML, DOCX, XLSX) shipped in
-> M3–M7 and run on both platforms. `tools/ci.ps1 -RunEmulator` is the
-> cross-platform gate and exits 0. See [CHANGELOG.md](CHANGELOG.md).
+> The full engine suite runs on both platforms: **B4J 491 checks,
+> B4A 346 checks, 0 errors on both** (emulator-5554, API 36).
+> Exporters (PDF, HTML, CSV, JSON, XML, DOCX, XLSX, ODT, ODS) shipped in
+> M3–M7 and M14 and run on both platforms. `tools/ci.ps1 -RunEmulator`
+> is the cross-platform gate and exits 0. See [CHANGELOG.md](CHANGELOG.md).
 
 ## Why this exists
 
@@ -54,9 +55,9 @@ support.
    database and never executes SQL from a template. The host application
    supplies typed data through a provider interface.
 3. **One template, several outputs, honest fidelity.** PDF is the
-   fixed-layout target. DOCX produces editable document structures, XLSX
-   produces real cells and values. CSV, XML, and JSON are data exports
-   and do not pretend to be pages. (ODT and ODS remain unscheduled.)
+   fixed-layout target. DOCX and ODT produce editable document
+   structures, XLSX and ODS produce real cells and values. CSV, XML, and
+   JSON are data exports and do not pretend to be pages.
 4. **The layout model is the product.** Text measurement, push-down,
    band overflow, and pagination are the hard parts. They are specified
    in [docs/layout.md](docs/layout.md) and exercised by fixtures before
@@ -79,12 +80,8 @@ support.
 | XML | Structured data interchange | shipped |
 | DOCX | Editable word-processing documents | shipped |
 | XLSX | Spreadsheets with real cells and values | shipped |
-| ODT | OpenDocument text | on request |
-| ODS | OpenDocument spreadsheets | on request |
-
-ODT and ODS are deliberately unscheduled. If demand appears, they are
-implemented with the same office-document writer used for DOCX and XLSX.
-No format is withheld from the MIT release.
+| ODT | OpenDocument text | shipped (v1.5, dataset as a table; string cells) |
+| ODS | OpenDocument spreadsheets | shipped (v1.5, dataset as a sheet; string cells) |
 
 ## Target platforms
 
@@ -112,7 +109,7 @@ and the M11 facts in [docs/b4x-notes.md](docs/b4x-notes.md).
   parameters ───────────────┘                          │              ├─► PDF
                                                        │              ├─► HTML
                                                        └─► data ──────┼─► CSV / JSON / XML
-                                                                      └─► DOCX / XLSX
+                                                                      └─► DOCX / XLSX / ODT / ODS
 ```
 
 Processing (binding, expressions, sorting, grouping, aggregates) is
@@ -287,6 +284,21 @@ known limitations:
   the right no longer take the medial form when the next character is
   not a joiner.
 - The `mixed-scripts` fixture exercises all of it on both platforms.
+
+## What 1.5 delivered
+
+The office-formats family is complete:
+
+- `ReportOdtExporter` and `ReportOdsExporter`: OpenDocument text and
+  spreadsheet output from the same dataset preparation as DOCX/XLSX,
+  using the same own-minimal-writer approach (zip + XML, no new
+  dependencies). The ODF package rules are honoured — `mimetype` is the
+  first zip entry and uncompressed — and the suite asserts the package
+  structure and content XML directly.
+- `Repot.ExportOdt` / `Repot.ExportOds` on the facade.
+- Known limitation, documented: cells are written as strings, matching
+  the XLSX writer's behaviour; typed numeric/date cells remain future
+  work for both office spreadsheet writers.
 
 ## License, support, and contributions
 

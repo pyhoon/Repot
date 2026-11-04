@@ -239,6 +239,18 @@ Public Sub ExportXlsx (OutputPath As String) As Boolean
 	Return ex.Export(DefaultDataSet, OutputPath)
 End Sub
 
+Public Sub ExportOdt (OutputPath As String) As Boolean
+	Dim ex As ReportOdtExporter
+	ex.Initialize(mDef, mBinder, Diagnostics)
+	Return ex.Export(DefaultDataSet, OutputPath)
+End Sub
+
+Public Sub ExportOds (OutputPath As String) As Boolean
+	Dim ex As ReportOdsExporter
+	ex.Initialize(mDef, mBinder, Diagnostics)
+	Return ex.Export(DefaultDataSet, OutputPath)
+End Sub
+
 Public Sub ExportHtml (OutputPath As String) As Boolean
 	Dim ex As ReportHtmlExporter
 	ex.Initialize(Diagnostics)

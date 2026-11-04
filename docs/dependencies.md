@@ -44,7 +44,7 @@ enough because B4JBuilder is Windows-only.
 | `Printing` (B4A library, `Printing.jar`) | B4A built-in | B4A | canvas-based `PdfDocument` for the B4A vector PDF exporter (M10); no new external dependency |
 | `FileProvider` (B4A library, `FileProvider.b4xlib`) | B4A built-in | B4A | sharing generated files (e.g. PDF) with viewer apps via `FileProvider` + `Intent.ACTION_VIEW` |
 | `XmlBuilder` | part of B4X | B4J / B4A | verify API and availability per platform |
-| `Archiver` / zip support | part of B4X | verify per platform | needed for DOCX/XLSX/ODF; verify |
+| `java.util.zip` (inline Java via `JavaObject`) | JDK / Android platform | verified both platforms | used by the DOCX/XLSX (v1.0) and ODT/ODS (v1.5) writers; the B4X `Archiver` library was not needed |
 
 The core must remain pure B4X. Anything here that turns out to be
 platform-specific gets an adapter, not a `#If` branch in logic code.
@@ -94,9 +94,10 @@ runtime or its jars inherits AGPL obligations. Do not copy from it.
 | Candidate | Licence | Android | Decision |
 |-----------|---------|---------|----------|
 | Own minimal OOXML writer (zip + XML) | n/a | yes | **preferred for DOCX/XLSX**; needs validation against Word and LibreOffice |
+| Own minimal ODF writer (zip + XML) | n/a | yes | **adopted for ODT/ODS (v1.5)**: same pattern as the OOXML writers — `mimetype` first entry uncompressed, manifest, content.xml; no ODF Toolkit |
 | Apache POI | Apache-2.0 | poor | rejected for the engine; too heavy, Android-hostile |
 | docx4j | Apache-2.0 | no | rejected: JAXB and size |
-| ODF Toolkit (Apache) | Apache-2.0 | no | not now; ODT/ODS are on request |
+| ODF Toolkit (Apache) | Apache-2.0 | no | not adopted: the minimal ODF writer covers the dataset-table need; revisit only if full ODF styling is demanded |
 | LibreOffice CLI | MPL-2.0 | no | rejected: external process |
 
 The minimal writer is more work than calling POI, but it is small,
@@ -152,7 +153,7 @@ chosen exporters need:
 | Exporter | Extra jars required |
 |----------|---------------------|
 | PDF (`ReportPdfExporter`) | Apache PDFBox 3.0.8 + fontbox + commons-logging (B4J only; B4A uses the HTML print path) |
-| DOCX, XLSX, HTML, CSV, JSON, XML | none |
+| DOCX, XLSX, ODT, ODS, HTML, CSV, JSON, XML | none |
 
 This keeps a PDF-only application from depending on spreadsheet
 libraries, and vice versa, at the jar layer (see ADR 0006).

@@ -21,6 +21,8 @@ and what is explicitly best-effort. It is the contract behind the phrase
 | XML export | 0.2 | 0.2 | 1.0 | -- |
 | DOCX export | 1.0 | 1.0 | 1.0 (verified) | -- |
 | XLSX export | 1.x | 1.x | 1.0 (verified) | -- |
+| ODT export | 1.5 | 1.5 | 1.5 | -- |
+| ODS export | 1.5 | 1.5 | 1.5 | -- |
 | Native preview | host WebView (`ReportHtmlExporter.ToHtml`) | n/a | host WebView (`ToHtml`) | n/a |
 | Print | opens the PDF in the system viewer | n/a | 1.0 (system print dialog, `ReportPrint`) | browser |
 | PDF introspection (page count) | 1.0 (PDFBox) | n/a | 1.2 (`PdfRenderer`, `ReportPdfIntrospection`) | -- |
@@ -114,6 +116,19 @@ the canvas is abstract. See
   text stack shapes, reorders and falls back across fonts at draw time;
   the RTL and mixed-script fixtures export through the vector canvas
   with introspected page counts.
+- ODT/ODS export (v1.5): minimal ODF 1.2 writers in the same style as
+  the DOCX/XLSX ones — a zip package with `mimetype` (first entry,
+  uncompressed, as ODF requires), `META-INF/manifest.xml` and
+  `content.xml`, no third-party library. The dataset becomes one
+  `table:table` (ODT: inside `office:text`; ODS: inside
+  `office:spreadsheet`) with a header row from the field definitions.
+  All cells are written as string cells, matching the XLSX writer's
+  inline-string behaviour; typed numeric/date cells are a known
+  limitation. Verification is structural (zip layout + XML
+  well-formedness asserted in the suite); no ODF application was
+  available on the development machine to open the output, so
+  "opens in LibreOffice" is unverified — reported as a Tier-2
+  equivalence claim, not Tier 1.
 
 ## 4. Fidelity tiers
 

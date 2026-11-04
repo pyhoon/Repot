@@ -55,13 +55,15 @@ Module50=|relative|..\..\source\ReportVersion
 Module51=|relative|..\..\source\ReportXlsxExporter
 Module52=|relative|..\..\source\Repot
 Module53=|relative|..\..\source\Utility
+Module54=|relative|..\..\source\ReportOdtExporter
+Module55=|relative|..\..\source\ReportOdsExporter
 Module6=|relative|..\..\source\ReportDataBinder
 Module7=|relative|..\..\source\ReportDataExporter
 Module8=|relative|..\..\source\ReportDataSet
 Module9=|relative|..\..\source\ReportDataSetDef
 NumberOfFiles=0
 NumberOfLibraries=5
-NumberOfModules=53
+NumberOfModules=55
 Version=14.2
 @EndOfDesignText@
 #Region  Project Attributes 

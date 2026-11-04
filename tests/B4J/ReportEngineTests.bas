@@ -1131,7 +1131,104 @@ Private Sub TestOfficeExport
 	Dim xlsxPath As String = File.Combine(File.DirApp, "test-items.xlsx")
 	Check(xlsx.Export("Items", xlsxPath), "xlsx export succeeds")
 	Check(File.Exists(File.DirApp, "test-items.xlsx"), "xlsx file exists")
+
+	'ODT/ODS (v1.5): same dataset through the ODF writers. The zip
+	'structure probe asserts the ODF package rules: mimetype first and
+	'uncompressed, manifest correct, content.xml well-formed with the
+	'expected table structure.
+	Dim odt As ReportOdtExporter
+	odt.Initialize(def, binder, diags)
+	Dim odtPath As String = File.Combine(File.DirApp, "test-items.odt")
+	Check(odt.Export("Items", odtPath), "odt export succeeds")
+	Check(File.Exists(File.DirApp, "test-items.odt"), "odt file exists")
+	Dim odtProblem As String = CheckOdfPackage(odtPath, "application/vnd.oasis.opendocument.text", File.Combine(File.DirApp, "test-items-odt-content.txt"))
+	Check(odtProblem = "", "odt package structure: " & odtProblem)
+	If File.Exists(File.DirApp, "test-items-odt-content.txt") Then
+		Dim odtContent As String = File.ReadString(File.DirApp, "test-items-odt-content.txt")
+		Check(odtContent.IndexOf("table:table") >= 0, "odt content has a table")
+		Check(odtContent.IndexOf("text:p") >= 0, "odt content has paragraphs")
+		Check(odtContent.IndexOf("office:text") >= 0, "odt content is a text body")
+	End If
+
+	Dim ods As ReportOdsExporter
+	ods.Initialize(def, binder, diags)
+	Dim odsPath As String = File.Combine(File.DirApp, "test-items.ods")
+	Check(ods.Export("Items", odsPath), "ods export succeeds")
+	Check(File.Exists(File.DirApp, "test-items.ods"), "ods file exists")
+	Dim odsProblem As String = CheckOdfPackage(odsPath, "application/vnd.oasis.opendocument.spreadsheet", File.Combine(File.DirApp, "test-items-ods-content.txt"))
+	Check(odsProblem = "", "ods package structure: " & odsProblem)
+	If File.Exists(File.DirApp, "test-items-ods-content.txt") Then
+		Dim odsContent As String = File.ReadString(File.DirApp, "test-items-ods-content.txt")
+		Check(odsContent.IndexOf("office:spreadsheet") >= 0, "ods content is a spreadsheet body")
+		Check(odsContent.IndexOf("table:table-cell") >= 0, "ods content has cells")
+	End If
 End Sub
+
+'Reads an ODF package and validates its structure. Returns "" when the
+'package is sound, otherwise the first problem found. Also writes the
+'extracted content.xml to DumpPath so the B4X layer can assert on the
+'document XML without zip access.
+Private Sub CheckOdfPackage (Path As String, ExpectedMime As String, DumpPath As String) As String
+	Dim jo As JavaObject = Me
+	Return jo.RunMethod("checkOdf", Array(Path, ExpectedMime, DumpPath))
+End Sub
+
+#If Java
+
+import java.io.*;
+import java.util.zip.*;
+import javax.xml.parsers.*;
+import org.w3c.dom.*;
+import org.xml.sax.InputSource;
+
+public static String checkOdf(String path, String expectedMime, String dumpPath) {
+    try {
+        ZipFile zf = new ZipFile(path);
+        try {
+            java.util.Enumeration<? extends ZipEntry> en = zf.entries();
+            if (!en.hasMoreElements()) return "package is empty";
+            ZipEntry first = en.nextElement();
+            if (!"mimetype".equals(first.getName())) return "first entry is " + first.getName();
+            if (first.getMethod() != ZipEntry.STORED) return "mimetype is not stored uncompressed";
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            InputStream in = zf.getInputStream(first);
+            byte[] buf = new byte[4096];
+            int n;
+            while ((n = in.read(buf)) > 0) bos.write(buf, 0, n);
+            in.close();
+            if (!expectedMime.equals(new String(bos.toByteArray(), "UTF-8")))
+                return "mimetype content mismatch";
+            ZipEntry manifest = zf.getEntry("META-INF/manifest.xml");
+            if (manifest == null) return "manifest missing";
+            Document m = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+                .parse(new InputSource(zf.getInputStream(manifest)));
+            NodeList entries = m.getElementsByTagName("manifest:file-entry");
+            if (entries.getLength() < 2) return "manifest does not list root and content.xml";
+            Element root = (Element) entries.item(0);
+            if (!expectedMime.equals(root.getAttribute("manifest:media-type")))
+                return "manifest root media type mismatch";
+            ZipEntry content = zf.getEntry("content.xml");
+            if (content == null) return "content.xml missing";
+            // well-formedness: parse it; also dump it for B4X-level asserts
+            InputStream cin = zf.getInputStream(content);
+            ByteArrayOutputStream cbos = new ByteArrayOutputStream();
+            while ((n = cin.read(buf)) > 0) cbos.write(buf, 0, n);
+            cin.close();
+            String xml = new String(cbos.toByteArray(), "UTF-8");
+            DocumentBuilderFactory.newInstance().newDocumentBuilder()
+                .parse(new InputSource(new StringReader(xml)));
+            Writer w = new OutputStreamWriter(new FileOutputStream(dumpPath), "UTF-8");
+            w.write(xml);
+            w.close();
+            return "";
+        } finally {
+            zf.close();
+        }
+    } catch (Exception e) {
+        return e.getClass().getSimpleName() + ": " + e.getMessage();
+    }
+}
+#End If
 '--------------------------------------------------------------- expressions
 
 Private Sub TestExpressions

@@ -51,13 +51,15 @@ Module49=|relative|..\ReportVersion
 Module5=|relative|..\ReportBandLayout
 Module50=|relative|..\ReportXlsxExporter
 Module51=|relative|..\Repot
+Module52=|relative|..\ReportOdtExporter
+Module53=|relative|..\ReportOdsExporter
 Module6=|relative|..\ReportDataBinder
 Module7=|relative|..\ReportDataExporter
 Module8=|relative|..\ReportDataSet
 Module9=|relative|..\ReportDataSetDef
 NumberOfFiles=0
 NumberOfLibraries=3
-NumberOfModules=51
+NumberOfModules=53
 Version=10.7
 @EndOfDesignText@
 #Region Project Attributes
@@ -68,7 +70,7 @@ Version=10.7
 #Region Project Copyright
 #LibraryName: Repot
 #LibraryAuthor: Repot contributors
-#LibraryVersion: 1.4
+#LibraryVersion: 1.5
 'This project builds the engine library. It also runs as a small console
 'smoke test so the command-line build proves the modules link.
 #End Region

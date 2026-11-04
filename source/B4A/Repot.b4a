@@ -58,13 +58,15 @@ Module5=|relative|..\ReportBand
 Module50=|relative|..\ReportVersion
 Module51=|relative|..\ReportXlsxExporter
 Module52=|relative|..\Repot
+Module53=|relative|..\ReportOdtExporter
+Module54=|relative|..\ReportOdsExporter
 Module6=|relative|..\ReportBandLayout
 Module7=|relative|..\ReportDataBinder
 Module8=|relative|..\ReportDataExporter
 Module9=|relative|..\ReportDataSet
 NumberOfFiles=1
 NumberOfLibraries=7
-NumberOfModules=52
+NumberOfModules=54
 Version=14.2
 @EndOfDesignText@
 #Region  Project Attributes 
@@ -81,7 +83,7 @@ Version=14.2
 #Region Project Copyright
 #LibraryName: Repot
 #LibraryAuthor: Repot contributors
-#LibraryVersion: 1.4
+#LibraryVersion: 1.5
 #End Region
 #Region  Activity Attributes 
 	#FullScreen: False

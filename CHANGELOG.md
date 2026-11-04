@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.5.0 — 2026-11-04
+
+ODT and ODS export (M14). B4J 491 checks / 0 errors, B4A 346 checks /
+0 errors on emulator-5554.
+
+### Added
+- `ReportOdtExporter`: OpenDocument text export — the dataset as one
+  `table:table` (header row from the field definitions, one row per
+  record) inside `office:text`, packaged as a valid ODF 1.2 document
+  (`mimetype` first entry and uncompressed, `META-INF/manifest.xml`,
+  `content.xml`). No third-party library; same own-minimal-writer
+  approach as DOCX/XLSX.
+- `ReportOdsExporter`: the same table model inside
+  `office:spreadsheet`, with the spreadsheet media type.
+- `Repot.ExportOdt` / `Repot.ExportOds` on the facade (DefaultDataSet,
+  mirroring `ExportDocx`/`ExportXlsx`).
+- B4J tests assert the ODF package structure directly through an
+  inline-Java zip probe (first entry name/method, mimetype content,
+  manifest root media type, content.xml well-formedness) plus content
+  assertions on the extracted XML; B4A asserts export + existence like
+  the DOCX/XLSX tests.
+
+### Known limitations
+- Cells are written as string cells, matching the XLSX writer's
+  inline-string behaviour; typed numeric/date cells remain future work
+  for both office spreadsheet writers.
+- No ODF application was available on the development machine to open
+  the output; verification is structural (zip layout + XML
+  well-formedness), recorded in compatibility.md as a Tier-2 claim.
+
 ## 1.4.0 — 2026-11-04
 
 Embedded font set and RTL base direction (M13). B4J 480 checks /

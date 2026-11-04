@@ -1089,6 +1089,18 @@ Private Sub TestOfficeExport
 	Dim xlsxPath As String = File.Combine(outDir, "test-items.xlsx")
 	Check(xlsx.Export("Items", xlsxPath), "xlsx export succeeds")
 	Check(File.Exists(outDir, "test-items.xlsx"), "xlsx file exists")
+
+	'ODT/ODS (v1.5): same dataset through the ODF writers; structure is
+	'asserted in the B4J suite (zip probe), here export + existence.
+	Dim odt As ReportOdtExporter
+	odt.Initialize(def, binder, diags)
+	Check(odt.Export("Items", File.Combine(outDir, "test-items.odt")), "odt export succeeds")
+	Check(File.Exists(outDir, "test-items.odt"), "odt file exists")
+
+	Dim ods As ReportOdsExporter
+	ods.Initialize(def, binder, diags)
+	Check(ods.Export("Items", File.Combine(outDir, "test-items.ods")), "ods export succeeds")
+	Check(File.Exists(outDir, "test-items.ods"), "ods file exists")
 End Sub
 '--------------------------------------------------------------- expressions
 

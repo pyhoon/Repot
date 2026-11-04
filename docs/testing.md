@@ -262,15 +262,17 @@ API 36):
 | PDF introspection (page count) | pass (PDFBox, via facade `GetPdfPageCount`) | pass (`ReportPdfIntrospection`, `PdfRenderer`) |
 | RTL text (bidi reordering, Arabic shaping) | pass (v1.3, `rtl-arabic` + `rtl-hebrew`) | pass (system text stack shapes at draw; export + page count verified) |
 | Mixed-script font set (per-run embedded fonts) | pass (v1.4, `mixed-scripts`) | pass (system fallback; export + page count verified) |
+| ODT/ODS export (ODF package structure) | pass (v1.5, zip + XML probe in-suite) | pass (export + existence) |
 | Layout goldens (AWT baselines) | pass | not applicable |
 | Fixture-level validation | pass | not applicable |
 
 This accounts for the check-count delta between platforms:
-**B4J 480 checks, B4A 342 checks, 0 errors on both** (v1.4.0: both
-platforms gained the `mixed-scripts` fixture test — B4J asserts
-run-splitting behaviour through extraction across three embedded font
-pairs, B4A asserts the vector export and introspected page count). PDF
-rendering on B4A goes through the `Printing` library vector canvas
+**B4J 491 checks, B4A 346 checks, 0 errors on both** (v1.5.0: both
+platforms gained the ODT/ODS office-export checks — B4J additionally
+asserts the ODF package structure through an inline-Java zip probe:
+mimetype first and uncompressed, manifest root media type, content.xml
+well-formed; B4A asserts export + existence like the DOCX/XLSX tests).
+PDF rendering on B4A goes through the `Printing` library vector canvas
 (M10); introspection reads the file back through
 `android.graphics.pdf.PdfRenderer`, and the missing-file contract
 (0 / `""`) is fail-silent on both platforms.
@@ -282,7 +284,7 @@ build:   cd tests\B4A; "C:\Program Files\B4X\B4A\B4ABuilder.exe" -task=Build -ob
 install: C:\android\sdk\platform-tools\adb.exe install -r Objects\tests.apk
 restart: adb shell am force-stop b4a.example; adb logcat -c
 run:     adb shell am start -n b4a.example/.main
-read:    adb logcat -d   →  PASS engine (342 checks), errors=0
+read:    adb logcat -d   →  PASS engine (346 checks), errors=0
 ```
 
 The suite's pass/fail status is written to `fixture-check.txt` in
