@@ -5,8 +5,11 @@
 **Ecosystem:** B4X (B4J first, B4A second)\
 **Template format:** Versioned JSON, `.repot` extension\
 **License:** MIT, all components\
-**Current stage:** v1.2.0 (M11 complete); B4A PDF introspection via
-PdfRenderer, facade bridges, SAF SaveAs; B4J 411 checks, B4A 327 checks
+**Current stage:** v1.5.0 (M10–M14 complete). B4A vector PDF via the
+Printing library, PDF introspection via PdfRenderer, SAF SaveAs; B4J PDF
+embeds TrueType fonts, renders RTL text (bidi + Arabic shaping), and
+accepts a mixed-script font set; office export covers DOCX, XLSX, ODT and
+ODS. B4J 500 checks, B4A 346 checks, 0 errors on both.
 
 ---
 
@@ -167,9 +170,15 @@ per week. They are planning ranges, not commitments.
 | M7 | DOCX and XLSX export | done |
 | M8 | B4A adapter, HTML print path, cross-platform comparison | done |
 | M9 | Examples, docs, packaging, CI hardening, release | done |
+| M10 | B4A vector PDF via Printing library, PDF open/view | 2–3 weeks |
+| M11 | B4A PDF introspection, facade bridges, SAF SaveAs | 1–2 weeks |
+| M12 | RTL text and complex-script Arabic shaping (B4J PDF) | 1–2 weeks |
+| M13 | Mixed-script embedded font set + configurable RTL base direction | 1–2 weeks |
+| M14 | ODT and ODS export via own minimal writers (office family symmetry) | 1–2 weeks |
 
 Indicative: v0.1 at M0–M5 (about 10–13 weeks); v1.0 at M0–M9 (about
-17–24 weeks). B4A depth is the largest source of variance.
+17–24 weeks). B4A depth is the largest source of variance. Current
+release cadence is one minor milestone per release.
 
 ### Phase gates
 
@@ -472,3 +481,28 @@ clip, ellipsis, min height, align override, field content
 | Render document | Immutable paginated display list consumed by exporters |
 | Golden | A checked-in expected output used by regression tests |
 | Adapter | Platform-specific implementation of a core interface |
+
+---
+
+## 15. After 1.5 — unscheduled (M15+)
+
+These are the items from §7.4 that remain unscheduled. None has a
+committed date. Each needs evidence of demand before it is started;
+see the risk of scope creep in §12.
+
+| Item | Why it is not yet scheduled | What it would need |
+|------|---------------------------|-------------------|
+| Browser viewer component | HTML fixed-layout export already works; a JS viewer is a separate product | A web build, not an engine change |
+| Subreports | Needs a nested-layout pass and its own data binding; the render document has no nesting yet | ADR + render-document extension |
+| Charts and cross-tabs | Needs a chart primitive in the render document | ADR + new draw op type |
+| Drill-down or interactive HTML | Needs a second, interactive HTML mode | Separate pipeline from fixed-layout |
+| Visual designer | ADR 0007 and §11: a separate application consuming the public API | Not an engine milestone |
+| Template inheritance and reusable styles | Schema extension; the schema is otherwise stable | ADR + schema bump discussion |
+| Typed office cells | Documented limitation in v1.4/v1.5: cells are strings | Change the office writers |
+| B4i | Not targeted; architecture should not preclude it | A platform adapter |
+| ODF application verification | No LibreOffice on the dev machine; verification is structural (Tier-2) | A build machine or a second opinion |
+
+The office-formats family (DOCX, XLSX, ODT, ODS) is now symmetric, and
+RTL/mixed-script coverage in the B4J PDF is complete. The next engine
+milestone, if any, is most likely the one with the clearest demand
+signal — see the decision below.
