@@ -5,17 +5,21 @@ ecosystem, written in B4X and licensed MIT.
 
 Repot turns a portable report definition (`.repot`) plus data supplied
 by the host application into paginated documents and structured exports.
-The same template is intended to work from B4J desktop, B4J server, and
-B4A, and to render to HTML for browsers.
+The same template works from B4J desktop, B4J server, and B4A, and
+renders to HTML for browsers.
 
-> **Project status: v1.1.0 (M10 + facade + print). A `Repot` facade (load → set data → build → export/print) is implemented; B4A PDF is vector and synchronous; multi-page and multi-language fixtures are in the suite. Tag pending.**
+> **Project status: v1.2.0 (M10 + M11 complete). A `Repot` facade
+> (load → bind → build → export/print) is implemented. B4A produces
+> vector PDF synchronously through the `Printing` library, can verify
+> exported PDFs (`GetPdfPageCount` via `PdfRenderer`), prints through
+> the system print dialog, and saves to a user-chosen location through
+> the Storage Access Framework (`ReportSaveAs`). Tagged `v1.2.0`.**
 >
-> M8 complete: the B4A adapter runs the full engine suite (305 checks, 0
-> errors on emulator-5554), matching the B4J suite (382 checks, 0 errors).
-> Exporters (PDF, HTML, CSV, JSON, XML, DOCX, XLSX) shipped in M3–M7 and
-> run on both platforms except PDF, which is B4J-only for v1.x (B4A uses
-> the HTML print path). `tools/ci.ps1 -RunEmulator` is the cross-platform
-> gate and exits 0.
+> The full engine suite runs on both platforms: **B4J 411 checks,
+> B4A 327 checks, 0 errors on both** (emulator-5554, API 36).
+> Exporters (PDF, HTML, CSV, JSON, XML, DOCX, XLSX) shipped in
+> M3–M7 and run on both platforms. `tools/ci.ps1 -RunEmulator` is the
+> cross-platform gate and exits 0. See [CHANGELOG.md](CHANGELOG.md).
 
 ## Why this exists
 
@@ -47,9 +51,9 @@ support.
    database and never executes SQL from a template. The host application
    supplies typed data through a provider interface.
 3. **One template, several outputs, honest fidelity.** PDF is the
-   fixed-layout target. DOCX and ODT produce editable document
-   structures. XLSX and ODS produce real cells and values. CSV, XML, and
-   JSON are data exports and do not pretend to be pages.
+   fixed-layout target. DOCX produces editable document structures, XLSX
+   produces real cells and values. CSV, XML, and JSON are data exports
+   and do not pretend to be pages. (ODT and ODS remain unscheduled.)
 4. **The layout model is the product.** Text measurement, push-down,
    band overflow, and pagination are the hard parts. They are specified
    in [docs/layout.md](docs/layout.md) and exercised by fixtures before
@@ -63,15 +67,15 @@ support.
 
 ## Output formats
 
-| Format | Intended use | Target release |
-|--------|--------------|----------------|
-| PDF | Fixed-layout, print-ready reports | 0.1 |
-| HTML | Preview, web reports, printing | 0.1 |
-| CSV | Flat tabular data | 0.1 |
-| JSON | Data interchange and diagnostics | 0.1 |
-| XML | Structured data interchange | 0.2 |
-| DOCX | Editable word-processing documents | 1.0 |
-| XLSX | Spreadsheets with real cells and values | 1.x |
+| Format | Intended use | Status |
+|--------|--------------|--------|
+| PDF | Fixed-layout, print-ready reports | shipped (B4J PDFBox, B4A vector canvas); introspected via PDFBox / `PdfRenderer` |
+| HTML | Preview, web reports, printing | shipped (layout and flow modes) |
+| CSV | Flat tabular data | shipped |
+| JSON | Data interchange and diagnostics | shipped |
+| XML | Structured data interchange | shipped |
+| DOCX | Editable word-processing documents | shipped |
+| XLSX | Spreadsheets with real cells and values | shipped |
 | ODT | OpenDocument text | on request |
 | ODS | OpenDocument spreadsheets | on request |
 
@@ -83,26 +87,28 @@ No format is withheld from the MIT release.
 
 | Platform | Scope |
 |----------|-------|
-| B4J desktop | Generation, HTML preview, PDF/HTML/data output, printing where practical |
-| B4J server | Headless generation to files or memory; no UI or JavaFX requirement |
-| B4A | Template reuse and on-device output; native preview/print integration |
+| B4J desktop | Generation, HTML preview, PDF/HTML/data output, print (system viewer), PDF text extraction |
+| B4J server | Headless generation to files or memory; no UI or JavaFX requirement (`examples/server`) |
+| B4A | Same engine; on-device vector PDF export, PDF page-count verification, system print dialog, SAF "Save As" |
 | Browser | Consumes generated HTML; optional lightweight viewer |
 | B4i | Not targeted for 1.0. The architecture should not preclude it, but no claim is made. |
 
-B4A delivery is scheduled after the B4J engine is stable, because
-Android cannot use the same PDF backend. See
-[docs/compatibility.md](docs/compatibility.md) and
-[docs/decisions/0004-b4a-output-strategy.md](docs/decisions/0004-b4a-output-strategy.md).
+Android cannot use the same PDF backend, so B4A renders through its own
+vector canvas (`Printing` library) and reads PDFs back through
+`android.graphics.pdf.PdfRenderer`. See
+[docs/compatibility.md](docs/compatibility.md),
+[docs/decisions/0004-b4a-output-strategy.md](docs/decisions/0004-b4a-output-strategy.md)
+and the M11 facts in [docs/b4x-notes.md](docs/b4x-notes.md).
 
 ## How it fits together
 
 ```text
-  .b4xr template ──┐
+  .repot template ──┐
                    ├─► template model ─► processing ─► layout ─► render document
   host data ───────┘        │                          │              │
   parameters ───────────────┘                          │              ├─► PDF
                                                        │              ├─► HTML
-                                                       └─► data ──────├─► CSV / JSON / XML
+                                                       └─► data ──────┼─► CSV / JSON / XML
                                                                       └─► DOCX / XLSX
 ```
 
@@ -113,72 +119,101 @@ the same processed data without pretending to paginate.
 
 Details: [docs/architecture.md](docs/architecture.md).
 
-## Quick start (API is not finalized)
+## Quick start
 
-The intended experience is two-phase: build a report once, then export it
-to as many formats as needed without re-running layout.
+Build a report once, then export it to as many formats as needed without
+re-running layout. The facade is synchronous: `Build` and the exporters
+return immediately.
 
 ```vb
 Dim Report As Repot
 Report.Initialize
-Report.LoadTemplate(File.DirAssets, "Invoice.b4xr")
-Report.SetDataSource("Items", InvoiceItems)      ' List of Maps or custom objects
+Report.LoadTemplate(File.DirAssets, "invoice.repot")
+Report.SetDataSource("Items", InvoiceItems)      ' List of Maps
+Report.SetDataSourceSingle("Customer", Customer) ' Map for single-record datasets
 Report.SetParameter("InvoiceNumber", "INV-1042")
-Report.SetTimestamp(DateTime.Now)                ' explicit clock, no ambient time
-Report.SetLocale("en-GB")                        ' explicit formatting culture
 
-Wait For (Report.Build) Complete (Result As ReportResult)
-If Result.Success Then
-    Dim Pdf As ReportPdf
-    Pdf.Initialize(Result)
-    Wait For (Pdf.Export(File.DirApp, "invoice.pdf")) Complete (Ok As Boolean)
+Dim Result As ReportResult = Report.Build
+If Result.Success = False Then
+    For Each D As ReportDiagnostic In Result.Errors
+        Log(D.Code & ": " & D.Message)
+    Next
+    Return
 End If
+
+Report.ExportPdf(File.Combine(DirApp, "invoice.pdf"))
+Report.ExportHtml(File.Combine(DirApp, "invoice.html"))
+Report.ExportCsv(File.Combine(DirApp, "items.csv")) ' DefaultDataSet; ExportCsvOf for another dataset
+
+' Verify the PDF (B4J PDFBox, B4A PdfRenderer; 0 when unreadable)
+Log(Report.GetPdfPageCount(File.Combine(DirApp, "invoice.pdf")))
 ```
 
-Method and class names in this document are illustrative. Programmatic
-report construction is equally supported; JSON-first must not mean
-JSON-only. See [docs/api-design.md](docs/api-design.md).
+On B4A, printing and saving to a user-chosen location need one line of
+host wiring each:
+
+```vb
+Report.PrintPdf(DirApp, "invoice.pdf", "Invoice")          ' system print dialog
+
+' Save As: launch the SAF picker, then handle the result
+Dim i As Intent = Report.SaveAsPdfIntent("application/pdf", "invoice.pdf")
+ReportSaveAs.StartForResult(i, ReportSaveAs.DefaultRequestCode)
+
+Sub Activity_Result (RequestCode As Int, ResultCode As Int, Data As Object)
+    Dim uri As String = ReportSaveAs.HandleActivityResult(RequestCode, ResultCode, Data)
+    If uri <> "" Then ReportSaveAs.CopyFileToUri(DirApp, "invoice.pdf", uri)
+End Sub
+```
+
+Examples using the same invoice template on all three platforms live in
+`examples/B4J`, `examples/B4A`, and `examples/server` (an HTTP server
+that renders `/report/pdf`). See [docs/api-design.md](docs/api-design.md)
+for the full facade and [docs/decisions/0006-packaging.md](docs/decisions/0006-packaging.md)
+for distribution as a `.b4xlib`.
 
 ## Repository layout
 
 ```text
 Repot/
 ├── README.md
-├── PLAN.md                      Engineering plan and milestone brief
+├── PLAN.md                      Development plan and coding-agent brief
+├── CHANGELOG.md                 Release notes per version
 ├── CONTRIBUTING.md              Contribution terms, review and support policy
 ├── LICENSE                      MIT
-├── docs/                        Design documentation
-│   ├── decisions/               Architecture decision records
-│   └── b4x-notes.md             Verified B4X API facts
-├── source/
-│   ├── Repot/                   Engine modules (model, loader, validator, binder, render document)
-│   └── RepotTests/              Fixture checker and engine unit tests
-├── demo/                        Minimal B4XPages demos for each platform
-├── fixtures/                    Templates, data and notes; goldens from M3
-└── tools/                       Developer scripts (fixture runner)
+├── docs/                        Design documentation (see index below)
+│   └── decisions/               Architecture decision records
+├── source/                      Engine modules (one .bas per class/module)
+│   ├── B4J/                     B4J library project
+│   └── B4A/                     B4A library project (same modules, |relative| refs)
+├── tests/                       Fixture checker and engine unit tests
+│   ├── B4J/                     Console test project (also used by headless CI)
+│   └── B4A/                     Same suite on device/emulator
+├── examples/
+│   ├── B4J/                     Desktop example
+│   ├── B4A/                     Android example (export, print, SaveAs)
+│   └── server/                  B4J HTTP server serving rendered reports
+├── fixtures/                    Templates, data and notes; layout/export goldens
+├── dist/                        Packaged Repot.b4xlib output
+└── tools/                       Developer scripts (ci.ps1, run-fixtures.ps1, packaging)
 ```
 
-The fixture checker and engine unit tests share one console project. The
-engine modules live in `source/Repot` and are compiled into the test
-project through relative module references. They load and validate the
-fixtures, round-trip them through canonical JSON, and bind the fixture
-data. Nothing renders a page yet.
-
-The engine ships as one `.b4xlib` containing all public modules, plus
-optional jar dependencies where a format needs them. Exporters are
-ordinary modules inside the library, not separate products. The real
-optional boundary is the jar dependency, not the B4X module. See
-[docs/decisions/0006-packaging.md](docs/decisions/0006-packaging.md).
+The engine ships as one `.b4xlib` containing all public modules. The B4J
+and B4A library projects both reference the shared modules in `source/`
+through relative module references, so one source base serves both
+targets. Exporters are ordinary modules inside the library, not separate
+products; the real optional boundary is the jar dependency, not the B4X
+module.
 
 ## Documentation index
 
 | Document | Contents |
 |----------|----------|
+| [CHANGELOG.md](CHANGELOG.md) | What changed in each release |
 | [PLAN.md](PLAN.md) | Scope, milestones, acceptance criteria, agent instructions |
 | [docs/architecture.md](docs/architecture.md) | Layers, interfaces, units, determinism, error model |
 | [docs/layout.md](docs/layout.md) | Band model, grid positioning, push-down, pagination |
-| [docs/template-format.md](docs/template-format.md) | `.b4xr` schema draft |
-| [docs/schema-review.md](docs/schema-review.md) | Fixture-driven review that closes M0 |
+| [docs/template-format.md](docs/template-format.md) | `.repot` schema reference |
+| [docs/schema-review.md](docs/schema-review.md) | Fixture-driven review that closed M0 |
 | [docs/render-document.md](docs/render-document.md) | Versioned display list consumed by exporters |
 | [docs/api-design.md](docs/api-design.md) | Public API shape and invariants |
 | [docs/compatibility.md](docs/compatibility.md) | Platform matrix and fidelity tolerances |
@@ -188,18 +223,20 @@ optional boundary is the jar dependency, not the B4X module. See
 | [docs/b4x-notes.md](docs/b4x-notes.md) | Verified B4X API facts and gotchas |
 | [docs/prior-art.md](docs/prior-art.md) | Existing B4X reporting tools and lessons |
 | [docs/decisions/](docs/decisions/) | Recorded architecture decisions |
+| [M10_TASKS.md](M10_TASKS.md), [M11_TASKS.md](M11_TASKS.md) | Milestone plans and completion state |
 
-## What 1.0 means
+## What 1.0 delivered
 
-Version 1.0 is a stable, versioned template format and a documented public
-API, proven by:
+Version 1.0 was the stable, versioned template format and a documented
+public API, proven by:
 
 - PDF output for multi-page, grouped reports with page numbering.
 - HTML output from the same template.
 - CSV, JSON, and XML data export from the same data preparation.
-- DOCX output containing real paragraphs and tables, not images.
+- DOCX and XLSX output containing real paragraphs, tables, and cells,
+  not images.
 - A B4J desktop example, a B4J server example, and a B4A example that
-  reuses the same template.
+  reuse the same template.
 - Regression fixtures and documented fidelity tolerances.
 - A dependency and license inventory.
 
@@ -208,11 +245,12 @@ API, proven by:
 - Feature parity with Crystal Reports or JasperReports.
 - A built-in database layer, query editor, or SQL execution from
   templates.
-- A visual designer in 1.0. The designer is a separate application that
+- A visual designer. The designer is a separate application that
   consumes the public model and API.
 - Identical pixel output across platforms and formats.
-- Right-to-left text, complex script shaping, or text shaping ligatures in
-  1.0.
+- Right-to-left text and complex-script shaping in the B4J PDF.
+  Deferred to v1.3 (needs an Arabic-capable embedded font). B4A renders
+  shaped text correctly today via Android's text stack.
 - A support contract. The project is best-effort, MIT, and maintained by
   its author.
 

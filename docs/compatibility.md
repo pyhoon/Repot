@@ -6,8 +6,8 @@ and what is explicitly best-effort. It is the contract behind the phrase
 
 ## 1. Platform matrix
 
-`0.1` = v0.1 target, `1.0` = v1.0 target, `--` = not planned for 1.0,
-`req` = available on request.
+`0.1` = v0.1 target, `1.0` = v1.0 target, `1.2` = v1.2.0,
+`--` = not planned for 1.0, `req` = available on request.
 
 | Capability | B4J desktop | B4J server | B4A | Browser |
 |------------|-------------|------------|-----|---------|
@@ -91,8 +91,10 @@ the canvas is abstract. See
   script the font contains; the `multilang` test embeds Noto Sans
   (Latin/Greek/Cyrillic). CJK and Arabic/Hebrew need a font with those
   glyphs; unsupported glyphs are replaced with `?` rather than failing.
-- Bidi and complex-script shaping are not implemented; RTL text is
-  rendered in logical order.
+- Bidi and complex-script shaping are not implemented (deferred to
+  v1.3, which needs an Arabic-capable embedded font); RTL text is
+  rendered in logical order. On B4A the system text stack shapes Arabic
+  correctly at draw time.
 
 ## 4. Fidelity tiers
 
