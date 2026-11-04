@@ -416,6 +416,51 @@ Verified 2026-11-04 with JDK 19.0.2 (`C:\Java\jdk-19.0.2\bin`, per
   `Canvas.drawtext` shape and reorder at draw time; the B4A side only
   gained fixture export + page-count tests.
 
+## JVM and PDF facts verified in M13 (font set, RTL base)
+
+Verified 2026-11-04, same toolchain as M12:
+
+- **`PDType0Font.hasGlyph(int)` does not take a Unicode codepoint.** On
+  Noto Sans Hebrew `hasGlyph(0x05D0)` returns false while
+  `encode("א")` succeeds, and Noto Sans reports `hasGlyph(0x0627)=true`
+  with no Arabic cmap — the int is interpreted as a character code, not
+  a codepoint (same for `toUnicode(int)`, which logs "No Unicode
+  mapping for CID+NNNN" for codepoint-shaped arguments). The reliable
+  per-codepoint coverage probe is `encode(String)`, which throws exactly
+  when the glyph is missing; `safeText` has relied on this since v1.2.
+  Probing is cheap (1000 lookups ≈ 1 ms), so results are cached per
+  (font, codepoint) in an `IdentityHashMap`.
+- **Mixed-script measurement tolerance.** Logical AWT fonts
+  (`Dialog`, `SansSerif`) fall back across system fonts for Arabic
+  inside a Latin string. On the probe line `Customer: شركة الأفق 1042`
+  the logical advance is 1105.9 vs 1209.6 for the sum of the embedded
+  Noto physical advances — ratio 0.914. Layout width (logical fonts)
+  and PDF width (embedded fonts) can therefore differ by up to ~10% on
+  mixed lines; the PDF's own right/center anchoring measures the
+  embedded fonts, so it stays self-consistent. This is the documented
+  Tier-2 metric risk.
+- **`Bidi` base direction.** `DIRECTION_RIGHT_TO_LEFT` makes a
+  pure-Arabic sentence one level-1 run, so trailing neutral punctuation
+  lands on the left edge; with `DIRECTION_LEFT_TO_RIGHT` the same
+  sentence splits (levels 1, 0) and the period floats to the right end.
+  Digits inside an RTL-base paragraph sit at level 2 (even) and stay
+  LTR; `reorderVisually` orders the chunks correctly either way.
+- **Content-stream proof for run splitting** (tools/pdf-probe,
+  `DumpCodes` now tracks `Tf` font switches and reports the active font
+  per `Tj`): the `mixed-scripts` subtitle
+  `Invoice فاتورة חשבונית 1042` paints as four runs — NotoSans
+  `Invoice 1042 `, Hebrew `תינובשח`, NotoSans space, Arabic `ةروتاف` —
+  which is the correct UAX#9 visual order for an LTR paragraph (the
+  trailing digits attach to the RTL block). With `BaseDirection=rtl`
+  the same line paints `1042` first (leftmost) and `Invoice` last
+  (rightmost), and the Note row's trailing period paints at the left
+  edge instead of the right.
+- **B4X gotcha:** `Array(a, b)` produces `Object[]`; assigning it to
+  `Dim p() As String` compiles but throws
+  `ClassCastException: [Ljava.lang.Object; cannot be cast to
+  [Ljava.lang.String;` at runtime. Declare the receiver as
+  `Dim p() As Object` and index it.
+
 ## Why this file exists
 
 `PLAN.md` forbids inventing B4X APIs. Two compile failures during M0 were

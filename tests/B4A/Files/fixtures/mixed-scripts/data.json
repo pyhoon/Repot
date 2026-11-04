@@ -1,0 +1,9 @@
+{
+  "Rows": [
+    { "Item": "Customer", "Value": "شركة الأفق" },
+    { "Item": "Invoice", "Value": "חשבונית 1042" },
+    { "Item": "Amount", "Value": "1,250.50 ريال" },
+    { "Item": "Payment", "Value": "שולם 2026-01" },
+    { "Item": "Note", "Value": "لا يوجد دفع مستحق." }
+  ]
+}

@@ -30,6 +30,7 @@ Public Sub Run (FixturesDir As String)
 	TestMultilangPdf
 	TestRtlArabicPdf
 	TestRtlHebrewPdf
+	TestMixedScriptsPdf
 	TestFacade
 	TestHtmlExport
 	TestDataExport
@@ -853,6 +854,80 @@ Private Sub TestRtlPdfCommon (DirName As String, FontFileName As String, FontBol
 		'extractable contract is the logical word; visual-order emission
 		'was verified at content-stream level during M12 (see notes).
 		Check(txt.IndexOf("פריט") >= 0, Tag & " rtl pdf extracts the header word")
+	End If
+End Sub
+
+Private Sub TestMixedScriptsPdf
+	Dim dir As String = File.Combine(mFixtures, "mixed-scripts")
+	Dim loader As ReportTemplateLoader
+	loader.Initialize
+	Dim def As ReportDefinition = loader.LoadFromFile(dir, "template.repot")
+	Check(loader.Diagnostics.HasErrors = False, "mixed-scripts loads")
+
+	Dim binder As ReportDataBinder
+	binder.Initialize(def)
+	Dim params As Map = LoadJsonMap(dir, "params.json")
+	For Each k As String In params.Keys
+		binder.SetParameter(k, params.Get(k))
+	Next
+	Dim data As Map = LoadJsonMap(dir, "data.json")
+	For Each name As String In data.Keys
+		Dim o As Object = data.Get(name)
+		If o Is List Then
+			binder.SetDataSource(name, o)
+		Else If o Is Map Then
+			binder.SetDataSourceSingle(name, o)
+		End If
+	Next
+	Check(binder.Validate, "mixed-scripts binds")
+
+	Dim diags As ReportDiagnostics
+	diags.Initialize
+	Dim measure As ReportB4JMeasure
+	measure.Initialize(diags)
+	Dim pag As ReportPaginator
+	pag.Initialize(def, binder, measure, diags)
+	Dim doc As ReportRenderDocument = pag.Render
+
+	Dim fontsDir As String = File.Combine(mFixtures, "_fonts")
+	Dim outDir As String = File.DirApp
+	Dim outPath As String = File.Combine(outDir, "test-mixed-scripts.pdf")
+	Dim pdf As ReportPdfExporter
+	pdf.Initialize(diags)
+	pdf.SourceDir = def.SourceDir
+	'primary pair covers Latin + digits; fallback pairs cover Arabic and Hebrew
+	pdf.FontFile = File.Combine(fontsDir, "NotoSans-Regular.ttf")
+	pdf.FontFileBold = File.Combine(fontsDir, "NotoSans-Bold.ttf")
+	pdf.AddEmbeddedFont(File.Combine(fontsDir, "NotoSansArabic-Regular.ttf"), File.Combine(fontsDir, "NotoSansArabic-Bold.ttf"))
+	pdf.AddEmbeddedFont(File.Combine(fontsDir, "NotoSansHebrew-Regular.ttf"), File.Combine(fontsDir, "NotoSansHebrew-Bold.ttf"))
+	Dim ok As Boolean = pdf.Export(doc, outPath)
+	Check(ok, "mixed-scripts pdf exports")
+	If File.Exists(outDir, "test-mixed-scripts.pdf") = False Then Return
+	Check(File.Size(outDir, "test-mixed-scripts.pdf") > 0, "mixed-scripts pdf non-empty")
+	Check(pdf.PageCount(outPath) = 1, "mixed-scripts pdf single page")
+
+	Dim txt As String = pdf.ExtractText(outPath)
+	Check(txt.Length > 0, "mixed-scripts pdf extracts text")
+	Check(txt.IndexOf("?") = -1, "mixed-scripts pdf has no unsupported-glyph filler")
+	Check(txt.IndexOf("Customer") >= 0, "mixed-scripts pdf extracts the latin label")
+	Check(txt.IndexOf("Invoice") >= 0, "mixed-scripts pdf extracts the latin subtitle word")
+	Check(txt.IndexOf("חשבונית") >= 0, "mixed-scripts pdf extracts logical hebrew")
+	Check(txt.IndexOf("1042") >= 0, "mixed-scripts pdf keeps digits")
+	Check(txt.IndexOf("شركة") >= 0, "mixed-scripts pdf extracts logical arabic")
+	Check(txt.IndexOf("1,250.50") >= 0, "mixed-scripts pdf keeps the decimal amount")
+
+	'BaseDirection = "rtl": export must succeed and extract the same
+	'logical text (extraction is direction-independent; the visual
+	'punctuation placement is verified with tools/pdf-probe)
+	Dim outPath2 As String = File.Combine(outDir, "test-mixed-scripts-rtl.pdf")
+	pdf.BaseDirection = "rtl"
+	Dim ok2 As Boolean = pdf.Export(doc, outPath2)
+	Check(ok2, "mixed-scripts rtl-base pdf exports")
+	If File.Exists(outDir, "test-mixed-scripts-rtl.pdf") Then
+		Check(pdf.PageCount(outPath2) = 1, "mixed-scripts rtl-base pdf single page")
+		Dim txt2 As String = pdf.ExtractText(outPath2)
+		Check(txt2.IndexOf("חשבונית") >= 0, "mixed-scripts rtl-base pdf extracts logical hebrew")
+		Check(txt2.IndexOf("1042") >= 0, "mixed-scripts rtl-base pdf keeps digits")
 	End If
 End Sub
 

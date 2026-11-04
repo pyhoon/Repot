@@ -35,6 +35,7 @@ Public Sub Run (FixturesDir As String)
 	TestPdfExport
 	TestMultilangPdf
 	TestRtlPdf
+	TestMixedScriptsPdf
 	TestFacade
 	TestHtmlExport
 	TestDataExport
@@ -879,6 +880,14 @@ Private Sub TestRtlPdfOne (FixtureName As String, OutName As String, TagMsg As S
 		Check(pdf.PageCount(outPath) = doc.PageCount, FixtureName & " pdf page count matches layout")
 		#End If
 	End If
+End Sub
+
+Private Sub TestMixedScriptsPdf
+	'v1.4: mixed Latin/Arabic/Hebrew/digits in one export. On B4A the
+	'system font stack falls back natively, so only the export pipeline
+	'and page count are verified here (the B4J suite carries the
+	'run-splitting content-stream checks via tools/pdf-probe).
+	TestRtlPdfOne("mixed-scripts", "test-mixed-scripts.pdf", "mixed-scripts loads")
 End Sub
 
 Private Sub TestFacade

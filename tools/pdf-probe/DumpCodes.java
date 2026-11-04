@@ -37,38 +37,66 @@ public class DumpCodes {
         PDPage page = doc.getPage(0);
         COSDictionary res = page.getResources().getCOSObject();
         COSDictionary fonts = (COSDictionary) res.getDictionaryObject("Font");
-        COSName firstKey = (COSName) fonts.keySet().iterator().next();
-        PDFont font = PDFontFactory.createFont((COSDictionary) fonts.getDictionaryObject(firstKey));
-        System.out.println("font: " + font.getName());
+        // v1.4: PDFs may carry several font resources (one per embedded
+        // pair); Tf selects the active one, so decode through it.
+        java.util.Map<String, PDFont> fontCache = new java.util.HashMap<String, PDFont>();
+        PDFont active = null;
         PDFStreamParser parser = new PDFStreamParser(page);
         Object token;
         COSString lastStr = null;
+        java.util.List<COSBase> operands = new java.util.ArrayList<COSBase>();
         while ((token = parser.parseNextToken()) != null) {
             if (token instanceof Operator) {
                 Operator op = (Operator) token;
-                if (op.getName().equals("Tj") && lastStr != null) {
-                    dumpString(lastStr, font, op.getName());
+                if (op.getName().equals("Tf")) {
+                    // operands: [fontName, size]
+                    if (operands.size() > 0 && operands.get(0) instanceof COSName) {
+                        String fname = ((COSName) operands.get(0)).getName();
+                        PDFont f = fontCache.get(fname);
+                        if (f == null && fonts != null
+                                && fonts.getDictionaryObject(fname) instanceof COSDictionary) {
+                            f = PDFontFactory.createFont(
+                                (COSDictionary) fonts.getDictionaryObject(fname));
+                            fontCache.put(fname, f);
+                        }
+                        active = f;
+                    }
+                } else if (op.getName().equals("Tj") && lastStr != null) {
+                    dumpString(lastStr, active, op.getName());
                     lastStr = null;
+                } else if (op.getName().equals("TJ")) {
+                    // operands: [array]
+                    StringBuilder out = new StringBuilder();
+                    for (COSBase o : operands) {
+                        if (o instanceof COSArray) {
+                            COSArray arr = (COSArray) o;
+                            for (int k = 0; k < arr.size(); k++) {
+                                COSBase e = arr.get(k);
+                                if (e instanceof COSString) {
+                                    out.append(decode((COSString) e, active));
+                                }
+                            }
+                        }
+                    }
+                    System.out.println("TJ [" + fontName(active) + "]: " + out);
                 }
+                operands.clear();
             } else if (token instanceof COSString) {
                 lastStr = (COSString) token;
-            } else if (token instanceof COSArray) {
-                COSArray arr = (COSArray) token;
-                StringBuilder out = new StringBuilder();
-                for (int k = 0; k < arr.size(); k++) {
-                    COSBase o = arr.get(k);
-                    if (o instanceof COSString) {
-                        out.append(decode((COSString) o, font));
-                    }
-                }
-                System.out.println("TJ unicode order: " + out);
+                operands.add((COSBase) token);
+            } else if (token instanceof COSBase) {
+                operands.add((COSBase) token);
             }
         }
         doc.close();
     }
 
+    private static String fontName(PDFont f) {
+        return f == null ? "?" : f.getName();
+    }
+
     private static void dumpString(COSString s, PDFont font, String name) {
-        System.out.println(name + " unicode order: " + decode(s, font));
+        System.out.println(name + " [" + fontName(font) + "]: " + decode(s, font));
     }
 
     private static String decode(COSString s, PDFont font) {

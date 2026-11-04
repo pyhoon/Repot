@@ -45,7 +45,7 @@ Copy-Item (Join-Path $additional "Repot.xml") $stage
 
 # Manifest.
 $manifest = @"
-Version=1.3
+Version=1.4
 B4J.DependsOn=Json, JavaObject
 B4A.DependsOn=Json, JavaObject, Printing, FileProvider
 "@

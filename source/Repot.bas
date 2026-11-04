@@ -16,8 +16,11 @@ Sub Class_Globals
 	'Optional TrueType fonts for the B4J PDF exporter.
 	Public FontFile As String
 	Public FontFileBold As String
+	'Paragraph base direction for the B4J PDF bidi pass ("ltr"/"rtl").
+	Public BaseDirection As String
 	'Used by the data exporters when no dataset name is passed.
 	Public DefaultDataSet As String
+	Private mExtraFonts As List
 	Private mLoader As ReportTemplateLoader
 	Private mDef As ReportDefinition
 	Private mBinder As ReportDataBinder
@@ -29,7 +32,15 @@ Public Sub Initialize
 	SourceDir = ""
 	FontFile = ""
 	FontFileBold = ""
+	BaseDirection = "ltr"
 	DefaultDataSet = ""
+	mExtraFonts.Initialize
+End Sub
+
+'Registers an additional embedded font pair for mixed-script B4J PDF
+'exports (mirrors ReportPdfExporter.AddEmbeddedFont).
+Public Sub AddEmbeddedFont (RegularPath As String, BoldPath As String)
+	mExtraFonts.Add(Array(RegularPath, BoldPath))
 End Sub
 
 Public Sub LoadTemplate (Dir As String, FileName As String) As Boolean
@@ -143,6 +154,10 @@ Public Sub ExportPdf (OutputPath As String) As Boolean
 	ex.SourceDir = SourceDir
 	ex.FontFile = FontFile
 	ex.FontFileBold = FontFileBold
+	ex.BaseDirection = BaseDirection
+	For Each pair() As Object In mExtraFonts
+		ex.AddEmbeddedFont(pair(0), pair(1))
+	Next
 	Return ex.Export(Result.RenderDocument, OutputPath)
 End Sub
 

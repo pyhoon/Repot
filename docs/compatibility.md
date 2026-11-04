@@ -100,11 +100,20 @@ the canvas is abstract. See
   readable logical-order text (the stripper normalises presentation
   forms back to base letters), so copy/search works. The fixture fonts
   matter: Noto Sans Arabic has no Latin letters and Noto Sans Hebrew has
-  no digits or Latin at all — a mixed-script line needs a font that
-  covers every glyph, which is a template author's choice.
-- B4A PDF: no engine changes were needed for v1.3. Android's system text
-  stack shapes and reorders Arabic/Hebrew at draw time; the RTL fixtures
-  export through the vector canvas with introspected page counts.
+  no digits or Latin at all — see the font-set bullet below for how
+  mixed lines are handled since v1.4.
+- Embedded font set (v1.4): `ReportPdfExporter.AddEmbeddedFont` registers
+  additional regular/bold pairs; `drawText` splits the processed string
+  into maximal runs by font coverage and emits one text object per run,
+  so one export can mix Latin, Arabic and Hebrew (the `mixed-scripts`
+  fixture). `?` appears only when no registered font covers a glyph.
+  `BaseDirection` ("ltr" default, "rtl") sets the bidi paragraph base
+  direction: with "rtl", a pure-RTL line keeps trailing punctuation on
+  the left edge and an LTR prefix anchors to the right edge.
+- B4A PDF: no engine changes were needed for v1.3/v1.4. Android's system
+  text stack shapes, reorders and falls back across fonts at draw time;
+  the RTL and mixed-script fixtures export through the vector canvas
+  with introspected page counts.
 
 ## 4. Fidelity tiers
 
@@ -139,6 +148,15 @@ the canvas is abstract. See
 - Identical pagination between PDF and browser print preview.
 - No RTL page/paragraph direction parameter: the paragraph base
   direction stays LTR; only RTL bidi runs are reordered.
+
+Update v1.4: `BaseDirection` on `ReportPdfExporter` (and the `Repot`
+facade) now selects the bidi base direction per export, which covers
+the pure-RTL paragraph case above; a per-template/per-style direction
+key still does not exist. Mixed-script line metrics remain Tier 2: the
+logical-font measurement advance differs from the embedded-font draw
+width by up to ~10% on mixed lines (recorded in b4x-notes), while the
+PDF's own right/center anchoring uses the embedded widths and stays
+self-consistent.
 
 Every new exporter must state which tier it meets for each fixture.
 

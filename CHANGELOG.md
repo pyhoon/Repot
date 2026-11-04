@@ -1,5 +1,51 @@
 # Changelog
 
+## 1.4.0 — 2026-11-04
+
+Embedded font set and RTL base direction (M13). B4J 480 checks /
+0 errors, B4A 342 checks / 0 errors on emulator-5554.
+
+### Added
+- `ReportPdfExporter.AddEmbeddedFont(Regular, Bold)`: register
+  additional embedded font pairs beyond the primary `FontFile`/
+  `FontFileBold`. `drawText` splits the shaped, visual-order string
+  into maximal runs by font coverage and emits one text object per
+  run, so a single export can mix Latin, Arabic and Hebrew. `?`
+  appears only when no registered font covers a glyph. Mirrored on the
+  `Repot` facade.
+- `ReportPdfExporter.BaseDirection` ("ltr" default, "rtl"): bidi
+  paragraph base direction for the PDF pass. With "rtl", pure-RTL lines
+  keep trailing punctuation on the left edge and an LTR prefix anchors
+  to the right edge (verified at content-stream level with
+  `tools/pdf-probe`).
+- Fixture `mixed-scripts`: Latin labels with Arabic and Hebrew values,
+  digits inside both RTL scripts, and a three-script subtitle line —
+  the case that was impossible in v1.3's single-font-pair exporter.
+- B4A: the fixture exports through the vector canvas with introspected
+  page counts (no engine changes; Android falls back across system
+  fonts natively).
+
+### Fixed
+- Arabic shaping: a letter joined from the right took the medial form
+  even when the following character was not a joiner (`دفع.` painted
+  `ع` medial instead of final). The medial form now requires a joining
+  next letter.
+
+### Changed
+- `tools/pdf-probe/DumpCodes` tracks `Tf` font switches and prints the
+  active font per text object, so multi-font PDFs decode correctly.
+- Documentation synced: compatibility (font set, base direction, mixed
+  metric tolerance), b4x-notes (M13 verified facts: `hasGlyph(int)`
+  takes a character code, not a codepoint; TextLayout mixed-script
+  ratio 0.914; Bidi base-direction behaviour), testing counts.
+
+### Known limitations
+- Mixed-script line metrics: layout width (logical AWT fonts) and PDF
+  width (embedded fonts) can differ by up to ~10% on mixed lines; the
+  PDF's own alignment anchoring uses embedded widths and stays
+  self-consistent.
+- Base direction is exporter-level, not a template/style key.
+
 ## 1.3.0 — 2026-11-04
 
 RTL text and complex scripts in the B4J PDF (M12). B4J 451 checks /

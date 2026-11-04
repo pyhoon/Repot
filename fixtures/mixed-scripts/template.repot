@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "0.1",
+  "id": "mixed.scripts",
+  "name": "Mixed-script listing",
+  "description": "Latin labels with Arabic and Hebrew values, digits everywhere, drawn with a three-pair embedded font set (v1.4 run splitting).",
+  "page": {
+    "size": "A4",
+    "orientation": "portrait",
+    "margins": { "top": "12mm", "right": "15mm", "bottom": "18mm", "left": "15mm" },
+    "grid": { "columns": 24, "cellHeight": 16 }
+  },
+  "fonts": {
+    "body": { "family": ["Arial", "sans-serif"], "size": 9 }
+  },
+  "styles": {
+    "title": { "font": "body", "size": 16, "bold": true },
+    "label": { "font": "body", "colour": "#555555" },
+    "cell": { "font": "body", "valign": "middle" }
+  },
+  "parameters": [
+    { "name": "ReportTitle", "type": "string", "required": true }
+  ],
+  "dataSets": [
+    {
+      "name": "Rows",
+      "kind": "rows",
+      "fields": [
+        { "name": "Item", "type": "string" },
+        { "name": "Value", "type": "string" }
+      ]
+    }
+  ],
+  "sections": [
+    {
+      "type": "ReportHeader",
+      "id": "report-header",
+      "height": 40,
+      "elements": [
+        { "type": "field", "id": "title", "bounds": [0, 0, 400, 24], "style": "title", "value": "{param.ReportTitle}" },
+        { "type": "text", "id": "subtitle", "bounds": [0, 26, 500, 14], "style": "label", "text": "Invoice فاتورة חשבונית 1042" }
+      ]
+    },
+    {
+      "type": "PageHeader",
+      "id": "page-header",
+      "height": 20,
+      "elements": [
+        { "type": "text", "id": "hdr-item", "cell": { "col": 0, "row": 0, "colSpan": 8, "rowSpan": 1 }, "style": "label", "text": "Item" },
+        { "type": "text", "id": "hdr-value", "cell": { "col": 8, "row": 0, "colSpan": 8, "rowSpan": 1 }, "style": "label", "text": "Value" }
+      ]
+    },
+    {
+      "type": "Detail",
+      "id": "detail",
+      "dataSet": "Rows",
+      "height": 16,
+      "elements": [
+        { "type": "field", "id": "cell-item", "cell": { "col": 0, "row": 0, "colSpan": 8, "rowSpan": 1 }, "style": "cell", "value": "{Item}" },
+        { "type": "field", "id": "cell-value", "cell": { "col": 8, "row": 0, "colSpan": 8, "rowSpan": 1 }, "style": "cell", "value": "{Value}" }
+      ]
+    }
+  ]
+}

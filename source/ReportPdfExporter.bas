@@ -11,12 +11,17 @@ Sub Class_Globals
 	Public Diagnostics As ReportDiagnostics
 	Public SourceDir As String
 	'Optional TrueType fonts to embed (empty = Standard 14, Latin-1 only).
+	'FontFile/FontFileBold are the primary pair; additional pairs can be
+	'registered with AddEmbeddedFont (v1.4) for mixed-script exports.
 	Public FontFile As String
 	Public FontFileBold As String
+	'Paragraph base direction for the bidi pass: "ltr" (default) or "rtl".
+	Public BaseDirection As String
 	Private mDoc As ReportRenderDocument
 	Private mOutPath As String
 	Private mJavaDoc As Object
 	Private mPageHeight As Double
+	Private mExtraFonts As List
 End Sub
 
 Public Sub Initialize (Diags As ReportDiagnostics)
@@ -29,6 +34,15 @@ Public Sub Initialize (Diags As ReportDiagnostics)
 	SourceDir = ""
 	FontFile = ""
 	FontFileBold = ""
+	BaseDirection = "ltr"
+	mExtraFonts.Initialize
+End Sub
+
+'Registers an additional embedded font pair for mixed-script exports.
+'The primary FontFile/FontFileBold pair is probed first; pairs are
+'tried in registration order. Call before Export.
+Public Sub AddEmbeddedFont (RegularPath As String, BoldPath As String)
+	mExtraFonts.Add(Array(RegularPath, BoldPath))
 End Sub
 
 Public Sub Export (Doc As ReportRenderDocument, OutputPath As String) As Boolean
@@ -47,6 +61,11 @@ Public Sub Export (Doc As ReportRenderDocument, OutputPath As String) As Boolean
 			jo.RunMethod("loadFonts", Array(mJavaDoc, FontFile, FontFileBold))
 		End If
 		Dim i As Int
+		jo.RunMethod("setBaseRTL", Array(BaseDirection <> Null And BaseDirection.ToLowerCase = "rtl"))
+		For i = 0 To mExtraFonts.Size - 1
+			Dim pair() As Object = mExtraFonts.Get(i)
+			jo.RunMethod("addFontPair", Array(mJavaDoc, pair(0), pair(1)))
+		Next
 		For i = 0 To Doc.PageCount - 1
 			Dim page As ReportRenderPage = Doc.PageAt(i + 1)
 			mPageHeight = page.Height
@@ -80,7 +99,7 @@ Private Sub DrawOp (jo As JavaObject, cs As Object, op As ReportDrawOp)
 		Case "text"
 			Dim font As Object = jo.RunMethod("resolveFont", Array(op.FontName, op.Bold, op.Italic))
 			Dim pdfBaseline As Double = mPageHeight - op.Y - op.Baseline
-			jo.RunMethod("drawText", Array(cs, font, op.FontSize, op.X, pdfBaseline, op.Text, op.Colour, op.Align, op.Width))
+			jo.RunMethod("drawText", Array(cs, font, op.FontSize, op.X, pdfBaseline, op.Text, op.Colour, op.Align, op.Width, op.Bold))
 		Case "image"
 			Dim pdfY As Double = mPageHeight - op.Y - op.Height
 			jo.RunMethod("drawImage", Array(cs, mJavaDoc, op.ResourcePath, op.X, pdfY, op.Width, op.Height, op.Fit, SourceDir))
@@ -167,16 +186,55 @@ public static void save(Object doc, String path) throws Exception {
 
 private static org.apache.pdfbox.pdmodel.font.PDType0Font sRegular = null;
 private static org.apache.pdfbox.pdmodel.font.PDType0Font sBold = null;
+/*
+ * Ordered embedded font pairs (v1.4): each entry is
+ * {regularFont, boldFont} with null for a missing variant. The primary
+ * FontFile/FontFileBold pair is registered first; AddEmbeddedFont
+ * appends. drawText walks the list to split a visual string into
+ * per-font runs so mixed-script lines draw with the right glyphs.
+ */
+private static java.util.List<org.apache.pdfbox.pdmodel.font.PDType0Font[]> sPairs =
+    new java.util.ArrayList<org.apache.pdfbox.pdmodel.font.PDType0Font[]>();
+/* Per (font, codepoint) coverage cache; encode() throws when uncovered. */
+private static java.util.Map<org.apache.pdfbox.pdmodel.font.PDType0Font, java.util.Map<Integer, Boolean>> sCoverage =
+    new java.util.IdentityHashMap<org.apache.pdfbox.pdmodel.font.PDType0Font, java.util.Map<Integer, Boolean>>();
+/* Paragraph base direction for the bidi pass (set per export). */
+private static boolean sBaseRTL = false;
+
+public static void setBaseRTL(boolean rtl) {
+    sBaseRTL = rtl;
+}
 
 public static void loadFonts(Object doc, String regular, String bold) throws Exception {
     PDDocument d = (PDDocument)doc;
     sRegular = null;
     sBold = null;
+    sPairs = new java.util.ArrayList<org.apache.pdfbox.pdmodel.font.PDType0Font[]>();
+    sCoverage = new java.util.IdentityHashMap<org.apache.pdfbox.pdmodel.font.PDType0Font, java.util.Map<Integer, Boolean>>();
+    addFontPair(d, regular, bold);
+    if (!sPairs.isEmpty()) {
+        sRegular = sPairs.get(0)[0];
+        sBold = sPairs.get(0)[1];
+    }
+}
+
+/*
+ * Loads one regular/bold pair and appends it to the set. Null or empty
+ * paths skip the variant. Called for the primary pair by loadFonts and
+ * once per AddEmbeddedFont registration by Export.
+ */
+public static void addFontPair(Object doc, String regular, String bold) throws Exception {
+    PDDocument d = (PDDocument)doc;
+    org.apache.pdfbox.pdmodel.font.PDType0Font r = null;
+    org.apache.pdfbox.pdmodel.font.PDType0Font b = null;
     if (regular != null && regular.length() > 0) {
-        sRegular = org.apache.pdfbox.pdmodel.font.PDType0Font.load(d, new File(regular));
+        r = org.apache.pdfbox.pdmodel.font.PDType0Font.load(d, new File(regular));
     }
     if (bold != null && bold.length() > 0) {
-        sBold = org.apache.pdfbox.pdmodel.font.PDType0Font.load(d, new File(bold));
+        b = org.apache.pdfbox.pdmodel.font.PDType0Font.load(d, new File(bold));
+    }
+    if (r != null || b != null) {
+        sPairs.add(new org.apache.pdfbox.pdmodel.font.PDType0Font[] { r, b });
     }
 }
 
@@ -184,6 +242,9 @@ public static void close(Object doc) throws Exception {
     ((PDDocument)doc).close();
     sRegular = null;
     sBold = null;
+    sPairs = new java.util.ArrayList<org.apache.pdfbox.pdmodel.font.PDType0Font[]>();
+    sCoverage = new java.util.IdentityHashMap<org.apache.pdfbox.pdmodel.font.PDType0Font, java.util.Map<Integer, Boolean>>();
+    sBaseRTL = false;
 }
 
 public static int pageCount(String path) throws Exception {
@@ -247,34 +308,124 @@ private static String safeText(PDFont font, String text) {
     return sb.toString();
 }
 
-public static void drawText(Object cs, Object font, double size, double x, double y, String text, String colour, String align, double boxWidth) throws Exception {
+public static void drawText(Object cs, Object font, double size, double x, double y, String text, String colour, String align, double boxWidth, boolean bold) throws Exception {
     PDPageContentStream s = (PDPageContentStream)cs;
     // Bidi + Arabic presentation-form shaping: PDF text streams have no
     // shaping engine of their own, so the logical-order string is first
     // shaped (Arabic contextual forms, lam-alef) and then chunked into
     // bidi runs and emitted in visual order. Latin-only strings pass
     // through unchanged.
-    String visual = bidiVisual(text);
-    String safe = safeText((PDFont)font, visual);
-    float drawX = (float)x;
-    if (align != null && align.length() > 0) {
+    String visual = bidiVisual(text, sBaseRTL);
+    // Split into maximal runs by which embedded font covers them (v1.4
+    // font set). With no embedded fonts (or a single covering font) this
+    // is one run and the code path is identical to v1.3.
+    java.util.List<Object[]> runs = splitRuns(visual, (PDFont)font, bold);
+    // Alignment width: sum of the run widths measured with their own
+    // fonts, so right/center anchors stay on the real PDF width.
+    float textWidth = 0f;
+    for (Object[] run : runs) {
+        PDFont f = (PDFont)run[0];
+        String safe = safeText(f, (String)run[1]);
+        if (safe.length() == 0) continue;
         try {
-            // measure the processed (visual) string: visual width == logical width
-            float textWidth = ((PDFont)font).getStringWidth(safe) / 1000f * (float)size;
-            if (align.equalsIgnoreCase("right")) {
-                drawX = (float)(x + boxWidth - textWidth);
-            } else if (align.equalsIgnoreCase("center")) {
-                drawX = (float)(x + (boxWidth - textWidth) / 2.0);
-            }
+            textWidth += f.getStringWidth(safe) / 1000f * (float)size;
         } catch (Exception ignored) {
-            // keep left alignment if the font cannot measure the string
+            // unmeasurable run contributes nothing to the anchor
         }
     }
-    s.beginText();
-    s.setFont((PDFont)font, (float)size);
-    s.newLineAtOffset(drawX, (float)y);
-    s.showText(safe);
-    s.endText();
+    float drawX = (float)x;
+    if (align != null && align.length() > 0) {
+        if (align.equalsIgnoreCase("right")) {
+            drawX = (float)(x + boxWidth - textWidth);
+        } else if (align.equalsIgnoreCase("center")) {
+            drawX = (float)(x + (boxWidth - textWidth) / 2.0);
+        }
+    }
+    float cursor = drawX;
+    for (Object[] run : runs) {
+        PDFont f = (PDFont)run[0];
+        String safe = safeText(f, (String)run[1]);
+        if (safe.length() == 0) continue;
+        s.beginText();
+        s.setFont(f, (float)size);
+        s.newLineAtOffset(cursor, (float)y);
+        s.showText(safe);
+        s.endText();
+        try {
+            cursor += f.getStringWidth(safe) / 1000f * (float)size;
+        } catch (Exception ignored) {
+            // keep the cursor moving even if a run cannot be measured
+        }
+    }
+}
+
+/*
+ * Splits a visual-order string into maximal runs drawn with one font
+ * each. Candidate fonts are the embedded pairs in registration order
+ * (bold ops prefer each pair's bold variant, falling back to its
+ * regular); the first font whose cmap covers the codepoint wins. A run
+ * no embedded font covers falls back to the caller's resolved font
+ * (primary embedded pair, or a Standard 14 font), where safeText's '?'
+ * substitution applies exactly as before.
+ */
+private static java.util.List<Object[]> splitRuns(String text, PDFont fallback, boolean bold) {
+    java.util.List<Object[]> out = new java.util.ArrayList<Object[]>();
+    if (text == null || text.isEmpty()) return out;
+    int i = 0;
+    int n = text.length();
+    while (i < n) {
+        int cp = text.codePointAt(i);
+        PDFont f = pickFont(cp, bold);
+        int j;
+        if (f == null) {
+            // uncovered: batch until the next covered codepoint
+            j = i + Character.charCount(cp);
+            while (j < n && pickFont(text.codePointAt(j), bold) == null) {
+                j += Character.charCount(text.codePointAt(j));
+            }
+            out.add(new Object[] { fallback, text.substring(i, j) });
+        } else {
+            j = i + Character.charCount(cp);
+            while (j < n) {
+                PDFont f2 = pickFont(text.codePointAt(j), bold);
+                if (f2 != f) break;
+                j += Character.charCount(text.codePointAt(j));
+            }
+            out.add(new Object[] { f, text.substring(i, j) });
+        }
+        i = j;
+    }
+    return out;
+}
+
+/* First embedded font covering the codepoint, or null. Cached per font. */
+private static PDFont pickFont(int cp, boolean bold) {
+    for (org.apache.pdfbox.pdmodel.font.PDType0Font[] pair : sPairs) {
+        org.apache.pdfbox.pdmodel.font.PDType0Font f =
+            (bold && pair[1] != null) ? pair[1] : pair[0];
+        if (f == null) continue;
+        if (covers(f, cp)) return f;
+    }
+    return null;
+}
+
+private static boolean covers(org.apache.pdfbox.pdmodel.font.PDType0Font f, int cp) {
+    java.util.Map<Integer, Boolean> m = sCoverage.get(f);
+    if (m == null) {
+        m = new java.util.HashMap<Integer, Boolean>();
+        sCoverage.put(f, m);
+    }
+    Boolean cached = m.get(Integer.valueOf(cp));
+    if (cached != null) return cached.booleanValue();
+    boolean ok;
+    try {
+        f.encode(new String(Character.toChars(cp)));
+        ok = true;
+    } catch (Exception e) {
+        ok = false;
+    }
+    m.put(Integer.valueOf(cp), Boolean.valueOf(ok));
+    return ok;
 }
 
 /*
@@ -396,7 +547,7 @@ public static String shapeArabic(String text) {
         if (forms == null) { out.appendCodePoint(cp); continue; } // tatweel or unmapped
         boolean iJoinNext = !(nonJoining(cp));
         int form;
-        if (joinedFromRight && iJoinNext) form = forms[3];     // medial
+        if (joinedFromRight && iJoinNext && arabicJoiner(ncp)) form = forms[3]; // medial: joined from both sides
         else if (joinedFromRight) form = forms[1];             // final
         else if (iJoinNext && arabicJoiner(ncp)) form = forms[2]; // initial
         else form = forms[0];                                  // isolated
@@ -419,10 +570,12 @@ private static boolean isSpaceLike(int cp) {
  * visual order. Odd-level chunks (true RTL) are codepoint-reversed so
  * PDFBox, which paints left to right, produces the correct glyph order.
  * Bidi.reorderVisually handles nested levels (digits inside Arabic run
- * at a deeper even level stay LTR). Base direction is LTR (the engine
- * has no RTL page direction yet; documented).
+ * at a deeper even level stay LTR). The base direction comes from the
+ * exporter's BaseDirection property ("ltr" default, "rtl" supported):
+ * with an RTL base a pure-RTL line stays one level-1 run, so trailing
+ * neutral punctuation lands on the left edge as an RTL reader expects.
  */
-public static String bidiVisual(String text) {
+public static String bidiVisual(String text, boolean rtlBase) {
     if (text == null || text.isEmpty()) return text;
     try {
         // Shape first, over the full logical string so joining context is
@@ -430,7 +583,9 @@ public static String bidiVisual(String text) {
         // run boundaries of the shaped string are the same: presentation
         // forms carry RTL direction just like their base letters.
         String shaped = shapeArabic(text);
-        java.text.Bidi bidi = new java.text.Bidi(shaped, java.text.Bidi.DIRECTION_LEFT_TO_RIGHT);
+        int direction = rtlBase ? java.text.Bidi.DIRECTION_RIGHT_TO_LEFT
+                                : java.text.Bidi.DIRECTION_LEFT_TO_RIGHT;
+        java.text.Bidi bidi = new java.text.Bidi(shaped, direction);
         int runs = bidi.getRunCount();
         if (runs <= 1 && bidi.getRunLevel(0) == 0) return shaped;
         byte[] levels = new byte[runs];

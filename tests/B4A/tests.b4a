@@ -113,7 +113,7 @@ Sub RunSuite As String
 	'(assets are read-only); the loader works on real files
 	Dim names As List
 	names.Initialize
-	names.AddAll(Array As String("invoice-basic", "listing-multipage", "multilang", "statement-grouped", "rtl-arabic", "rtl-hebrew"))
+	names.AddAll(Array As String("invoice-basic", "listing-multipage", "multilang", "statement-grouped", "rtl-arabic", "rtl-hebrew", "mixed-scripts"))
 	Dim commonFiles() As String = Array As String("template.repot", "data.json", "params.json")
 	For Each n As String In names
 		File.MakeDir(File.DirInternal, "fixtures")
