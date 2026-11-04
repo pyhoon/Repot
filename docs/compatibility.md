@@ -118,7 +118,12 @@ the canvas is abstract. See
   CJK-capable font is registered through `AddEmbeddedFont` (verified
   with Noto Sans SC + Noto Sans KR; note a single regional variant does
   not cover all three scripts — SC has no hangul, KR has the hangul).
-  The `multilang` fixture now registers CJK subset fonts (see
+  Simplified vs Traditional Chinese: the unified Han repertoire is in
+  both — a full Noto Sans SC covers Traditional codepoints too, but
+  shared codepoints draw with SC-preferred glyph shapes; register Noto
+  Sans TC (also OFL) for Traditional-preferred shapes. TC does not
+  cover some Simplified-only characters, so mixed reports register
+  both. The `multilang` fixture now registers CJK subset fonts (see
   `fixtures/_fonts/README.md`) plus the Arabic and Hebrew pairs, and
   the suite asserts that every script row extracts from the PDF with
   zero `?` substitutions. The subsets cover only the fixture's
