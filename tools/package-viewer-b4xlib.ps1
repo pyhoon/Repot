@@ -12,7 +12,7 @@
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
-$src = Join-Path $root "ui"
+$src = Join-Path $root "preview"
 $dist = Join-Path $root "dist"
 $stage = Join-Path $env:TEMP "repot-viewer-stage"
 

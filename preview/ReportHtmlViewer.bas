@@ -1,5 +1,5 @@
-B4J=true
-Group=Export
+﻿B4J=true
+Group=Default Group
 ModulesStructureVersion=1
 Type=Class
 Version=10.7

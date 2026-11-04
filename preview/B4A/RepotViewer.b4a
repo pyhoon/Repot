@@ -1,14 +1,13 @@
-Build1=Default,b4a.example
-File1=viewer.bal
+﻿Build1=Default,b4a.example
+File1=1.bal
 FileGroup1=Default Group
 Group=Default Group
 Library1=core
 Library2=xui
-Library3=javaobject
 ManifestCode=
 Module1=|relative|..\ReportHtmlViewer
 NumberOfFiles=1
-NumberOfLibraries=3
+NumberOfLibraries=2
 NumberOfModules=1
 Version=14.2
 @EndOfDesignText@
@@ -44,7 +43,7 @@ End Sub
 
 Sub Activity_Create (FirstTime As Boolean)
 	'Do not forget to load the layout file created with the visual designer. For example:
-	Activity.LoadLayout("viewer")
+	Activity.LoadLayout("1")
 
 End Sub
 

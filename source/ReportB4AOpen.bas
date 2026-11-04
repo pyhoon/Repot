@@ -1,4 +1,4 @@
-﻿B4A=true
+B4A=true
 Group=Export
 ModulesStructureVersion=1
 Type=Code
@@ -7,14 +7,18 @@ Version=10.7
 ' B4A-only helper: open a file (e.g. a generated PDF) in a viewer app.
 
 Sub Process_Globals
+	#If B4A
 	Private provider As FileProvider
 	Private isInit As Boolean
+	#End If
 End Sub
 
 Private Sub EnsureInit
+	#If B4A
 	If isInit Then Return
 	provider.Initialize
 	isInit = True
+	#End If
 End Sub
 
 Public Sub OpenPdf(Dir As String, FileName As String)

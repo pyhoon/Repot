@@ -1,15 +1,15 @@
-AppType=JavaFX
+﻿AppType=JavaFX
 Build1=Default,b4j.example
+File1=1.bjl
+FileGroup1=Default Group
 Group=Default Group
 Library1=jcore
-Library2=json
-Library3=javaobject
+Library2=jfx
+Library3=jxui
 Library4=repot
-Library5=jfx
-Library6=jxui
-Module1=|relative|..\..\ui\ReportHtmlViewer
-NumberOfFiles=0
-NumberOfLibraries=6
+Module1=|relative|..\ReportHtmlViewer
+NumberOfFiles=1
+NumberOfLibraries=4
 NumberOfModules=1
 Version=10.7
 @EndOfDesignText@
@@ -35,13 +35,14 @@ Version=10.7
 
 Sub Process_Globals
 	Private MainForm As Form
-	Private mViewer As ReportHtmlViewer
+	'Private mViewer As ReportHtmlViewer
+	Private ReportHtmlViewer1 As ReportHtmlViewer
 End Sub
 
 Sub AppStart (Form1 As Form, Args() As String)
 	MainForm = Form1
 	MainForm.Title = "Repot - inline HTML preview"
-
+	
 	Dim fixtureDir As String = ""
 	If Args.Length > 0 Then
 		fixtureDir = Args(0)
@@ -89,10 +90,15 @@ Sub AppStart (Form1 As Form, Args() As String)
 		LogDiagnostics("build", r)
 		Return
 	End If
-
-	mViewer.Initialize(Me, "viewer")
-	mViewer.CreateView(MainForm.RootPane)
-	If mViewer.LoadHtml(r.GetHtml) = False Then
+	
+	MainForm.RootPane.LoadLayout("1")
+	'mViewer.Initialize(Me, "viewer")
+	'mViewer.CreateView(MainForm.RootPane)
+	'If mViewer.LoadHtml(r.GetHtml) = False Then
+	'	Log("preview: viewer could not load the document")
+	'	Return
+	'End If
+	If ReportHtmlViewer1.LoadHtml(r.GetHtml) = False Then
 		Log("preview: viewer could not load the document")
 		Return
 	End If

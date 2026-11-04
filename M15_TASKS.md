@@ -34,7 +34,7 @@ duplicate layout and drift, so it stays out of scope.
   pass as `ExportHtml`, so preview and file are identical (tested).
 
 ## Task 3: Viewer module + separate package — COMPLETE
-- [x] `ui/ReportHtmlViewer.bas` is a **B4X custom view**: `Type=Class`,
+- [x] `preview/ReportHtmlViewer.bas` is a **B4X custom view**: `Type=Class`,
   `DesignerCreateView(Base, Lbl, Props)`, `Public mBase As B4XView`,
   `#Event: PageFinished`, plus a `CreateView(Parent)` path for code use.
   It appears in the Layout Designer's Custom Views list once
@@ -49,11 +49,11 @@ duplicate layout and drift, so it stays out of scope.
   `Supported Platforms=B4A,B4J`,
   `B4J.DependsOn=Json, JavaObject, jfx, jxui, Repot`,
   `B4A.DependsOn=Json, JavaObject, xui, Repot`.
-- [x] Compile-check projects: `examples/B4J-preview/preview.b4j` (JavaFX,
-  exit 0) and `ui/B4A/RepotViewer.b4a` (B4ABuilder, exit 0).
+- [x] Compile-check projects: `preview/B4J/preview.b4j` (JavaFX,
+  exit 0) and `preview/B4A/RepotViewer.b4a` (B4ABuilder, exit 0).
 
 ## Task 4: Example — COMPLETE
-- [x] `examples/B4J-preview/preview.b4j`: builds invoice-basic through the
+- [x] `preview/B4J/preview.b4j`: builds invoice-basic through the
   facade, then `mViewer.LoadHtml(r.GetHtml)`.
 - [ ] Not run in a GUI here (headless verification only).
 

@@ -15,9 +15,9 @@ Inline HTML preview for B4J desktop, and the facade accessor it needs.
   One module serves both platforms (B4J `fx.WebView`, B4A core
   `WebView`); APIs verified against `jFX.xml` and `Core.xml`.
   Manifest: `Supported Platforms=B4A,B4J`.
-- `examples/B4J-preview/preview.b4j`: the reference use case — builds
+- `preview/B4J/preview.b4j`: the reference use case — builds
   invoice-basic through the facade and shows `GetHtml` inline.
-- `ui/B4A/RepotViewer.b4a`: compile-check project; the B4A branch is
+- `preview/B4A/RepotViewer.b4a`: compile-check project; the B4A branch is
   verified by a B4ABuilder run (exit 0).
 - `TestHtmlPreview` in the engine suite: `GetHtml` is non-empty, contains
   the document markers, and is byte-identical to the `ExportHtml` file.

@@ -1,4 +1,4 @@
-﻿B4A=true
+B4A=true
 Group=Export
 ModulesStructureVersion=1
 Type=Code
@@ -10,8 +10,14 @@ Version=10.7
 ' fires on completion. Use with B4A Wait For.
 
 Sub Process_Globals
+	#If B4A
 	Private mSourceDir As String
+	#Else
+	' B4J compiles this module to an empty shell; the real code is B4A-only.
+	#End If
 End Sub
+
+#If B4A
 
 ' Vector PDF via the Printing library's PdfDocument canvas (synchronous).
 Public Sub PrintVectorPdf(Doc As ReportRenderDocument, OutputPath As String, SourceDir As String) As Boolean
@@ -330,5 +336,6 @@ private static void cleanup(final WebView wv) {
 		}
 	});
 }
+#End If
 #End If
 #End If

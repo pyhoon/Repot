@@ -221,9 +221,10 @@ Repot/
 │   ├── B4J-preview/             Inline HTML preview example (M15)
 │   ├── B4A/                     Android example (export, print, SaveAs)
 │   └── server/                  B4J HTTP server serving rendered reports
-├── ui/                          Optional viewer module (separate RepotViewer.b4xlib)
+├── preview/                     Viewer: module + designer projects
 │   ├── ReportHtmlViewer.bas     Designer-addable custom view (B4J + B4A)
-│   └── B4A/                     B4A compile-check project for the viewer
+│   ├── B4J/                     B4J preview app (designer-added view)
+│   └── B4A/                     B4A preview app (designer-added view)
 ├── fixtures/                    Templates, data and notes; layout/export goldens
 ├── dist/                        Packaged Repot.b4xlib and RepotViewer.b4xlib
 └── tools/                       Developer scripts (ci.ps1, run-fixtures.ps1, packaging)
@@ -351,7 +352,7 @@ Inline preview for B4J desktop, and the accessor that makes it trustworthy:
   event exposed), or create it in code with `CreateView(Parent)`. It has
   native backends for B4J (`fx.WebView`) and B4A (core `WebView`), and is
   kept out of the headless core library.
-- `examples/B4J-preview` shows the facade → `GetHtml` → inline preview
+- `preview/B4J` shows the facade → `GetHtml` → inline preview
   flow end to end.
 - B4A keeps the vector PDF path; an on-device HTML preview widget is not
   planned (Android has no `fx.WebView`).
