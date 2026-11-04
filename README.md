@@ -8,15 +8,18 @@ by the host application into paginated documents and structured exports.
 The same template works from B4J desktop, B4J server, and B4A, and
 renders to HTML for browsers.
 
-> **Project status: v1.2.0 (M10 + M11 complete). A `Repot` facade
+> **Project status: v1.4.0 (M10–M13 complete). A `Repot` facade
 > (load → bind → build → export/print) is implemented. B4A produces
 > vector PDF synchronously through the `Printing` library, can verify
 > exported PDFs (`GetPdfPageCount` via `PdfRenderer`), prints through
 > the system print dialog, and saves to a user-chosen location through
-> the Storage Access Framework (`ReportSaveAs`). Tagged `v1.2.0`.**
+> the Storage Access Framework (`ReportSaveAs`). The B4J PDF embeds
+> TrueType fonts, renders right-to-left text (bidi reordering + Arabic
+> shaping), and accepts a set of embedded fonts for mixed-script
+> documents. Tagged `v1.4.0`.**
 >
-> The full engine suite runs on both platforms: **B4J 411 checks,
-> B4A 327 checks, 0 errors on both** (emulator-5554, API 36).
+> The full engine suite runs on both platforms: **B4J 480 checks,
+> B4A 342 checks, 0 errors on both** (emulator-5554, API 36).
 > Exporters (PDF, HTML, CSV, JSON, XML, DOCX, XLSX) shipped in
 > M3–M7 and run on both platforms. `tools/ci.ps1 -RunEmulator` is the
 > cross-platform gate and exits 0. See [CHANGELOG.md](CHANGELOG.md).
@@ -69,7 +72,7 @@ support.
 
 | Format | Intended use | Status |
 |--------|--------------|--------|
-| PDF | Fixed-layout, print-ready reports | shipped (B4J PDFBox, B4A vector canvas); introspected via PDFBox / `PdfRenderer` |
+| PDF | Fixed-layout, print-ready reports | shipped (B4J PDFBox with embedded fonts, RTL text and a mixed-script font set; B4A vector canvas); introspected via PDFBox / `PdfRenderer` |
 | HTML | Preview, web reports, printing | shipped (layout and flow modes) |
 | CSV | Flat tabular data | shipped |
 | JSON | Data interchange and diagnostics | shipped |
@@ -223,7 +226,7 @@ module.
 | [docs/b4x-notes.md](docs/b4x-notes.md) | Verified B4X API facts and gotchas |
 | [docs/prior-art.md](docs/prior-art.md) | Existing B4X reporting tools and lessons |
 | [docs/decisions/](docs/decisions/) | Recorded architecture decisions |
-| [M10_TASKS.md](M10_TASKS.md), [M11_TASKS.md](M11_TASKS.md) | Milestone plans and completion state |
+| [M10_TASKS.md](M10_TASKS.md)–[M13_TASKS.md](M13_TASKS.md) | Milestone plans and completion state |
 
 ## What 1.0 delivered
 
@@ -267,6 +270,23 @@ deferred from v1.2.0:
   verified against the pipeline, plus `rtl-arabic` and `rtl-hebrew`
   fixtures. B4A needed no changes: the system text stack shapes at
   draw time.
+
+## What 1.4 delivered
+
+Mixed-script documents and paragraph direction, closing v1.3's own
+known limitations:
+
+- `ReportPdfExporter.AddEmbeddedFont`: additional embedded font pairs
+  beyond the primary `FontFile`/`FontFileBold`. Text is split into
+  maximal per-font runs, so one export can mix Latin, Arabic and
+  Hebrew — including digits inside Hebrew text, which no single Noto
+  font covers.
+- `BaseDirection` ("ltr"/"rtl"): bidi paragraph base direction for the
+  PDF pass; pure-RTL lines keep trailing punctuation on the left edge.
+- A shaping fix found during verification: Arabic letters joined from
+  the right no longer take the medial form when the next character is
+  not a joiner.
+- The `mixed-scripts` fixture exercises all of it on both platforms.
 
 ## License, support, and contributions
 
