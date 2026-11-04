@@ -23,7 +23,7 @@ and what is explicitly best-effort. It is the contract behind the phrase
 | XLSX export | 1.x | 1.x | 1.0 (verified) | -- |
 | ODT export | 1.5 | 1.5 | 1.5 | -- |
 | ODS export | 1.5 | 1.5 | 1.5 | -- |
-| Inline preview widget | 1.6 (`RepotViewer.b4xlib`: `ReportHtmlViewer` over fx.WebView; needs `jfx`) | -- (host renders HTML itself) | 1.6 (`RepotViewer.b4xlib`: `ReportHtmlViewer` over the core WebView) | n/a |
+| Inline preview widget | 1.6 (`RepotViewer.b4xlib`: designer-addable custom view over fx.WebView; needs `jfx`,`jxui`) | -- (host renders HTML itself) | 1.6 (`RepotViewer.b4xlib`: same custom view over the core WebView; needs `xui`) | n/a |
 | Native preview | host WebView (`ReportHtmlExporter.ToHtml`) | n/a | host WebView (`ToHtml`) | n/a |
 | Print | opens the PDF in the system viewer | n/a | 1.0 (system print dialog, `ReportPrint`) | browser |
 | PDF introspection (page count) | 1.0 (PDFBox) | n/a | 1.2 (`PdfRenderer`, `ReportPdfIntrospection`) | -- |

@@ -28,8 +28,10 @@ Get-ChildItem -Path $src -Filter "*.bas" -File | ForEach-Object {
 
 $manifest = @"
 Version=1.6
-B4J.DependsOn=Json, JavaObject, jfx, Repot
-B4A.DependsOn=Json, JavaObject, Repot
+Author=Repot contributors
+B4J.DependsOn=Json, JavaObject, jfx, jxui, Repot
+B4A.DependsOn=Json, JavaObject, xui, Repot
+Supported Platforms=B4A,B4J
 "@
 Set-Content -Path (Join-Path $stage "manifest.txt") -Value $manifest -NoNewline
 

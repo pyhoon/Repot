@@ -1,10 +1,14 @@
 Build1=Default,b4a.example
+File1=viewer.bal
+FileGroup1=Default Group
 Group=Default Group
 Library1=core
-Library2=javaobject
+Library2=xui
+Library3=javaobject
+ManifestCode=
 Module1=|relative|..\ReportHtmlViewer
-NumberOfFiles=0
-NumberOfLibraries=2
+NumberOfFiles=1
+NumberOfLibraries=3
 NumberOfModules=1
 Version=14.2
 @EndOfDesignText@
@@ -16,7 +20,14 @@ Version=14.2
 	#VersionCode: 1
 	#VersionName: 1.6
 	#SupportedOrientations: unspecified
+	#CanInstallToExternalStorage: False
 #End Region
+
+#Region  Activity Attributes 
+	#FullScreen: False
+	#IncludeTitle: True
+#End Region
+
 #Region Project Copyright
 #LibraryName: RepotViewer
 #LibraryAuthor: Repot contributors
@@ -24,7 +35,23 @@ Version=14.2
 #End Region
 
 Sub Process_Globals
+	
 End Sub
 
 Sub Globals
+	
+End Sub
+
+Sub Activity_Create (FirstTime As Boolean)
+	'Do not forget to load the layout file created with the visual designer. For example:
+	Activity.LoadLayout("viewer")
+
+End Sub
+
+Sub Activity_Resume
+
+End Sub
+
+Sub Activity_Pause (UserClosed As Boolean)
+
 End Sub

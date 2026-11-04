@@ -9,9 +9,12 @@ Inline HTML preview for B4J desktop, and the facade accessor it needs.
   (same render document, same `ReportHtmlExporter` pass), so a preview
   cannot drift from the exported file.
 - `RepotViewer.b4xlib` (separate optional package,
-  `tools/package-viewer-b4xlib.ps1`): `ReportHtmlViewer` with two
-  platform backends — B4J `fx.WebView` (`jfx` library) and B4A core
-  `WebView`. APIs verified against `jFX.xml` and `Core.xml`.
+  `tools/package-viewer-b4xlib.ps1`): `ReportHtmlViewer` as a B4X
+  **custom view** — `DesignerCreateView` plus
+  `#Event: PageFinished`, so it is added directly in the Layout Designer.
+  One module serves both platforms (B4J `fx.WebView`, B4A core
+  `WebView`); APIs verified against `jFX.xml` and `Core.xml`.
+  Manifest: `Supported Platforms=B4A,B4J`.
 - `examples/B4J-preview/preview.b4j`: the reference use case — builds
   invoice-basic through the facade and shows `GetHtml` inline.
 - `ui/B4A/RepotViewer.b4a`: compile-check project; the B4A branch is

@@ -1,4 +1,4 @@
-B4A=false
+﻿B4A=false
 Group=Tests
 ModulesStructureVersion=1
 Type=Class
@@ -1271,6 +1271,7 @@ Private Sub OutputWritable (Name As String) As Boolean
 		File.Delete(File.DirApp, Name)
 	Catch
 		'delete can throw or return silently depending on platform
+		Log(LastException.Message)
 	End Try
 	If File.Exists(File.DirApp, Name) Then
 		Check(False, Name & " is locked - close it in Excel/Word and re-run")

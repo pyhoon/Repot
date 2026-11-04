@@ -6,9 +6,10 @@ Library2=json
 Library3=javaobject
 Library4=repot
 Library5=jfx
+Library6=jxui
 Module1=|relative|..\..\ui\ReportHtmlViewer
 NumberOfFiles=0
-NumberOfLibraries=5
+NumberOfLibraries=6
 NumberOfModules=1
 Version=10.7
 @EndOfDesignText@
@@ -89,7 +90,8 @@ Sub AppStart (Form1 As Form, Args() As String)
 		Return
 	End If
 
-	mViewer.Initialize(MainForm.RootPane)
+	mViewer.Initialize(Me, "viewer")
+	mViewer.CreateView(MainForm.RootPane)
 	If mViewer.LoadHtml(r.GetHtml) = False Then
 		Log("preview: viewer could not load the document")
 		Return

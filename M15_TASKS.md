@@ -34,18 +34,23 @@ duplicate layout and drift, so it stays out of scope.
   pass as `ExportHtml`, so preview and file are identical (tested).
 
 ## Task 3: Viewer module + separate package — COMPLETE
-- [x] `ui/ReportHtmlViewer.bas`, one module with `#If B4J` / `#Else If B4A`
-  branches: `Initialize(Parent As Object)`, `LoadHtml(Html)`, `Destroy`.
+- [x] `ui/ReportHtmlViewer.bas` is a **B4X custom view**: `Type=Class`,
+  `DesignerCreateView(Base, Lbl, Props)`, `Public mBase As B4XView`,
+  `#Event: PageFinished`, plus a `CreateView(Parent)` path for code use.
+  It appears in the Layout Designer's Custom Views list once
+  `RepotViewer.b4xlib` is installed.
+- [x] One module, `#If`-free: both platforms expose a `WebView` type, so
+  `mWv As WebView` / `LoadHtml` / `IsInitialized` compile on B4J
+  (fx.WebView) and B4A (android.webkit.WebView) alike.
 - [x] **Boundary:** the module is *not* in the core library. The engine
   builds as `AppType=StandardJava` (headless); a JavaFX-typed module fails
   that build (`javafx.scene.layout` missing). New package
-  `RepotViewer.b4xlib` via `tools/package-viewer-b4xlib.ps1`
-  (`B4J.DependsOn=...,jfx,Repot`; `B4A.DependsOn=...,Repot`).
-- [x] B4A uses the core `WebView` (no extra library); removal uses
-  `RemoveViewAt` with the index recorded at `Initialize` (documented
-  limitation).
-- [x] Compile-check projects: `examples/B4J-preview/preview.b4j` (JavaFX)
-  and `ui/B4A/RepotViewer.b4a`. Both build with exit 0.
+  `RepotViewer.b4xlib` via `tools/package-viewer-b4xlib.ps1` with
+  `Supported Platforms=B4A,B4J`,
+  `B4J.DependsOn=Json, JavaObject, jfx, jxui, Repot`,
+  `B4A.DependsOn=Json, JavaObject, xui, Repot`.
+- [x] Compile-check projects: `examples/B4J-preview/preview.b4j` (JavaFX,
+  exit 0) and `ui/B4A/RepotViewer.b4a` (B4ABuilder, exit 0).
 
 ## Task 4: Example — COMPLETE
 - [x] `examples/B4J-preview/preview.b4j`: builds invoice-basic through the

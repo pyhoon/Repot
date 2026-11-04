@@ -1,4 +1,4 @@
-AppType=StandardJava
+﻿AppType=StandardJava
 Build1=Default,b4j.example
 Group=Default Group
 Library1=jcore
@@ -100,7 +100,7 @@ Sub AppStart (Args() As String)
     ' Prints the length and a short prefix of the markup.
     Dim htmlStr As String = r.GetHtml()
     If htmlStr <> "" Then
-        Log("preview: html len=" & htmlStr.Length & ", prefix=" & htmlStr.SubString(0, 80))
+        Log("preview: html len=" & htmlStr.Length & ", prefix=" & htmlStr.SubString2(0, 80))
     Else
         Log("preview: empty html from GetHtml")
     End If

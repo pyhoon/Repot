@@ -145,9 +145,9 @@ Central). B4A needs nothing extra. See
 
 Inline preview is a separate, optional package: install
 `dist/RepotViewer.b4xlib` as well. It contains
-`ReportHtmlViewer` and targets B4J desktop (`fx.WebView`, needs the
-`jfx` library) and B4A (the core `WebView`). The core engine library
-stays headless — the viewer is not part of it.
+`ReportHtmlViewer`, a B4X custom view that appears in the Layout
+Designer's Custom Views list; B4J needs `jfx` + `jxui`, B4A needs `xui`.
+The core engine library stays headless — the viewer is not part of it.
 
 Build a report once, then export it to as many formats as needed without
 re-running layout. The facade is synchronous: `Build` and the exporters
@@ -222,7 +222,7 @@ Repot/
 │   ├── B4A/                     Android example (export, print, SaveAs)
 │   └── server/                  B4J HTTP server serving rendered reports
 ├── ui/                          Optional viewer module (separate RepotViewer.b4xlib)
-│   ├── ReportHtmlViewer.bas     B4J fx.WebView / B4A WebView branches
+│   ├── ReportHtmlViewer.bas     Designer-addable custom view (B4J + B4A)
 │   └── B4A/                     B4A compile-check project for the viewer
 ├── fixtures/                    Templates, data and notes; layout/export goldens
 ├── dist/                        Packaged Repot.b4xlib and RepotViewer.b4xlib
@@ -346,10 +346,13 @@ Inline preview for B4J desktop, and the accessor that makes it trustworthy:
 - `Repot.GetHtml` returns the same HTML document `ExportHtml` writes.
   One render document, one exporter pass — a preview cannot differ from
   the exported file.
-- `ReportHtmlViewer` (`source/ReportHtmlViewer.bas`) embeds a JavaFX
-  `WebView` and loads that string. It is an optional JavaFX module, not
-  part of the headless core library; `examples/B4J-preview` shows the
-  full use case.
+- `ReportHtmlViewer` (`RepotViewer.b4xlib`) is a B4X **custom view**:
+  add it in the Layout Designer like any other control (`PageFinished`
+  event exposed), or create it in code with `CreateView(Parent)`. It has
+  native backends for B4J (`fx.WebView`) and B4A (core `WebView`), and is
+  kept out of the headless core library.
+- `examples/B4J-preview` shows the facade → `GetHtml` → inline preview
+  flow end to end.
 - B4A keeps the vector PDF path; an on-device HTML preview widget is not
   planned (Android has no `fx.WebView`).
 
