@@ -492,7 +492,7 @@ see the risk of scope creep in §12.
 
 | Item | Why it is not yet scheduled | What it would need |
 |------|---------------------------|-------------------|
-| Browser viewer component | HTML fixed-layout export already works; a JS viewer is a separate product | A web build, not an engine change |
+| Browser viewer component | M15 ships an optional `RepotViewer.b4xlib` (B4J fx.WebView, B4A core WebView) over `Repot.GetHtml`; a browser/JS-side viewer remains unscheduled | Separate UI package, not an engine change |
 | Subreports | Needs a nested-layout pass and its own data binding; the render document has no nesting yet | ADR + render-document extension |
 | Charts and cross-tabs | Needs a chart primitive in the render document | ADR + new draw op type |
 | Drill-down or interactive HTML | Needs a second, interactive HTML mode | Separate pipeline from fixed-layout |

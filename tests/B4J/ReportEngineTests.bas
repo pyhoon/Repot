@@ -1,4 +1,4 @@
-﻿B4A=false
+B4A=false
 Group=Tests
 ModulesStructureVersion=1
 Type=Class
@@ -33,6 +33,7 @@ Public Sub Run (FixturesDir As String)
 	TestMixedScriptsPdf
 	TestFacade
 	TestHtmlExport
+	TestHtmlPreview
 	TestDataExport
 	TestOfficeExport
 	TestExpressions
@@ -617,6 +618,11 @@ Private Sub TestGoldens
 		Dim goldenPath As String = File.Combine(expectedDir, "layout.json")
 		If File.Exists(expectedDir, "layout.json") Then
 			Dim existing As String = File.ReadString(expectedDir, "layout.json")
+			If existing <> json Then
+				' keep the actual geometry for diffing; never overwrite the golden here
+				File.WriteString(File.DirApp, name & "-layout.actual.json", json)
+				Log("golden mismatch: " & name & " actual written to Objects\" & name & "-layout.actual.json")
+			End If
 			Check(existing = json, name & " golden matches")
 		Else
 			File.MakeDir(dir, "expected")
@@ -1032,6 +1038,66 @@ Private Sub TestHtmlExport
 		Check(content.IndexOf("INVOICE") >= 0, "invoice html contains INVOICE")
 		Check(content.IndexOf("page-break-after") >= 0, "invoice html has page break css")
 		Check(content.IndexOf("<!DOCTYPE html>") >= 0, "invoice html is a document")
+	End If
+End Sub
+
+'--------------------------------------------------------- html preview (M15)
+'GetHtml is the string the ReportHtmlViewer feeds to the WebView. It must be
+'identical to the file ExportHtml writes, and non-empty, so the preview is
+'guaranteed-consistent with the exported document.
+Private Sub TestHtmlPreview
+	Dim invDir As String = File.Combine(mFixtures, "invoice-basic")
+	Dim loader As ReportTemplateLoader
+	loader.Initialize
+	Dim def As ReportDefinition = loader.LoadFromFile(invDir, "template.repot")
+	Check(loader.Diagnostics.HasErrors = False, "invoice loads for preview")
+
+	Dim binder As ReportDataBinder
+	binder.Initialize(def)
+	Dim params As Map = LoadJsonMap(invDir, "params.json")
+	For Each k As String In params.Keys
+		binder.SetParameter(k, params.Get(k))
+	Next
+	Dim data As Map = LoadJsonMap(invDir, "data.json")
+	For Each name As String In data.Keys
+		Dim o As Object = data.Get(name)
+		If o Is List Then
+			binder.SetDataSource(name, o)
+		Else If o Is Map Then
+			binder.SetDataSourceSingle(name, o)
+		End If
+	Next
+	Check(binder.Validate, "invoice binds for preview")
+
+	Dim r As Repot
+	r.Initialize
+	Check(r.LoadTemplate(invDir, "template.repot"), "preview: template loads through facade")
+	For Each k As String In params.Keys
+		r.SetParameter(k, params.Get(k))
+	Next
+	For Each name As String In data.Keys
+		Dim o2 As Object = data.Get(name)
+		If o2 Is List Then
+			r.SetDataSource(name, o2)
+		Else If o2 Is Map Then
+			r.SetDataSourceSingle(name, o2)
+		End If
+	Next
+	Dim res As ReportResult = r.Build
+	Check(res.Success, "preview: report builds")
+
+	Dim inline As String = r.GetHtml()
+	Check(inline.Length > 0, "preview: GetHtml returns a document")
+	Check(inline.IndexOf("INVOICE") >= 0, "preview: html contains INVOICE")
+	Check(inline.IndexOf("page-break-after") >= 0, "preview: html has page break css")
+	Check(inline.IndexOf("</html>") >= 0, "preview: html is complete")
+
+	Dim outDir As String = File.DirApp
+	Dim outPath As String = File.Combine(outDir, "test-preview.html")
+	Check(r.ExportHtml(outPath), "preview: ExportHtml succeeds")
+	If File.Exists(outDir, "test-preview.html") Then
+		Dim onDisk As String = File.ReadString(outDir, "test-preview.html")
+		Check(onDisk = inline, "preview: GetHtml identical to exported file")
 	End If
 End Sub
 '--------------------------------------------------------------- data export

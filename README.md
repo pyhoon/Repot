@@ -101,7 +101,7 @@ support.
 
 | Platform | Scope |
 |----------|-------|
-| B4J desktop | Generation, HTML preview, PDF/HTML/data output, print (system viewer), PDF text extraction |
+| B4J desktop | Generation, inline HTML preview (`ReportHtmlViewer`), HTML/PDF/data output, print (system viewer), PDF text extraction |
 | B4J server | Headless generation to files; no UI or JavaFX requirement (`examples/server`); `ReportHtmlExporter.ToHtml` returns a document string |
 | B4A | Same engine; on-device vector PDF export, PDF page-count verification, system print dialog, SAF "Save As" |
 | Browser | Consumes generated HTML; optional lightweight viewer |
@@ -142,6 +142,12 @@ manifest declares it under `B4J.DependsOn`, so the compiler resolves
 it from there; the jar itself is not bundled — download from Maven
 Central). B4A needs nothing extra. See
 [docs/dependencies.md](docs/dependencies.md).
+
+Inline preview is a separate, optional package: install
+`dist/RepotViewer.b4xlib` as well. It contains
+`ReportHtmlViewer` and targets B4J desktop (`fx.WebView`, needs the
+`jfx` library) and B4A (the core `WebView`). The core engine library
+stays headless — the viewer is not part of it.
 
 Build a report once, then export it to as many formats as needed without
 re-running layout. The facade is synchronous: `Build` and the exporters
@@ -212,14 +218,20 @@ Repot/
 │   └── B4A/                     Same suite on device/emulator
 ├── examples/
 │   ├── B4J/                     Desktop example
+│   ├── B4J-preview/             Inline HTML preview example (M15)
 │   ├── B4A/                     Android example (export, print, SaveAs)
 │   └── server/                  B4J HTTP server serving rendered reports
+├── ui/                          Optional viewer module (separate RepotViewer.b4xlib)
+│   ├── ReportHtmlViewer.bas     B4J fx.WebView / B4A WebView branches
+│   └── B4A/                     B4A compile-check project for the viewer
 ├── fixtures/                    Templates, data and notes; layout/export goldens
-├── dist/                        Packaged Repot.b4xlib output
+├── dist/                        Packaged Repot.b4xlib and RepotViewer.b4xlib
 └── tools/                       Developer scripts (ci.ps1, run-fixtures.ps1, packaging)
 ```
 
-The engine ships as one `.b4xlib` containing all public modules. The B4J
+The engine ships as one `.b4xlib` containing all public modules; the
+optional viewer ships separately as `RepotViewer.b4xlib` so the core
+library never pulls in a UI stack. The B4J
 and B4A library projects both reference the shared modules in `source/`
 through relative module references, so one source base serves both
 targets. Exporters are ordinary modules inside the library, not separate
@@ -245,7 +257,7 @@ module.
 | [docs/b4x-notes.md](docs/b4x-notes.md) | Verified B4X API facts and gotchas |
 | [docs/prior-art.md](docs/prior-art.md) | Existing B4X reporting tools and lessons |
 | [docs/decisions/](docs/decisions/) | Recorded architecture decisions |
-| [M10_TASKS.md](M10_TASKS.md)–[M13_TASKS.md](M13_TASKS.md) | Milestone plans and completion state |
+| [M10_TASKS.md](M10_TASKS.md)–[M15_TASKS.md](M15_TASKS.md) | Milestone plans and completion state |
 
 ## What 1.0 delivered
 
@@ -326,6 +338,22 @@ The office-formats family is complete:
   script extracts from the PDF with zero `?` substitutions — Japanese,
   Chinese and Korean render in the B4J PDF whenever a covering font is
   registered (`AddEmbeddedFont`).
+
+## What 1.6 delivers
+
+Inline preview for B4J desktop, and the accessor that makes it trustworthy:
+
+- `Repot.GetHtml` returns the same HTML document `ExportHtml` writes.
+  One render document, one exporter pass — a preview cannot differ from
+  the exported file.
+- `ReportHtmlViewer` (`source/ReportHtmlViewer.bas`) embeds a JavaFX
+  `WebView` and loads that string. It is an optional JavaFX module, not
+  part of the headless core library; `examples/B4J-preview` shows the
+  full use case.
+- B4A keeps the vector PDF path; an on-device HTML preview widget is not
+  planned (Android has no `fx.WebView`).
+
+The viewer is compile-verified; `GetHtml` is covered by the engine suite.
 
 ## License, support, and contributions
 

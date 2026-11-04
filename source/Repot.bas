@@ -1,4 +1,4 @@
-﻿B4J=true
+B4J=true
 Group=Core
 ModulesStructureVersion=1
 Type=Class
@@ -263,6 +263,13 @@ Public Sub ExportHtml (OutputPath As String) As Boolean
 	Dim ex As ReportHtmlExporter
 	ex.Initialize(Diagnostics)
 	Return ex.Export(Result.RenderDocument, OutputPath)
+End Sub
+
+'Returns the rendered report's HTML as a string, for embedding in an inline preview.
+Public Sub GetHtml () As String
+	Dim ex As ReportHtmlExporter
+	ex.Initialize(Diagnostics)
+	Return ex.ToHtml(Result.RenderDocument)
 End Sub
 
 'Prints an already exported PDF (B4A: system dialog; B4J: opens the viewer).

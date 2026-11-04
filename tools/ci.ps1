@@ -18,6 +18,19 @@ $root = Split-Path -Parent $PSScriptRoot
 $adb = "C:\android\sdk\platform-tools\adb.exe"
 $failed = $false
 
+# B4X installs have shipped under both roots; resolve instead of hardcoding.
+function Resolve-Builder([string]$name) {
+    $candidates = @(
+        (Join-Path $env:ProgramFiles "B4X\$name"),
+        (Join-Path $env:ProgramFiles "Anywhere Software\$name")
+    )
+    $found = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+    if (-not $found) { throw "Builder not found: $name (looked in $($candidates -join ', '))" }
+    return $found
+}
+$b4jBuilder = Resolve-Builder "B4J\B4JBuilder.exe"
+$b4aBuilder = Resolve-Builder "B4A\B4ABuilder.exe"
+
 function Fail($msg) {
     Write-Host "FAILED: $msg" -ForegroundColor Red
     $script:failed = $true
@@ -27,7 +40,7 @@ function Fail($msg) {
 Write-Host ""
 Write-Host "=== B4J library build ===" -ForegroundColor Cyan
 Push-Location (Join-Path $root "source\B4J")
-& "C:\Program Files\B4X\B4J\B4JBuilder.exe" -Task=BuildLibrary
+& $b4jBuilder -Task=BuildLibrary
 $code = $LASTEXITCODE
 Pop-Location
 if ($code -ne 0) { Fail "B4J library build (exit $code)" } else { Write-Host "PASSED" -ForegroundColor Green }
@@ -45,7 +58,7 @@ if (-not $SkipB4A -and -not $failed) {
     Write-Host ""
     Write-Host "=== B4A library build ===" -ForegroundColor Cyan
     Push-Location (Join-Path $root "source\B4A")
-    & "C:\Program Files\B4X\B4A\B4ABuilder.exe" -task=Build -obfuscate=False
+    & $b4aBuilder -task=Build -obfuscate=False
     $code = $LASTEXITCODE
     Pop-Location
     if ($code -ne 0) { Fail "B4A library build (exit $code)" } else { Write-Host "PASSED" -ForegroundColor Green }
@@ -55,7 +68,7 @@ if (-not $SkipB4A -and -not $failed) {
             Write-Host ""
             Write-Host "=== B4A emulator run ===" -ForegroundColor Cyan
             Push-Location (Join-Path $root "tests\B4A")
-            & "C:\Program Files\B4X\B4A\B4ABuilder.exe" -task=Build -obfuscate=False
+            & $b4aBuilder -task=Build -obfuscate=False
             $b = $LASTEXITCODE
             Pop-Location
             if ($b -ne 0) { Fail "B4A test build (exit $b)" }

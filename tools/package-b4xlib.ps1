@@ -22,8 +22,14 @@ $dist = Join-Path $root "dist"
 $stage = Join-Path $env:TEMP "repot-b4xlib-stage"
 
 if (-not $NoBuild) {
+    $builderCandidates = @(
+        (Join-Path $env:ProgramFiles "B4X\B4J\B4JBuilder.exe"),
+        (Join-Path $env:ProgramFiles "Anywhere Software\B4J\B4JBuilder.exe")
+    )
+    $builder = $builderCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+    if (-not $builder) { throw "B4JBuilder not found (looked in $($builderCandidates -join ', '))" }
     Push-Location $b4j
-    & "C:\Program Files\B4X\B4J\B4JBuilder.exe" -Task=BuildLibrary
+    & $builder -Task=BuildLibrary
     if ($LASTEXITCODE -ne 0) { Pop-Location; throw "B4J library build failed (exit $LASTEXITCODE)" }
     Pop-Location
 }
@@ -32,14 +38,15 @@ Remove-Item -Recurse -Force $stage -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Path $stage | Out-Null
 New-Item -ItemType Directory -Path $dist -ErrorAction SilentlyContinue | Out-Null
 
-# Shared modules (all .bas at the source root).
-Get-ChildItem -Path $src -Filter "*.bas" -File | ForEach-Object {
-    Copy-Item $_.FullName $stage
-}
+# Shared modules (all .bas at the source root). UI modules live in ui\ and
+# are packaged separately as RepotViewer.b4xlib, so the core library stays
+# headless (see docs/architecture.md).
+Get-ChildItem -Path $src -Filter "*.bas" -File |
+    ForEach-Object { Copy-Item $_.FullName $stage }
 
 # Manifest.
 $manifest = @"
-Version=1.5
+Version=1.6
 B4J.DependsOn=Json, JavaObject, pdfbox-app-3.0.8
 B4A.DependsOn=Json, JavaObject, Printing, FileProvider
 "@

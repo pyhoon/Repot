@@ -64,7 +64,8 @@ Implemented in v1.1:
 | `SetDataSourceSingle(Name, Map)` | Single-record dataset |
 | `Build As ReportResult` | Bind, measure, paginate once |
 | `ExportPdf`, `ExportHtml` | Render-document exporters |
-| `ExportCsv`, `ExportJson`, `ExportXml`, `ExportDocx`, `ExportXlsx` | Data exporters (`DefaultDataSet`) |
+| `GetHtml As String` | The same HTML `ExportHtml` writes, for an inline preview (v1.6) |
+| `ExportCsv`, `ExportJson`, `ExportXml`, `ExportDocx`, `ExportXlsx`, `ExportOdt`, `ExportOds` | Data exporters (`DefaultDataSet`) |
 | `ExportCsvOf(DataSet, Path)` | Explicit dataset |
 | `PrintPdf(Dir, File, Job)` | B4A system print dialog; B4J opens the viewer |
 | `PrintHtml(Job)` | B4A prints the rendered HTML |

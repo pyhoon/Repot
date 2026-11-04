@@ -1,0 +1,111 @@
+AppType=JavaFX
+Build1=Default,b4j.example
+Group=Default Group
+Library1=jcore
+Library2=json
+Library3=javaobject
+Library4=repot
+Library5=jfx
+Module1=|relative|..\..\ui\ReportHtmlViewer
+NumberOfFiles=0
+NumberOfLibraries=5
+NumberOfModules=1
+Version=10.7
+@EndOfDesignText@
+' Example: inline HTML preview of the invoice-basic fixture (M15).
+'
+' This is the B4J desktop use case the viewer exists for: build the report
+' through the Repot facade, then show Repot.GetHtml inside an embedded
+' WebView instead of opening a separate browser. The same HTML string is
+' exactly what ExportHtml writes to disk, so the preview cannot drift from
+' the exported document.
+'
+' The viewer module is intentionally NOT part of the headless core library;
+' it is compiled into this JavaFX example (Module1 above). Copy
+' source\ReportHtmlViewer.bas into your own JavaFX project to use it.
+'
+' Run from the IDE, or: java -jar Objects\preview.jar [fixtureFolder]
+
+#Region Project Attributes
+	#MainFormWidth: 960
+	#MainFormHeight: 720
+	#MergeLibraries: True
+#End Region
+
+Sub Process_Globals
+	Private MainForm As Form
+	Private mViewer As ReportHtmlViewer
+End Sub
+
+Sub AppStart (Form1 As Form, Args() As String)
+	MainForm = Form1
+	MainForm.Title = "Repot - inline HTML preview"
+
+	Dim fixtureDir As String = ""
+	If Args.Length > 0 Then
+		fixtureDir = Args(0)
+	Else
+		Dim candidates() As String = Array As String( _
+			"..\..\..\fixtures\invoice-basic", _
+			"..\..\..\..\fixtures\invoice-basic", _
+			"..\..\fixtures\invoice-basic", _
+			"fixtures\invoice-basic")
+		For Each c As String In candidates
+			If File.Exists(c, "template.repot") Then
+				fixtureDir = c
+				Exit
+			End If
+		Next
+	End If
+	If fixtureDir = "" Then
+		Log("preview: fixture folder not found; pass fixtures\invoice-basic as an argument")
+		Return
+	End If
+
+	Dim r As Repot
+	r.Initialize
+	If r.LoadTemplate(fixtureDir, "template.repot") = False Then
+		LogDiagnostics("load", r)
+		Return
+	End If
+
+	Dim params As Map = LoadJsonMap(fixtureDir, "params.json")
+	For Each k As String In params.Keys
+		r.SetParameter(k, params.Get(k))
+	Next
+	Dim data As Map = LoadJsonMap(fixtureDir, "data.json")
+	For Each name As String In data.Keys
+		Dim o As Object = data.Get(name)
+		If o Is List Then
+			r.SetDataSource(name, o)
+		Else If o Is Map Then
+			r.SetDataSourceSingle(name, o)
+		End If
+	Next
+
+	Dim res As ReportResult = r.Build
+	If res.Success = False Then
+		LogDiagnostics("build", r)
+		Return
+	End If
+
+	mViewer.Initialize(MainForm.RootPane)
+	If mViewer.LoadHtml(r.GetHtml) = False Then
+		Log("preview: viewer could not load the document")
+		Return
+	End If
+	Log("preview: rendered " & res.PageCount & " page(s); HTML " & r.GetHtml.Length & " chars")
+End Sub
+
+Private Sub LogDiagnostics (Stage As String, r As Repot)
+	Log("preview: " & Stage & " failed")
+	For Each d As ReportDiagnostic In r.Diagnostics.Items
+		Log("  " & d.Code & " " & d.Message)
+	Next
+End Sub
+
+Private Sub LoadJsonMap (Dir As String, Name As String) As Map
+	Dim parser As JSONParser
+	parser.Initialize(File.ReadString(Dir, Name))
+	Return parser.NextObject
+End Sub

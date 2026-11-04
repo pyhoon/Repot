@@ -1,0 +1,30 @@
+Build1=Default,b4a.example
+Group=Default Group
+Library1=core
+Library2=javaobject
+Module1=|relative|..\ReportHtmlViewer
+NumberOfFiles=0
+NumberOfLibraries=2
+NumberOfModules=1
+Version=14.2
+@EndOfDesignText@
+' Compile-check project for the B4A branch of the optional viewer module.
+' It is not an app: it exists so a headless B4A build proves the module
+' compiles against the B4A core WebView APIs.
+#Region  Project Attributes
+	#ApplicationLabel: RepotViewer
+	#VersionCode: 1
+	#VersionName: 1.6
+	#SupportedOrientations: unspecified
+#End Region
+#Region Project Copyright
+#LibraryName: RepotViewer
+#LibraryAuthor: Repot contributors
+#LibraryVersion: 1.6
+#End Region
+
+Sub Process_Globals
+End Sub
+
+Sub Globals
+End Sub

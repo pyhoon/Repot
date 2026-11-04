@@ -1,5 +1,47 @@
 # Changelog
 
+## 1.6.0 — M15 (release pending; suite blocked by font baselines)
+
+Inline HTML preview for B4J desktop, and the facade accessor it needs.
+
+### Added
+- `Repot.GetHtml`: returns the exact HTML document `ExportHtml` writes
+  (same render document, same `ReportHtmlExporter` pass), so a preview
+  cannot drift from the exported file.
+- `RepotViewer.b4xlib` (separate optional package,
+  `tools/package-viewer-b4xlib.ps1`): `ReportHtmlViewer` with two
+  platform backends — B4J `fx.WebView` (`jfx` library) and B4A core
+  `WebView`. APIs verified against `jFX.xml` and `Core.xml`.
+- `examples/B4J-preview/preview.b4j`: the reference use case — builds
+  invoice-basic through the facade and shows `GetHtml` inline.
+- `ui/B4A/RepotViewer.b4a`: compile-check project; the B4A branch is
+  verified by a B4ABuilder run (exit 0).
+- `TestHtmlPreview` in the engine suite: `GetHtml` is non-empty, contains
+  the document markers, and is byte-identical to the `ExportHtml` file.
+
+### Changed
+- The viewer is deliberately **not** shipped in the core `.b4xlib`:
+  the engine library builds as a headless (StandardJava) project, and a
+  JavaFX-typed module fails that build. The viewer is a separate package,
+  so server/console consumers never need JavaFX.
+- `tools/ci.ps1`, `tools/run-fixtures.ps1` and `tools/package-b4xlib.ps1`
+  resolve `B4JBuilder`/`B4ABuilder` from either installed root
+  (`Program Files\B4X` or `Program Files\Anywhere Software`) instead of
+  hardcoding one.
+
+### Known limitations
+- The B4J viewer is compile-verified but has not been run in a GUI on the
+  build machine; `GetHtml` itself is covered by the suite. The B4A branch
+  is compile-verified only (no emulator run in this milestone).
+- `Destroy` on B4A removes the viewer by the index recorded at
+  `Initialize`; removing other views from the same panel first would
+  invalidate that index.
+- The layout goldens for `invoice-basic` and `listing-multipage` fail on
+  a machine whose font resolution differs from the one that generated
+  them (goldens record `Arial`; this machine resolves `DejaVu Sans`,
+  changing baselines). Unrelated to M15; needs a decision (see
+  M15_TASKS.md).
+
 ## 1.5.0 — 2026-11-04
 
 ODT and ODS export (M14). B4J 491 checks / 0 errors, B4A 346 checks /

@@ -1,4 +1,4 @@
-﻿Build1=Default,b4a.example
+Build1=Default,b4a.example
 File1=Layout.bal
 FileGroup1=Default Group
 Group=Default Group
@@ -83,7 +83,7 @@ Version=14.2
 #Region Project Copyright
 #LibraryName: Repot
 #LibraryAuthor: Repot contributors
-#LibraryVersion: 1.5
+#LibraryVersion: 1.6
 #End Region
 #Region  Activity Attributes 
 	#FullScreen: False

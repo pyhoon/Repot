@@ -32,9 +32,13 @@ if (-not (Test-Path $Fixtures)) {
 $Fixtures = (Resolve-Path $Fixtures).Path
 
 $project = Join-Path $repo 'tests\B4J'
-$builder = Join-Path $env:ProgramFiles 'B4X\B4J\B4JBuilder.exe'
-if (-not (Test-Path $builder)) {
-    throw "B4JBuilder not found at $builder"
+$builderCandidates = @(
+    (Join-Path $env:ProgramFiles 'B4X\B4J\B4JBuilder.exe'),
+    (Join-Path $env:ProgramFiles 'Anywhere Software\B4J\B4JBuilder.exe')
+)
+$builder = $builderCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+if (-not $builder) {
+    throw "B4JBuilder not found (looked in $($builderCandidates -join ', '))"
 }
 
 function Get-JavaBin {
