@@ -1,4 +1,4 @@
-B4A=true
+﻿B4A=true
 Group=Export
 ModulesStructureVersion=1
 Type=Code
@@ -19,6 +19,7 @@ Version=10.7
 ' validation; ReportDiagnostics stays the validation channel).
 
 Sub Process_Globals
+	
 End Sub
 
 'Returns the number of pages in a PDF file, or 0 when the file does not
@@ -42,6 +43,7 @@ Public Sub GetPdfPageCount (Path As String) As Int
 		Log("GetPdfPageCount failed: " & LastException.Message)
 		Return 0
 	End Try
-	#End If
+	#Else
 	Return 0
+	#End If
 End Sub

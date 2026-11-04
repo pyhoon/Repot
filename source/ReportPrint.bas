@@ -11,6 +11,7 @@ Version=10.7
 ' The engine never prints directly on a background thread.
 
 Sub Process_Globals
+	
 End Sub
 
 'Prints an existing PDF file. Dir / FileName identify the file.
@@ -24,8 +25,9 @@ Public Sub PrintPdf (Dir As String, FileName As String, JobName As String) As Bo
 	#Else If B4J
 	ReportB4JOpen.OpenPdf(Dir, FileName)
 	Return True
-	#End If
+	#Else
 	Return False
+	#End If
 End Sub
 
 'B4A only: prints an HTML string through the system print dialog.
@@ -36,6 +38,7 @@ Public Sub PrintHtml (JobName As String, Html As String) As Boolean
 	If p.PrintSupported = False Then Return False
 	p.PrintHtml(JobName, Html)
 	Return True
-	#End If
+	#Else
 	Return False
+	#End If
 End Sub

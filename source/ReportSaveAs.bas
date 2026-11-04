@@ -1,4 +1,4 @@
-B4A=true
+﻿B4A=true
 Group=Core
 ModulesStructureVersion=1
 Type=Code
@@ -48,8 +48,9 @@ Public Sub CreateDocumentIntent (Mime As String, Title As String) As Object
 	i.PutExtra("android.intent.extra.TITLE", Title)
 	i.AddCategory("android.intent.category.OPENABLE")
 	Return i
-	#End If
+	#Else
 	Return Null
+	#End If
 End Sub
 
 'Starts the intent for a result on the current activity and arms this
@@ -82,8 +83,9 @@ Public Sub HandleActivityResult (RequestCode As Int, ResultCode As Int, Data As 
 	Dim in As Intent = Data
 	Dim uri As String = in.GetData
 	Return uri
-	#End If
+	#Else
 	Return ""
+	#End If
 End Sub
 
 'Copies a file from app-visible storage into the content URI chosen in
@@ -106,6 +108,7 @@ Public Sub CopyFileToUri (SrcDir As String, SrcName As String, Uri As String) As
 		Log("CopyFileToUri failed: " & LastException.Message)
 		Return False
 	End Try
-	#End If
+	#Else
 	Return False
+	#End If
 End Sub

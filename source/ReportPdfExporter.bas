@@ -37,7 +37,7 @@ Public Sub Export (Doc As ReportRenderDocument, OutputPath As String) As Boolean
 	#If B4A
 	'Android uses the vector canvas path (Printing library) instead of PDFBox.
 	Return ReportB4APrint.PrintVectorPdf(Doc, OutputPath, SourceDir)
-	#End If
+	#Else
 	Dim jo As JavaObject
 	jo.InitializeStatic("b4j.example.reportpdfexporter")
 
@@ -72,6 +72,7 @@ Public Sub Export (Doc As ReportRenderDocument, OutputPath As String) As Boolean
 		End Try
 		Return False
 	End Try
+	#End If
 End Sub
 
 Private Sub DrawOp (jo As JavaObject, cs As Object, op As ReportDrawOp)
@@ -103,7 +104,7 @@ End Sub
 Public Sub PageCount (Path As String) As Int
 	#If B4A
 	Return 0
-	#End If
+	#Else
 	Try
 		Dim jo As JavaObject
 		jo.InitializeStatic("b4j.example.reportpdfexporter")
@@ -113,12 +114,13 @@ Public Sub PageCount (Path As String) As Int
 		'export path reports its own diagnostics separately.
 		Return 0
 	End Try
+	#End If
 End Sub
 
 Public Sub ExtractText (Path As String) As String
 	#If B4A
 	Return ""
-	#End If
+	#Else
 	Try
 		Dim jo As JavaObject
 		jo.InitializeStatic("b4j.example.reportpdfexporter")
@@ -127,6 +129,7 @@ Public Sub ExtractText (Path As String) As String
 		'See PageCount; unreadable files yield "".
 		Return ""
 	End Try
+	#End If
 End Sub
 
 #If B4J

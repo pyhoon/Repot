@@ -156,8 +156,9 @@ Public Sub GetPdfPageCount (Path As String) As Int
 	Dim ex As ReportPdfExporter
 	ex.Initialize(Diagnostics)
 	Return ex.PageCount(Path)
-	#End If
+	#Else
 	Return 0
+	#End If
 End Sub
 
 'Extracts text from an exported PDF. B4J-biased operation through PDFBox;
@@ -169,8 +170,9 @@ Public Sub ExtractPdfText (Path As String) As String
 	Dim ex As ReportPdfExporter
 	ex.Initialize(Diagnostics)
 	Return ex.ExtractText(Path)
-	#End If
+	#Else
 	Return ""
+	#End If
 End Sub
 
 'SaveAs: returns the SAF CreateDocument intent the host must launch for a

@@ -274,6 +274,7 @@ Private Sub BaseFont (Family As String, Bold As Boolean, Italic As Boolean) As J
 	Return f
 End Sub
 
+#If B4A
 'Maps template family names to Android typeface families.
 Private Sub AndroidFamily (Family As String) As String
 	Select Case Family.ToLowerCase
@@ -287,6 +288,7 @@ Private Sub AndroidFamily (Family As String) As String
 			Return "sans-serif"
 	End Select
 End Sub
+#End If
 
 Private Sub BaseFamily (Handle As JavaObject, Fallback As String) As String
 	#If B4A

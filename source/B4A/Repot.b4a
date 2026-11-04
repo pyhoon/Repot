@@ -1,4 +1,4 @@
-Build1=Default,b4a.example
+﻿Build1=Default,b4a.example
 File1=Layout.bal
 FileGroup1=Default Group
 Group=Default Group
@@ -36,28 +36,28 @@ Module3=|relative|..\ReportB4APrint
 Module30=|relative|..\ReportPaginator
 Module31=|relative|..\ReportParameterDef
 Module32=|relative|..\ReportPdfExporter
-Module33=|relative|..\ReportRenderAnchor
-Module34=|relative|..\ReportRenderDocument
-Module35=|relative|..\ReportRenderJsonWriter
-Module36=|relative|..\ReportRenderPage
-Module37=|relative|..\ReportSection
-Module38=|relative|..\ReportSortDef
-Module39=|relative|..\ReportStyle
+Module33=|relative|..\ReportPdfIntrospection
+Module34=|relative|..\ReportPrint
+Module35=|relative|..\ReportRenderAnchor
+Module36=|relative|..\ReportRenderDocument
+Module37=|relative|..\ReportRenderJsonWriter
+Module38=|relative|..\ReportRenderPage
+Module39=|relative|..\ReportResult
 Module4=|relative|..\ReportB4JMeasure
-Module40=|relative|..\ReportTemplateLoader
-Module41=|relative|..\ReportTextMetrics
-Module42=|relative|..\ReportTextStyle
-Module43=|relative|..\ReportToken
-Module44=|relative|..\ReportUnits
-Module45=|relative|..\ReportValidator
-Module46=|relative|..\ReportVersion
-Module47=|relative|..\ReportXlsxExporter
-Module48=|relative|..\Repot
-Module49=|relative|..\ReportResult
-Module50=|relative|..\ReportPrint
-Module51=|relative|..\ReportPdfIntrospection
-Module52=|relative|..\ReportSaveAs
+Module40=|relative|..\ReportSaveAs
+Module41=|relative|..\ReportSection
+Module42=|relative|..\ReportSortDef
+Module43=|relative|..\ReportStyle
+Module44=|relative|..\ReportTemplateLoader
+Module45=|relative|..\ReportTextMetrics
+Module46=|relative|..\ReportTextStyle
+Module47=|relative|..\ReportToken
+Module48=|relative|..\ReportUnits
+Module49=|relative|..\ReportValidator
 Module5=|relative|..\ReportBand
+Module50=|relative|..\ReportVersion
+Module51=|relative|..\ReportXlsxExporter
+Module52=|relative|..\Repot
 Module6=|relative|..\ReportBandLayout
 Module7=|relative|..\ReportDataBinder
 Module8=|relative|..\ReportDataExporter
@@ -71,7 +71,6 @@ Version=14.2
 	#ApplicationLabel: Repot
 	#VersionCode: 1
 	#VersionName: 0.12
-	'#AdditionalJar: pdfbox-app-3.0.8.jar
 	'SupportedOrientations possible values: unspecified, landscape or portrait.
 	#SupportedOrientations: unspecified
 	#EdgeToEdgeOldDevices: True
@@ -82,7 +81,7 @@ Version=14.2
 #Region Project Copyright
 #LibraryName: Repot
 #LibraryAuthor: Repot contributors
-#LibraryVersion: 1.1
+#LibraryVersion: 1.2
 #End Region
 #Region  Activity Attributes 
 	#FullScreen: False
