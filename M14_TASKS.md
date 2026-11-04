@@ -44,8 +44,8 @@ accept DOCX.
   Second fix: added the spec-optional `styles.xml`/`meta.xml` parts
   and manifest entries (the "LibreOffice-shaped package", matching
   what LibreOffice and Excel themselves write). Both asserted by the
-  zip probe. Awaiting Excel re-test; if the prompt persists the
-  fallback is a documented Tier-2 note.
+  zip probe. CONFIRMED FIXED by re-test in Excel LTSC 2508: the
+  repair prompt is gone.
 - [x] CJK verification (post-release, same milestone): extraction
   showed the multilang PDF rendered Japanese/Chinese/Korean as `?` —
   the embedded Noto Sans pair has no CJK coverage. Verified the

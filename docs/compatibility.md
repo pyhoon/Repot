@@ -146,9 +146,9 @@ the canvas is abstract. See
   `manifest:version="1.2"` and the package includes the spec-optional
   `styles.xml`/`meta.xml` parts (the "LibreOffice-shaped package") —
   both target Excel's ODF importer, which reported a repair prompt on
-  the first release build (found in first release testing; package
-  fixes in v1.5.0; Excel verification is by the maintainer's copy of
-  Excel LTSC). Verification is
+  the first release build (found in first release testing; fixed in
+  v1.5.0 and verified in Excel LTSC 2508: the prompt is gone after
+  adding the two parts). Verification is
   structural (zip layout + XML well-formedness asserted in the suite);
   no ODF application is installed on the development machine, so
   "opens in LibreOffice" is unverified — reported as a Tier-2

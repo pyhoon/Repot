@@ -39,7 +39,8 @@ ODT and ODS export (M14). B4J 491 checks / 0 errors, B4A 346 checks /
   parts that every real producer (LibreOffice, Excel) writes — the
   "LibreOffice-shaped package". The suite's zip probe asserts all of
   it, and the XML declarations drop the non-standard
-  `standalone="yes"` to match known-good ODF writers.
+  `standalone="yes"` to match known-good ODF writers. Verified in
+  Excel LTSC 2508: the repair prompt is gone.
 
 ### Known limitations
 - Cells are written as string cells, matching the XLSX writer's
