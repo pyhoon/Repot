@@ -47,9 +47,13 @@ Public Sub DesignerCreateView (Base As Object, Lbl As Label, Props As Map)
 End Sub
 
 'Code entry point: parent the viewer on an existing panel/pane.
-Public Sub CreateView (Parent As B4XView)
-	mBase = Parent
-	BuildWebView
+'Public Sub CreateView (Parent As B4XView)
+'	mBase = Parent
+'	BuildWebView
+'End Sub
+
+Private Sub Base_Resize (Width As Double, Height As Double)
+
 End Sub
 
 Private Sub BuildWebView

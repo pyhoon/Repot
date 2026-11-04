@@ -4,6 +4,6 @@ ModuleBreakpoints0=
 ModuleBreakpoints1=
 ModuleClosedNodes0=
 ModuleClosedNodes1=
-NavigationStack=Visual Designer,1.bjl,-100,6,Main,Process_Globals,23,0,Main,AppStart,85,6
+NavigationStack=Main,Process_Globals,23,0,Main,AppStart,80,6,ReportHtmlViewer,Base_Resize,50,0,ReportHtmlViewer,DesignerCreateView,43,0,Visual Designer,1.bjl,-100,6,ReportHtmlViewer,Initialize,30,0
 SelectedBuild=0
 VisibleModules=1

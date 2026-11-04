@@ -1,28 +1,34 @@
-﻿Build1=Default,b4a.example
+Build1=Default,b4a.example
 File1=1.bal
 FileGroup1=Default Group
 Group=Default Group
 Library1=core
-Library2=xui
-ManifestCode=
-Module1=|relative|..\ReportHtmlViewer
+Library2=repot
+Library3=json
+Library4=javaobject
+Library5=xui
+Library6=repotviewer
+ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="36"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~CreateResourceFromFile(Macro, Themes.LightTheme)~\n~AddApplicationText(~\n~<provider android:name="android.support.v4.content.FileProvider" android:authorities="$PACKAGE$.provider" android:exported="false" android:grantUriPermissions="true">~\n~    <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/provider_paths" />~\n~</provider>)~\n~CreateResource(xml, provider_paths,~\n~<files-path name="name" path="shared" />)~\n~'End of default text.~\n~
 NumberOfFiles=1
-NumberOfLibraries=2
-NumberOfModules=1
+NumberOfLibraries=6
+NumberOfModules=0
 Version=14.2
 @EndOfDesignText@
-' Compile-check project for the B4A branch of the optional viewer module.
-' It is not an app: it exists so a headless B4A build proves the module
-' compiles against the B4A core WebView APIs.
+' Example: inline HTML preview on B4A (M15).
+'
+' Applies the examples/B4A workflow to the designer-added viewer:
+' copy the invoice-basic fixture assets, build the report through the Repot
+' facade, then show Repot.GetHtml in the ReportHtmlViewer1 custom view
+' placed in layout "1". Save As / Print still operate on the exported PDF.
 #Region  Project Attributes
 	#ApplicationLabel: RepotViewer
 	#VersionCode: 1
 	#VersionName: 1.6
-	#SupportedOrientations: unspecified
+	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 #End Region
 
-#Region  Activity Attributes 
+#Region  Activity Attributes
 	#FullScreen: False
 	#IncludeTitle: True
 #End Region
@@ -34,23 +40,127 @@ Version=14.2
 #End Region
 
 Sub Process_Globals
-	
 End Sub
 
 Sub Globals
-	
+	Private ReportHtmlViewer1 As ReportHtmlViewer
+	Private lbl As Label
+	Private btnPrint As Button
+	Private btnSave As Button
+	Private mReport As Repot
+	Private mOutDir As String
 End Sub
 
 Sub Activity_Create (FirstTime As Boolean)
-	'Do not forget to load the layout file created with the visual designer. For example:
 	Activity.LoadLayout("1")
 
+	' Small status line and the two PDF actions, laid over the viewer's
+	' bottom edge (the layout itself only contains the viewer).
+	lbl.Initialize("")
+	lbl.TextSize = 12
+	lbl.TextColor = Colors.DarkGray
+	lbl.Text = "Loading report..."
+	Activity.AddView(lbl, 8dip, 100%y - 118dip, 100%x - 16dip, 28dip)
+
+	btnSave.Initialize("btnSave")
+	btnSave.Text = "Save As PDF"
+	Activity.AddView(btnSave, 8dip, 100%y - 86dip, (100%x - 24dip) / 2, 38dip)
+
+	btnPrint.Initialize("btnPrint")
+	btnPrint.Text = "Print PDF"
+	Activity.AddView(btnPrint, 8dip + (100%x - 24dip) / 2 + 8dip, 100%y - 86dip, (100%x - 24dip) / 2, 38dip)
+
+	RunExample
 End Sub
 
-Sub Activity_Resume
-
+Sub Activity_Result (RequestCode As Int, ResultCode As Int, Data As Object)
+	'SAF CreateDocument result: pick the chosen location and copy the PDF.
+	Dim uri As String = ReportSaveAs.HandleActivityResult(RequestCode, ResultCode, Data)
+	If uri <> "" Then
+		If ReportSaveAs.CopyFileToUri(mOutDir, "invoice.pdf", uri) Then
+			Log("SaveAs: PDF saved to " & uri)
+			lbl.Text = "PDF saved to user-chosen location"
+		Else
+			Log("SaveAs: failed to save PDF to " & uri)
+			lbl.Text = "SaveAs failed"
+		End If
+	End If
 End Sub
 
-Sub Activity_Pause (UserClosed As Boolean)
+Sub btnPrint_Click
+	If mReport = Null Then Return
+	Log("print: " & mReport.PrintPdf(mOutDir, "invoice.pdf", "Repot invoice"))
+End Sub
 
+Sub btnSave_Click
+	If mReport = Null Then Return
+	Dim i As Intent = mReport.SaveAsPdfIntent("application/pdf", "invoice.pdf")
+	If i <> Null Then
+		ReportSaveAs.StartForResult(i, ReportSaveAs.DefaultRequestCode)
+		Log("SaveAs: SAF picker opened")
+	End If
+End Sub
+
+Sub RunExample
+	Dim fixDir As String = File.DirInternal & "/fixtures/invoice-basic"
+	CopyAssets
+	Dim outDir As String = File.DirInternal
+	mOutDir = outDir
+
+	mReport.Initialize
+	If mReport.LoadTemplate(fixDir, "template.repot") = False Then
+		Log("Load errors")
+		lbl.Text = "Load failed"
+		Return
+	End If
+
+	Dim params As Map = LoadJsonMap(fixDir, "params.json")
+	For Each k As String In params.Keys
+		mReport.SetParameter(k, params.Get(k))
+	Next
+	Dim data As Map = LoadJsonMap(fixDir, "data.json")
+	For Each name As String In data.Keys
+		Dim o As Object = data.Get(name)
+		If o Is List Then
+			mReport.SetDataSource(name, o)
+		Else If o Is Map Then
+			mReport.SetDataSourceSingle(name, o)
+		End If
+	Next
+
+	Dim res As ReportResult = mReport.Build
+	If res.Success = False Then
+		lbl.Text = "Build failed"
+		Return
+	End If
+	Log("Rendered " & res.PageCount & " page(s), " & res.RecordCount & " record(s)")
+
+	' Inline preview: the exact HTML ExportHtml would write.
+	If ReportHtmlViewer1.LoadHtml(mReport.GetHtml) = False Then
+		lbl.Text = "Viewer could not load the document"
+		Return
+	End If
+
+	Dim vPath As String = File.Combine(outDir, "invoice.pdf")
+	If mReport.ExportPdf(vPath) Then
+		Log("PDF -> " & vPath)
+		lbl.Text = res.PageCount & " page(s) - PDF ready"
+	Else
+		lbl.Text = "PDF export failed"
+	End If
+End Sub
+
+Private Sub CopyAssets
+	Dim dst As String = File.DirInternal & "/fixtures/invoice-basic"
+	File.MakeDir(File.DirInternal, "fixtures")
+	File.MakeDir(File.DirInternal & "/fixtures", "invoice-basic")
+	For Each n As String In Array As String("template.repot","data.json","params.json","logo.png")
+		File.Copy(File.DirAssets, "fixtures/invoice-basic/" & n, dst, n)
+	Next
+End Sub
+
+Private Sub LoadJsonMap(dir As String, name As String) As Map
+	Dim parser As JSONParser
+	parser.Initialize(File.ReadString(dir, name))
+	Return parser.NextObject
 End Sub

@@ -4,6 +4,6 @@ ModuleBreakpoints0=
 ModuleBreakpoints1=
 ModuleClosedNodes0=
 ModuleClosedNodes1=
-NavigationStack=ReportHtmlViewer,Class_Globals,27,0,Main,Process_Globals,16,0,Main,Globals,22,0,Main,Activity_Pause,36,0,Visual Designer,1.bal,-100,1,Main,Activity_Resume,38,0,Main,Activity_Create,32,1
+NavigationStack=Main,Process_Globals,16,0,Main,Activity_Resume,38,0,Visual Designer,1.bal,-100,2,Main,Globals,27,0,Main,Activity_Pause,95,0,Main,LoadJsonMap,85,0,Main,Activity_Create,34,4,Main,CopyAssets,89,0,ReportHtmlViewer,DesignerCreateView,39,0,Main,LogDiagnostics,79,0
 SelectedBuild=0
 VisibleModules=1

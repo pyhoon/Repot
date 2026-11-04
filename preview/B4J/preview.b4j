@@ -29,7 +29,7 @@ Version=10.7
 
 #Region Project Attributes
 	#MainFormWidth: 960
-	#MainFormHeight: 720
+	#MainFormHeight: 600
 	#MergeLibraries: True
 #End Region
 
@@ -92,6 +92,7 @@ Sub AppStart (Form1 As Form, Args() As String)
 	End If
 	
 	MainForm.RootPane.LoadLayout("1")
+	MainForm.Show
 	'mViewer.Initialize(Me, "viewer")
 	'mViewer.CreateView(MainForm.RootPane)
 	'If mViewer.LoadHtml(r.GetHtml) = False Then
