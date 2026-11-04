@@ -118,12 +118,12 @@ and the M11 facts in [docs/b4x-notes.md](docs/b4x-notes.md).
 
 ```text
   .repot template ──┐
-                   ├─► template model ─► processing ─► layout ─► render document
-  host data ───────┘        │                          │              │
-  parameters ───────────────┘                          │              ├─► PDF
-                                                       │              ├─► HTML
-                                                       └─► data ──────┼─► CSV / JSON / XML
-                                                                      └─► DOCX / XLSX / ODT / ODS
+                    ├─► template model ─► processing ─► layout ─► render document
+   host data ───────┘        │                          │              │
+   parameters ───────────────┘                          │              ├─► PDF
+                                                        │              ├─► HTML
+                                                        └─► data ──────┼─► CSV / JSON / XML
+                                                                       └─► DOCX / XLSX / ODT / ODS
 ```
 
 Processing (binding, expressions, sorting, grouping, aggregates) is
