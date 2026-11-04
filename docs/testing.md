@@ -262,16 +262,18 @@ API 36):
 | PDF introspection (page count) | pass (PDFBox, via facade `GetPdfPageCount`) | pass (`ReportPdfIntrospection`, `PdfRenderer`) |
 | RTL text (bidi reordering, Arabic shaping) | pass (v1.3, `rtl-arabic` + `rtl-hebrew`) | pass (system text stack shapes at draw; export + page count verified) |
 | Mixed-script font set (per-run embedded fonts) | pass (v1.4, `mixed-scripts`) | pass (system fallback; export + page count verified) |
+| CJK scripts (Japanese/Chinese/Korean) | pass (v1.5, `multilang` extracts kana/han/hangul, zero `?`) | pass (system text stack covers CJK at draw; export + page count verified) |
 | ODT/ODS export (ODF package structure) | pass (v1.5, zip + XML probe in-suite) | pass (export + existence) |
 | Layout goldens (AWT baselines) | pass | not applicable |
 | Fixture-level validation | pass | not applicable |
 
 This accounts for the check-count delta between platforms:
-**B4J 491 checks, B4A 346 checks, 0 errors on both** (v1.5.0: both
-platforms gained the ODT/ODS office-export checks — B4J additionally
-asserts the ODF package structure through an inline-Java zip probe:
-mimetype first and uncompressed, manifest root media type, content.xml
-well-formed; B4A asserts export + existence like the DOCX/XLSX tests).
+**B4J 499 checks, B4A 346 checks, 0 errors on both** (v1.5.0: both
+platforms gained the ODT/ODS office-export checks, and the B4J
+`multilang` test grew extraction assertions for every script row —
+kana, han, hangul, Greek, Cyrillic, Arabic, Hebrew — through the
+registered font set, so CJK glyph coverage is regression-tested;
+B4A asserts export + existence like the DOCX/XLSX tests).
 PDF rendering on B4A goes through the `Printing` library vector canvas
 (M10); introspection reads the file back through
 `android.graphics.pdf.PdfRenderer`, and the missing-file contract

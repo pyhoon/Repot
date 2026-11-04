@@ -771,11 +771,29 @@ Private Sub TestMultilangPdf
 	pdf.SourceDir = def.SourceDir
 	pdf.FontFile = File.Combine(File.Combine(mFixtures, "_fonts"), "NotoSans-Regular.ttf")
 	pdf.FontFileBold = File.Combine(File.Combine(mFixtures, "_fonts"), "NotoSans-Bold.ttf")
+	'v1.5: register the CJK subsets (fixture-only, see fixtures/_fonts/README.md)
+	'plus the Arabic and Hebrew pairs, so this fixture exercises the
+	'run-splitting across five font families and every script row extracts.
+	pdf.AddEmbeddedFont(File.Combine(File.Combine(mFixtures, "_fonts"), "NotoSansSC-Subset-Regular.ttf"), File.Combine(File.Combine(mFixtures, "_fonts"), "NotoSansSC-Subset-Regular.ttf"))
+	pdf.AddEmbeddedFont(File.Combine(File.Combine(mFixtures, "_fonts"), "NotoSansKR-Subset-Regular.ttf"), File.Combine(File.Combine(mFixtures, "_fonts"), "NotoSansKR-Subset-Regular.ttf"))
+	pdf.AddEmbeddedFont(File.Combine(File.Combine(mFixtures, "_fonts"), "NotoSansArabic-Regular.ttf"), File.Combine(File.Combine(mFixtures, "_fonts"), "NotoSansArabic-Bold.ttf"))
+	pdf.AddEmbeddedFont(File.Combine(File.Combine(mFixtures, "_fonts"), "NotoSansHebrew-Regular.ttf"), File.Combine(File.Combine(mFixtures, "_fonts"), "NotoSansHebrew-Bold.ttf"))
 	Dim ok As Boolean = pdf.Export(doc, outPath)
 	Check(ok, "multilang pdf exports successfully")
 	If File.Exists(outDir, "test-multilang.pdf") Then
 		Check(File.Size(outDir, "test-multilang.pdf") > 0, "multilang pdf is non-empty")
 		Check(pdf.PageCount(outPath) = doc.PageCount, "multilang pdf page count matches layout")
+		'every script row must survive extraction; a count of 0 means the
+		'glyphs were replaced with '?' (uncovered by the registered fonts)
+		Dim extracted As String = ExtractPdfText(outPath)
+		Check(extracted.Length > 0, "multilang pdf extracts text")
+		Check(CountScript(extracted, 0x3040, 0x30FF) > 0, "multilang pdf extracts kana")
+		Check(CountScript(extracted, 0x4E00, 0x9FFF) > 0, "multilang pdf extracts han")
+		Check(CountScript(extracted, 0xAC00, 0xD7AF) > 0, "multilang pdf extracts hangul")
+		Check(CountScript(extracted, 0x0370, 0x03FF) > 0, "multilang pdf extracts greek")
+		Check(CountScript(extracted, 0x0400, 0x04FF) > 0, "multilang pdf extracts cyrillic")
+		Check(CountScript(extracted, 0x0600, 0x06FF) > 0, "multilang pdf extracts arabic")
+		Check(CountScript(extracted, 0x0590, 0x05FF) > 0, "multilang pdf extracts hebrew")
 	End If
 End Sub
 
@@ -1173,6 +1191,19 @@ Private Sub CheckOdfPackage (Path As String, ExpectedMime As String, DumpPath As
 	Return jo.RunMethod("checkOdf", Array(Path, ExpectedMime, DumpPath))
 End Sub
 
+'Extracts the text layer of a PDF through PDFBox so B4X-level tests can
+'assert on what was actually drawn (glyph coverage, script presence).
+Private Sub ExtractPdfText (Path As String) As String
+	Dim jo As JavaObject = Me
+	Return jo.RunMethod("extractPdfText", Array(Path))
+End Sub
+
+'Counts codepoints of Text inside the inclusive Unicode range First..Last.
+Private Sub CountScript (Text As String, FirstCode As Int, LastCode As Int) As Int
+	Dim jo As JavaObject = Me
+	Return jo.RunMethod("countScript", Array(Text, FirstCode, LastCode))
+End Sub
+
 #If Java
 
 import java.io.*;
@@ -1180,6 +1211,28 @@ import java.util.zip.*;
 import javax.xml.parsers.*;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+
+public static String extractPdfText(String path) throws Exception {
+    PDDocument doc = Loader.loadPDF(new File(path));
+    try {
+        return new PDFTextStripper().getText(doc);
+    } finally {
+        doc.close();
+    }
+}
+
+public static int countScript(String text, int from, int to) {
+    int count = 0;
+    for (int i = 0; i < text.length(); ) {
+        int cp = text.codePointAt(i);
+        if (cp >= from && cp <= to) count++;
+        i += Character.charCount(cp);
+    }
+    return count;
+}
 
 public static String checkOdf(String path, String expectedMime, String dumpPath) {
     try {

@@ -21,6 +21,14 @@ ODT and ODS export (M14). B4J 491 checks / 0 errors, B4A 346 checks /
   manifest root media type, content.xml well-formedness) plus content
   assertions on the extracted XML; B4A asserts export + existence like
   the DOCX/XLSX tests.
+- CJK verification in the B4J PDF: the `multilang` fixture registers
+  Noto Sans SC/KR subset fonts (fixture-only, OFL; generated with
+  fontbox's `TTFSubsetter`, variable-font tables stripped — see
+  `fixtures/_fonts/README.md` and `tools/font-subset/`) plus the Arabic
+  and Hebrew pairs, and the suite asserts every script row — kana, han,
+  hangul, Greek, Cyrillic, Arabic, Hebrew — extracts with zero `?`
+  substitutions. CJK support requires the host to register a covering
+  font; the mechanism itself is script-agnostic.
 
 ### Fixed
 - ODS/ODT packages opened in Microsoft Excel reported "a problem with

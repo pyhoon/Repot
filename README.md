@@ -19,7 +19,7 @@ renders to HTML for browsers.
 > documents. Office export covers DOCX, XLSX, ODT and ODS. Tagged
 > `v1.5.0`.**
 >
-> The full engine suite runs on both platforms: **B4J 491 checks,
+> The full engine suite runs on both platforms: **B4J 499 checks,
 > B4A 346 checks, 0 errors on both** (emulator-5554, API 36).
 > Exporters (PDF, HTML, CSV, JSON, XML, DOCX, XLSX, ODT, ODS) shipped in
 > M3–M7 and M14 and run on both platforms. `tools/ci.ps1 -RunEmulator`
@@ -299,6 +299,11 @@ The office-formats family is complete:
 - Known limitation, documented: cells are written as strings, matching
   the XLSX writer's behaviour; typed numeric/date cells remain future
   work for both office spreadsheet writers.
+- CJK verification: the `multilang` fixture now embeds Noto Sans SC/KR
+  subsets plus the Arabic/Hebrew pairs, and the suite asserts every
+  script extracts from the PDF with zero `?` substitutions — Japanese,
+  Chinese and Korean render in the B4J PDF whenever a covering font is
+  registered (`AddEmbeddedFont`).
 
 ## License, support, and contributions
 

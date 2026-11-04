@@ -112,6 +112,19 @@ the canvas is abstract. See
   `BaseDirection` ("ltr" default, "rtl") sets the bidi paragraph base
   direction: with "rtl", a pure-RTL line keeps trailing punctuation on
   the left edge and an LTR prefix anchors to the right edge.
+- CJK scripts (v1.5): the run-splitting mechanism is script-agnostic —
+  a codepoint renders whenever a registered font's cmap covers it, so
+  Japanese, Chinese and Korean work in the B4J PDF as soon as a
+  CJK-capable font is registered through `AddEmbeddedFont` (verified
+  with Noto Sans SC + Noto Sans KR; note a single regional variant does
+  not cover all three scripts — SC has no hangul, KR has the hangul).
+  The `multilang` fixture now registers CJK subset fonts (see
+  `fixtures/_fonts/README.md`) plus the Arabic and Hebrew pairs, and
+  the suite asserts that every script row extracts from the PDF with
+  zero `?` substitutions. The subsets cover only the fixture's
+  characters; full CJK deployments ship their own complete font.
+  Caveat: the exporter loads single-file TTF/OTF fonts
+  (`PDType0Font.load`); TrueType collections (`.ttc`) are not read.
 - B4A PDF: no engine changes were needed for v1.3/v1.4. Android's system
   text stack shapes, reorders and falls back across fonts at draw time;
   the RTL and mixed-script fixtures export through the vector canvas

@@ -69,7 +69,7 @@ negative). See [b4x-notes.md](b4x-notes.md) for the verified B4A facts.
 
 | Candidate | Licence | Android | Size | Decision |
 |-----------|---------|---------|------|----------|
-| Apache PDFBox 3.0.8 | Apache-2.0 | no | moderate (fontbox, commons-logging) | **primary for B4J**; all PDFBox code is `#If B4J`-gated so the B4A build never touches it |
+| Apache PDFBox 3.0.8 | Apache-2.0 | no | moderate (fontbox, commons-logging) | **primary for B4J**; all PDFBox code is `#If B4J`-gated so the B4A build never touches it; fontbox `TTFSubsetter` also generates the fixture CJK subsets at development time (`tools/font-subset/`, not shipped) |
 | Apache PDFBox 2.0.x | Apache-2.0 | no | moderate | fallback if 3.x misbehaves |
 | OpenPDF | LGPL-2.1 / MPL-2.0 dual | no | moderate | not adopted: B4J-only, and PDFBox 3 already embeds TrueType via `PDType0Font`; avoids LGPL overhead |
 | PDFjet (jPDFjet / PDFjetB4A) | commercial; evaluation watermarked; OS edition feature-limited | B4A wrapper exists | moderate | **rejected**: paid/proprietary licence conflicts with MIT-only policy |

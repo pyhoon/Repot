@@ -42,6 +42,18 @@ accept DOCX.
   difference from a documented-working minimal ODS). Fixed in both
   exporters, asserted by the zip probe, `standalone="yes"` dropped
   from the XML declarations to match known-good writers.
+- [x] CJK verification (post-release, same milestone): extraction
+  showed the multilang PDF rendered Japanese/Chinese/Korean as `?` —
+  the embedded Noto Sans pair has no CJK coverage. Verified the
+  run-splitting mechanism handles CJK when a covering font is
+  registered (Noto Sans SC → kana + han; a Korean font → hangul; SC
+  has no hangul). Bundled fixture-only OFL subsets
+  (`fixtures/_fonts/NotoSansSC-Subset-Regular.ttf`,
+  `NotoSansKR-Subset-Regular.ttf`, ~220 KB each) generated with
+  fontbox `TTFSubsetter` + a variable-table strip
+  (`tools/font-subset/`); the multilang test now registers the CJK
+  subsets plus the Arabic/Hebrew pairs and asserts every script row
+  extracts with zero `?`. B4J 499 checks / 0 errors.
 
 ## Task 2: ReportOdtExporter — COMPLETE
 - [x] Same class shape as `ReportDocxExporter`; diagnostics on missing
