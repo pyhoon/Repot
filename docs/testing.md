@@ -77,8 +77,12 @@ fixtures/
 ├── listing-multipage/
 ├── multilang/                     Unicode scripts: Latin, Greek, Cyrillic,
 │                                  Japanese, Chinese, Arabic, Hebrew, Korean
+├── rtl-arabic/                    Arabic-only: bidi reordering, contextual
+│                                  forms, lam-alef, digits inside RTL (v1.3)
+├── rtl-hebrew/                    Hebrew-only: bidi reordering proof (v1.3)
 ├── statement-grouped/
-└── _fonts/                        added with the first PDF golden (M3)
+└── _fonts/                        added with the first PDF golden (M3);
+                                    Arabic/Hebrew Noto fonts added v1.3
 ```
 
 Every fixture has a `notes.md` listing the behaviours it exists to
@@ -254,13 +258,15 @@ API 36):
 | DOCX / XLSX export | pass | pass |
 | PDF export, extracted text, goldens | pass | export pass; text extraction not possible (`PdfRenderer` has no text API) |
 | PDF introspection (page count) | pass (PDFBox, via facade `GetPdfPageCount`) | pass (`ReportPdfIntrospection`, `PdfRenderer`) |
+| RTL text (bidi reordering, Arabic shaping) | pass (v1.3, `rtl-arabic` + `rtl-hebrew`) | pass (system text stack shapes at draw; export + page count verified) |
 | Layout goldens (AWT baselines) | pass | not applicable |
 | Fixture-level validation | pass | not applicable |
 
 This accounts for the check-count delta between platforms:
-**B4J 411 checks, B4A 327 checks, 0 errors on both** (v1.2.0: B4A gained
-the two introspection checks on exported fixture PDFs; B4J gained four
-facade bridging checks). PDF rendering on B4A goes through the
+**B4J 451 checks, B4A 337 checks, 0 errors on both** (v1.3.0: both
+platforms gained the two RTL fixture tests — B4J asserts bidi/shaping
+behaviour through extraction, B4A asserts the vector export and
+introspected page count). PDF rendering on B4A goes through the
 `Printing` library vector canvas (M10); introspection reads the file
 back through `android.graphics.pdf.PdfRenderer`, and the missing-file
 contract (0 / `""`) is fail-silent on both platforms.
@@ -272,7 +278,7 @@ build:   cd tests\B4A; "C:\Program Files\B4X\B4A\B4ABuilder.exe" -task=Build -ob
 install: C:\android\sdk\platform-tools\adb.exe install -r Objects\tests.apk
 restart: adb shell am force-stop b4a.example; adb logcat -c
 run:     adb shell am start -n b4a.example/.main
-read:    adb logcat -d   →  PASS engine (327 checks), errors=0
+read:    adb logcat -d   →  PASS engine (337 checks), errors=0
 ```
 
 The suite's pass/fail status is written to `fixture-check.txt` in

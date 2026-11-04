@@ -88,13 +88,23 @@ the canvas is abstract. See
 - B4J PDF uses the PDFBox Standard 14 fonts (WinAnsi) by default, so
   only Latin-1 text is guaranteed. Setting `ReportPdfExporter.FontFile`
   (and optionally `FontFileBold`) embeds a TrueType font and renders any
-  script the font contains; the `multilang` test embeds Noto Sans
-  (Latin/Greek/Cyrillic). CJK and Arabic/Hebrew need a font with those
-  glyphs; unsupported glyphs are replaced with `?` rather than failing.
-- Bidi and complex-script shaping are not implemented (deferred to
-  v1.3, which needs an Arabic-capable embedded font); RTL text is
-  rendered in logical order. On B4A the system text stack shapes Arabic
-  correctly at draw time.
+  script the font contains. The `multilang` test embeds Noto Sans
+  (Latin/Greek/Cyrillic); the `rtl-arabic` test embeds Noto Sans Arabic
+  and the `rtl-hebrew` test embeds Noto Sans Hebrew. Unsupported glyphs
+  are replaced with `?` rather than failing.
+- RTL text (v1.3): the B4J PDF draws logical-order text in visual order.
+  Arabic runs are shaped contextual (initial/medial/final/isolated
+  presentation forms, U+FE70–FEFF, plus the lam-alef ligatures
+  U+FEF5–FEFC) and bidi runs are reordered with `java.text.Bidi`;
+  digits inside an RTL span stay LTR. Extraction through PDFBox restores
+  readable logical-order text (the stripper normalises presentation
+  forms back to base letters), so copy/search works. The fixture fonts
+  matter: Noto Sans Arabic has no Latin letters and Noto Sans Hebrew has
+  no digits or Latin at all — a mixed-script line needs a font that
+  covers every glyph, which is a template author's choice.
+- B4A PDF: no engine changes were needed for v1.3. Android's system text
+  stack shapes and reorders Arabic/Hebrew at draw time; the RTL fixtures
+  export through the vector canvas with introspected page counts.
 
 ## 4. Fidelity tiers
 
@@ -105,6 +115,8 @@ the canvas is abstract. See
 - Element bounds in points, after auto-grow and push-down.
 - Page count for the fixture font set.
 - Text content and page-number fields.
+- Hebrew bidi reordering with an embedded font (v1.3, `rtl-hebrew`
+  fixture): Hebrew needs no shaping, so embed + reorder + draw is exact.
 
 **Tier 2 — equivalent, may differ in detail**
 
@@ -112,6 +124,12 @@ the canvas is abstract. See
 - Glyph positions, kerning, and hinting.
 - Image resampling quality.
 - HTML flow mode relative to PDF.
+- Arabic in the B4J PDF (v1.3, `rtl-arabic` fixture): correct bidi
+  order and correct standard contextual forms via the presentation-form
+  table, but it is not a full GSUB shaping engine — marginal letters
+  with irregular joining behaviour, and fonts whose shapes disagree
+  with the Unicode forms, may differ from HarfBuzz output by a glyph.
+  B4A output for the same text is shaped by the OS and is the reference.
 
 **Tier 3 — not promised**
 
@@ -119,6 +137,8 @@ the canvas is abstract. See
 - Pixel-identical PDF vs. DOCX vs. XLSX.
 - Identical layout after a font file is upgraded.
 - Identical pagination between PDF and browser print preview.
+- No RTL page/paragraph direction parameter: the paragraph base
+  direction stays LTR; only RTL bidi runs are reordered.
 
 Every new exporter must state which tier it meets for each fixture.
 

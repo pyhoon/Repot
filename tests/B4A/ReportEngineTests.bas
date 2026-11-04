@@ -34,6 +34,7 @@ Public Sub Run (FixturesDir As String)
 	#End If
 	TestPdfExport
 	TestMultilangPdf
+	TestRtlPdf
 	TestFacade
 	TestHtmlExport
 	TestDataExport
@@ -815,6 +816,68 @@ Private Sub TestMultilangPdf
 	Check(ok, "multilang pdf exports successfully")
 	If File.Exists(outDir, "test-multilang.pdf") Then
 		Check(File.Size(outDir, "test-multilang.pdf") > 0, "multilang pdf is non-empty")
+	End If
+End Sub
+
+Private Sub TestRtlPdf
+	'v1.3: the two RTL fixtures render through the platform PDF exporters.
+	'On B4A the system text stack shapes Arabic/Hebrew at draw time, so
+	'only the export pipeline and page count are verified here (the B4J
+	'suite carries the bidi/shaping content-stream and extraction checks).
+	TestRtlPdfOne("rtl-arabic", "test-rtl-arabic.pdf", "arabic loads")
+	TestRtlPdfOne("rtl-hebrew", "test-rtl-hebrew.pdf", "hebrew loads")
+End Sub
+
+Private Sub TestRtlPdfOne (FixtureName As String, OutName As String, TagMsg As String)
+	Dim dir As String = File.Combine(mFixtures, FixtureName)
+	Dim loader As ReportTemplateLoader
+	loader.Initialize
+	Dim def As ReportDefinition = loader.LoadFromFile(dir, "template.repot")
+	Check(loader.Diagnostics.HasErrors = False, TagMsg)
+
+	Dim binder As ReportDataBinder
+	binder.Initialize(def)
+	Dim params As Map = LoadJsonMap(dir, "params.json")
+	For Each k As String In params.Keys
+		binder.SetParameter(k, params.Get(k))
+	Next
+	Dim data As Map = LoadJsonMap(dir, "data.json")
+	For Each name As String In data.Keys
+		Dim o As Object = data.Get(name)
+		If o Is List Then
+			binder.SetDataSource(name, o)
+		Else If o Is Map Then
+			binder.SetDataSourceSingle(name, o)
+		End If
+	Next
+	Check(binder.Validate, FixtureName & " binds")
+
+	Dim diags As ReportDiagnostics
+	diags.Initialize
+	Dim measure As ReportB4JMeasure
+	measure.Initialize(diags)
+	Dim pag As ReportPaginator
+	pag.Initialize(def, binder, measure, diags)
+	Dim doc As ReportRenderDocument = pag.Render
+
+	#If B4A
+	Dim outDir As String = File.DirInternal
+	#Else
+	Dim outDir As String = File.DirAppData
+	#End If
+	Dim outPath As String = File.Combine(outDir, OutName)
+	Dim pdf As ReportPdfExporter
+	pdf.Initialize(diags)
+	pdf.SourceDir = def.SourceDir
+	Dim ok As Boolean = pdf.Export(doc, outPath)
+	Check(ok, FixtureName & " pdf exports successfully")
+	If File.Exists(outDir, OutName) Then
+		Check(File.Size(outDir, OutName) > 0, FixtureName & " pdf is non-empty")
+		#If B4A
+		Check(ReportPdfIntrospection.GetPdfPageCount(outPath) = doc.PageCount, FixtureName & " pdf introspection counts the pages")
+		#Else
+		Check(pdf.PageCount(outPath) = doc.PageCount, FixtureName & " pdf page count matches layout")
+		#End If
 	End If
 End Sub
 

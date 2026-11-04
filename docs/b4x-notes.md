@@ -372,6 +372,50 @@ verified section:
 - `Private Const` must be inside `Class_Globals` for a class module; it
   cannot sit loose between subs.
 
+## JVM and PDF facts verified in M12 (RTL)
+
+Verified 2026-11-04 with JDK 19.0.2 (`C:\Java\jdk-19.0.2\bin`, per
+`b4xV5.ini` `JavaBin`) headless and `pdfbox-app-3.0.8.jar`:
+
+- **`java.text.Bidi` works headless.** `new Bidi(text,
+  Bidi.DIRECTION_LEFT_TO_RIGHT)` gives correct runs and levels for
+  Arabic/Hebrew. `Bidi.reorderVisually` is **void and mutates the
+  Object[] in place** — its signature is
+  `reorderVisually(byte[] levels, int levelStart, Object[] objects,
+  int objectStart, int objectLength)`; there is no two-argument
+  overload, and assigning its (nonexistent) return value is a compile
+  error. Chunk the text into runs first, reorder the chunk array, then
+  reverse the codepoints of odd-level chunks only.
+- **`PDPageContentStream.showText` takes String only.** There is no
+  byte[] overload, public or private. `PDType0Font.encodeGlyphId(int)`
+  and `addGlyphsToSubset` exist, so a glyph-id path is theoretically
+  possible, but glyph-only content bypasses the ToUnicode CMap that
+  `encode()` builds — extracted text breaks. Rejected for v1.3.
+- **Arabic presentation forms are the working shaping route.** Mapping
+  base letters to U+FE70–FEFF forms (plus lam-alef U+FEF5–FEFC) flows
+  through the existing `showText`/`encode` path: subsetting and
+  ToUnicode keep working, and `PDFTextStripper` normalises the forms
+  back to base letters on extraction, so extracted text is logical
+  order and readable. Verified coverage: Noto Sans Arabic maps 140/144
+  of U+FE70–FEFF (gaps are unused variation-selector positions) and all
+  four lam-alef pairs.
+- **`PDFTextStripper` rewrites RTL on extraction.** It re-orders RTL
+  spans to logical order and normalises presentation forms to base
+  letters. Tests must therefore assert logical text (and the absence of
+  `?`), not visual order; visual order is verified at content-stream
+  level with `tools/pdf-probe/DumpCodes.java`.
+- **`PDType0Font.encode(int)` is protected; `toUnicode(int)` is
+  public.** The `safeText` per-codepoint `encode` probe remains the
+  unsupported-glyph fallback.
+- **Font coverage surprises that cost a fixture redesign:** Noto Sans
+  Arabic contains ASCII digits and `. , : ; -` but **no Latin letters**;
+  Noto Sans Hebrew contains **no digits and no Latin at all** (only `-`
+  and space outside the alphabet). A mixed Hebrew + digits line needs a
+  different font; the `rtl-hebrew` fixture is deliberately digits-free.
+- **B4A needed no RTL changes.** `android.graphics.Paint` /
+  `Canvas.drawtext` shape and reorder at draw time; the B4A side only
+  gained fixture export + page-count tests.
+
 ## Why this file exists
 
 `PLAN.md` forbids inventing B4X APIs. Two compile failures during M0 were

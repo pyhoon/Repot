@@ -1,5 +1,50 @@
 # Changelog
 
+## 1.3.0 — 2026-11-04
+
+RTL text and complex scripts in the B4J PDF (M12). B4J 451 checks /
+0 errors, B4A 337 checks / 0 errors on emulator-5554.
+
+### Added
+- Bidi run reordering in the B4J PDF (`ReportPdfExporter`): logical-order
+  strings are chunked with `java.text.Bidi` and emitted in visual order;
+  digits and other even-level runs inside an RTL span stay left-to-right.
+  Base paragraph direction remains LTR (no RTL page-direction parameter).
+- Arabic contextual shaping through the Unicode presentation forms
+  (U+FE70–FEFF) with the mandatory lam-alef ligatures (U+FEF5–FEFC).
+  The forms flow through the existing PDFBox embed/subset/ToUnicode
+  path, so extracted text stays readable: PDFBox normalises the forms
+  back to base letters and restores logical order on extraction.
+- Right/center alignment now measures the processed (visual) string;
+  visual width equals logical width, so anchors are unchanged.
+- Embeddable fonts `fixtures/_fonts/NotoSansArabic-{Regular,Bold}.ttf`
+  and `NotoSansHebrew-{Regular,Bold}.ttf` (SIL OFL 1.1, from
+  googlefonts/noto-fonts), recorded in `docs/dependencies.md` §5.
+- Fixtures `rtl-arabic` (Arabic-only: contextual forms, lam-alef,
+  digits-in-RTL, Arabic-Indic digits) and `rtl-hebrew` (Hebrew-only,
+  deliberately digits-free — Noto Sans Hebrew contains no digits or
+  Latin). B4J tests assert logical extraction and no `?` substitution;
+  visual-order emission is verified at content-stream level with the
+  new `tools/pdf-probe` helpers (`DumpCodes.java`, `DumpPdf.java`).
+- B4A: the two RTL fixtures export through the vector canvas with
+  introspected page counts (no engine changes needed — Android shapes
+  at draw time).
+
+### Changed
+- Documentation synced: compatibility fidelity tiers (Hebrew Tier 1,
+  Arabic Tier 2 with documented limits), b4x-notes M12 verified facts
+  (`Bidi.reorderVisually` is void and mutates in place; no byte-level
+  `showText`; extraction normalisation), testing counts and fixture
+  list, README capability statement.
+
+### Known limitations
+- Arabic shaping in the B4J PDF uses the presentation-form table, not a
+  full GSUB engine: marginal letters and fonts whose shapes disagree
+  with the Unicode forms may differ from HarfBuzz output by a glyph.
+- A mixed Hebrew + digits line needs a font covering both (Noto Sans
+  Hebrew has no digits); Arabic/Hebrew cannot share one embedded font
+  in v1.3 (`FontFile` takes one file pair).
+
 ## 1.2.0 — 2026-11-04
 
 B4A PDF verification and saving (M11). B4J 411 checks / 0 errors,

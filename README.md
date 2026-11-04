@@ -248,11 +248,25 @@ public API, proven by:
 - A visual designer. The designer is a separate application that
   consumes the public model and API.
 - Identical pixel output across platforms and formats.
-- Right-to-left text and complex-script shaping in the B4J PDF.
-  Deferred to v1.3 (needs an Arabic-capable embedded font). B4A renders
-  shaped text correctly today via Android's text stack.
 - A support contract. The project is best-effort, MIT, and maintained by
   its author.
+
+## What 1.3 delivered
+
+Right-to-left text in the B4J PDF, the one capability explicitly
+deferred from v1.2.0:
+
+- Bidi run reordering (`java.text.Bidi`) so logical-order Arabic and
+  Hebrew strings draw in correct visual order; digits inside an RTL
+  span stay left-to-right.
+- Arabic contextual shaping through the Unicode presentation forms
+  (U+FE70–FEFF) including the mandatory lam-alef ligatures, flowing
+  through the existing PDFBox embed/subset path so extracted text stays
+  readable and searchable.
+- Embeddable Noto Sans Arabic and Noto Sans Hebrew fonts (SIL OFL 1.1)
+  verified against the pipeline, plus `rtl-arabic` and `rtl-hebrew`
+  fixtures. B4A needed no changes: the system text stack shapes at
+  draw time.
 
 ## License, support, and contributions
 

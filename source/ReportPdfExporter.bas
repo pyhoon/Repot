@@ -249,10 +249,17 @@ private static String safeText(PDFont font, String text) {
 
 public static void drawText(Object cs, Object font, double size, double x, double y, String text, String colour, String align, double boxWidth) throws Exception {
     PDPageContentStream s = (PDPageContentStream)cs;
-    String safe = safeText((PDFont)font, text);
+    // Bidi + Arabic presentation-form shaping: PDF text streams have no
+    // shaping engine of their own, so the logical-order string is first
+    // shaped (Arabic contextual forms, lam-alef) and then chunked into
+    // bidi runs and emitted in visual order. Latin-only strings pass
+    // through unchanged.
+    String visual = bidiVisual(text);
+    String safe = safeText((PDFont)font, visual);
     float drawX = (float)x;
     if (align != null && align.length() > 0) {
         try {
+            // measure the processed (visual) string: visual width == logical width
             float textWidth = ((PDFont)font).getStringWidth(safe) / 1000f * (float)size;
             if (align.equalsIgnoreCase("right")) {
                 drawX = (float)(x + boxWidth - textWidth);
@@ -268,6 +275,199 @@ public static void drawText(Object cs, Object font, double size, double x, doubl
     s.newLineAtOffset(drawX, (float)y);
     s.showText(safe);
     s.endText();
+}
+
+/*
+ * Arabic presentation-form shaping table (Unicode Arabic Forms-B,
+ * U+FE70-FEFF) with mandatory lam-alef ligatures. Compiled per request:
+ * for each letter, {isolated, final, initial, medial}; -1 = form does
+ * not exist (non-joining letters have no initial/medial forms).
+ * This is the classic shaping approach used before HarfBuzz-era
+ * engines; it covers correct contextual forms for all 36 standard
+ * Arabic letters. Presentation forms are emitted as normal Unicode
+ * codepoints through PDFont.encode, so PDFBox subsetting and the
+ * ToUnicode CMap keep working (extractable text).
+ * Verified: Noto Sans Arabic maps 140/144 of U+FE70-FEFF (the four
+ * gaps are unused variation-selector positions) and all lam-alef
+ * ligatures.
+ */
+private static int[][] ARABIC_FORMS = new int[0x0700][];
+
+private static void setForms(int base, int i, int f, int ini, int m) {
+    ARABIC_FORMS[base] = new int[] { i, f, ini, m };
+}
+
+private static void buildArabicForms() {
+    setForms(0x0621, 0xFE80, -1, -1, -1);        // HAMZA
+    setForms(0x0622, 0xFE81, 0xFE82, -1, -1);    // ALEF MADDA
+    setForms(0x0623, 0xFE83, 0xFE84, -1, -1);    // ALEF HAMZA ABOVE
+    setForms(0x0624, 0xFE85, 0xFE86, -1, -1);    // WAW HAMZA
+    setForms(0x0625, 0xFE87, 0xFE88, -1, -1);    // ALEF HAMZA BELOW
+    setForms(0x0626, 0xFE89, 0xFE8A, 0xFE8B, 0xFE8C); // YEH HAMZA
+    setForms(0x0627, 0xFE8D, 0xFE8E, -1, -1);    // ALEF
+    setForms(0x0628, 0xFE8F, 0xFE90, 0xFE91, 0xFE92); // BEH
+    setForms(0x0629, 0xFE93, 0xFE94, -1, -1);    // TEH MARBUTA
+    setForms(0x062A, 0xFE95, 0xFE96, 0xFE97, 0xFE98); // TEH
+    setForms(0x062B, 0xFE99, 0xFE9A, 0xFE9B, 0xFE9C); // THEH
+    setForms(0x062C, 0xFE9D, 0xFE9E, 0xFE9F, 0xFEA0); // JEEM
+    setForms(0x062D, 0xFEA1, 0xFEA2, 0xFEA3, 0xFEA4); // HAH
+    setForms(0x062E, 0xFEA5, 0xFEA6, 0xFEA7, 0xFEA8); // KHAH
+    setForms(0x062F, 0xFEA9, 0xFEAA, -1, -1);    // DAL
+    setForms(0x0630, 0xFEAB, 0xFEAC, -1, -1);    // THAL
+    setForms(0x0631, 0xFEAD, 0xFEAE, -1, -1);    // REH
+    setForms(0x0632, 0xFEAF, 0xFEB0, -1, -1);    // ZAIN
+    setForms(0x0633, 0xFEB1, 0xFEB2, 0xFEB3, 0xFEB4); // SEEN
+    setForms(0x0634, 0xFEB5, 0xFEB6, 0xFEB7, 0xFEB8); // SHEEN
+    setForms(0x0635, 0xFEB9, 0xFEBA, 0xFEBB, 0xFEBC); // SAD
+    setForms(0x0636, 0xFEBD, 0xFEBE, 0xFEBF, 0xFEC0); // DAD
+    setForms(0x0637, 0xFEC1, 0xFEC2, 0xFEC3, 0xFEC4); // TAH
+    setForms(0x0638, 0xFEC5, 0xFEC6, 0xFEC7, 0xFEC8); // ZAH
+    setForms(0x0639, 0xFEC9, 0xFECA, 0xFECB, 0xFECC); // AIN
+    setForms(0x063A, 0xFECD, 0xFECE, 0xFECF, 0xFED0); // GHAIN
+    setForms(0x0641, 0xFED1, 0xFED2, 0xFED3, 0xFED4); // FEH
+    setForms(0x0642, 0xFED5, 0xFED6, 0xFED7, 0xFED8); // QAF
+    setForms(0x0643, 0xFED9, 0xFEDA, 0xFEDB, 0xFEDC); // KAF
+    setForms(0x0644, 0xFEDD, 0xFEDE, 0xFEDF, 0xFEE0); // LAM
+    setForms(0x0645, 0xFEE1, 0xFEE2, 0xFEE3, 0xFEE4); // MEEM
+    setForms(0x0646, 0xFEE5, 0xFEE6, 0xFEE7, 0xFEE8); // NOON
+    setForms(0x0647, 0xFEE9, 0xFEEA, 0xFEEB, 0xFEEC); // HEH
+    setForms(0x0648, 0xFEED, 0xFEEE, -1, -1);    // WAW
+    setForms(0x0649, 0xFEEF, 0xFEF0, -1, -1);    // ALEF MAKSURA
+    setForms(0x064A, 0xFEF1, 0xFEF2, 0xFEF3, 0xFEF4); // YEH
+}
+
+private static boolean arabicLetter(int cp) {
+    return cp >= 0x0621 && cp <= 0x064A;
+}
+
+// Letters that never join to the following letter (logical next).
+private static boolean nonJoining(int cp) {
+    return cp == 0x0621 || cp == 0x0622 || cp == 0x0623 || cp == 0x0624
+        || cp == 0x0625 || cp == 0x0627 || cp == 0x0629 || cp == 0x062F
+        || cp == 0x0630 || cp == 0x0631 || cp == 0x0632 || cp == 0x0648;
+}
+
+/*
+ * Shapes an Arabic logical-order string into presentation forms.
+ * Context spans the whole string; neighbours that are Arabic letters
+ * propose joining. Lam + one of the ALEF variants collapses into the
+ * mandatory ligature (isolated or final form). Tatweel (U+0640) passes
+ * through and sustains joins. Nothing else is touched, so Latin, digits
+ * and punctuation are unchanged.
+ */
+public static String shapeArabic(String text) {
+    if (text == null || text.isEmpty()) return text;
+    boolean hasArabic = false;
+    for (int i = 0; i < text.length(); i++) {
+        if (arabicLetter(text.charAt(i))) { hasArabic = true; break; }
+    }
+    if (!hasArabic) return text;
+    buildArabicForms();
+    int n = text.length();
+    StringBuilder out = new StringBuilder(n + 8);
+    for (int i = 0; i < n; i++) {
+        int cp = text.codePointAt(i);
+        if (!arabicLetter(cp) && cp != 0x0640) { out.appendCodePoint(cp); continue; }
+        // previous strong-Arabic letter (skipping non-letters) proposes a join from the right
+        boolean joinedFromRight = false;
+        for (int j = i - 1; j >= 0; j--) {
+            int pj = text.codePointAt(j);
+            if (pj == 0x0640) { joinedFromRight = true; break; }  // tatweel sustains the connection
+            if (isSpaceLike(pj)) break;                          // whitespace breaks joining
+            if (arabicLetter(pj)) { joinedFromRight = !nonJoining(pj); break; }
+            break;                                                // any other glyph breaks joining
+        }
+        // next letter proposes a join from the left (I must be a joining letter)
+        boolean joinsNext = false;
+        int ncp = 0, ni = -1;
+        if (cp != 0x0640 && i < n - 1) {
+            int k = i + 1;
+            ncp = text.codePointAt(k);
+            ni = k;
+        }
+        int[] forms = (cp >= 0x0621 && cp <= 0x064A) ? ARABIC_FORMS[cp] : null;
+        // lam-alef mandatory ligature
+        if (cp == 0x0644 && (ncp == 0x0622 || ncp == 0x0623 || ncp == 0x0625 || ncp == 0x0627)) {
+            int lig = ncp == 0x0622 ? 0xFEF5 : ncp == 0x0623 ? 0xFEF7 : ncp == 0x0625 ? 0xFEF9 : 0xFEFB;
+            out.appendCodePoint(lig + (joinedFromRight ? 1 : 0));
+            i = ni; // consume the alef too
+            continue;
+        }
+        if (forms == null) { out.appendCodePoint(cp); continue; } // tatweel or unmapped
+        boolean iJoinNext = !(nonJoining(cp));
+        int form;
+        if (joinedFromRight && iJoinNext) form = forms[3];     // medial
+        else if (joinedFromRight) form = forms[1];             // final
+        else if (iJoinNext && arabicJoiner(ncp)) form = forms[2]; // initial
+        else form = forms[0];                                  // isolated
+        int chosen = form >= 0 ? form : forms[0];
+        out.appendCodePoint(chosen);
+    }
+    return out.toString();
+}
+
+private static boolean arabicJoiner(int cp) {
+    return arabicLetter(cp) || cp == 0x0640;
+}
+
+private static boolean isSpaceLike(int cp) {
+    return cp == ' ' || cp == '\t' || cp == '\n' || cp == '\r';
+}
+
+/*
+ * Bidi pass: chunk the string into unicode bidi runs and arrange them in
+ * visual order. Odd-level chunks (true RTL) are codepoint-reversed so
+ * PDFBox, which paints left to right, produces the correct glyph order.
+ * Bidi.reorderVisually handles nested levels (digits inside Arabic run
+ * at a deeper even level stay LTR). Base direction is LTR (the engine
+ * has no RTL page direction yet; documented).
+ */
+public static String bidiVisual(String text) {
+    if (text == null || text.isEmpty()) return text;
+    try {
+        // Shape first, over the full logical string so joining context is
+        // complete (lam-alef collapses two codepoints into one). The bidi
+        // run boundaries of the shaped string are the same: presentation
+        // forms carry RTL direction just like their base letters.
+        String shaped = shapeArabic(text);
+        java.text.Bidi bidi = new java.text.Bidi(shaped, java.text.Bidi.DIRECTION_LEFT_TO_RIGHT);
+        int runs = bidi.getRunCount();
+        if (runs <= 1 && bidi.getRunLevel(0) == 0) return shaped;
+        byte[] levels = new byte[runs];
+        Object[] items = new Object[runs];
+        for (int r = 0; r < runs; r++) {
+            levels[r] = (byte) bidi.getRunLevel(r);
+            items[r] = new Object[] { Integer.valueOf(r), shaped.substring(bidi.getRunStart(r), bidi.getRunLimit(r)) };
+        }
+        // Bidi.reorderVisually reorders the array in place (returns void)
+        java.text.Bidi.reorderVisually(levels, 0, items, 0, items.length);
+        Object[] visual = items;
+        StringBuilder out = new StringBuilder(text.length());
+        for (Object o : visual) {
+            Object[] pair = (Object[]) o;
+            int idx = ((Integer) pair[0]).intValue();
+            byte lvl = levels[idx];
+            String chunk = ((String) pair[1]);
+            if ((lvl & 1) == 1) {
+                // RTL chunk: shape happens before reversal in the logical string,
+                // so reverse now for left-to-right painting
+                int[] cps = chunk.codePoints().toArray();
+                int from = 0, to = cps.length - 1;
+                while (from < to) {
+                    int t = cps[from]; cps[from] = cps[to]; cps[to] = t;
+                    from++; to--;
+                }
+                StringBuilder rev = new StringBuilder(cps.length);
+                for (int c : cps) rev.appendCodePoint(c);
+                out.append(rev);
+            } else {
+                out.append(chunk);
+            }
+        }
+        return out.toString();
+    } catch (Throwable t) {
+        return shapeArabic(text == null ? "" : text);
+    }
 }
 
 public static void drawLine(Object cs, double x1, double y1, double x2, double y2, double lw, String colour, String dash) throws Exception {
