@@ -9,11 +9,13 @@ Version=10.7
 '
 'Build is synchronous. The underlying modules remain public for advanced use.
 '
-'B4J only: PDF export and introspection compile against Apache PDFBox,
-'which is not bundled. The host project must add the jar to the
-'additional libraries folder and declare it in the main module:
-'  #AdditionalJar: pdfbox-app-3.0.8.jar
-'B4A needs nothing - its PDF path uses the Android Printing library.
+'B4J only: PDF export and introspection compile against Apache PDFBox.
+'The b4xlib manifest lists it under B4J.DependsOn (pdfbox-app-3.0.8);
+'the compiler resolves the jar from the libraries folders, so place
+'pdfbox-app-3.0.8.jar in your additional libraries folder. It is not
+'bundled with the b4xlib - download it from Maven Central
+'(org.apache.pdfbox:pdfbox:3.0.8, app jar). B4A needs nothing - its
+'PDF path uses the Android Printing library.
 
 Sub Class_Globals
 	Public Diagnostics As ReportDiagnostics

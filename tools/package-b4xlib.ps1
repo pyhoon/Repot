@@ -40,7 +40,7 @@ Get-ChildItem -Path $src -Filter "*.bas" -File | ForEach-Object {
 # Manifest.
 $manifest = @"
 Version=1.5
-B4J.DependsOn=Json, JavaObject
+B4J.DependsOn=Json, JavaObject, pdfbox-app-3.0.8
 B4A.DependsOn=Json, JavaObject, Printing, FileProvider
 "@
 Set-Content -Path (Join-Path $stage "manifest.txt") -Value $manifest -NoNewline
