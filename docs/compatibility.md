@@ -124,9 +124,12 @@ the canvas is abstract. See
   `office:spreadsheet`) with a header row from the field definitions.
   All cells are written as string cells, matching the XLSX writer's
   inline-string behaviour; typed numeric/date cells are a known
-  limitation. Verification is structural (zip layout + XML
-  well-formedness asserted in the suite); no ODF application was
-  available on the development machine to open the output, so
+  limitation. The manifest's root file-entry carries
+  `manifest:version="1.2"` — without it Excel's ODF importer treats
+  the document as pre-1.2 and reports a content problem on open
+  (found in first release testing; fixed in v1.5.0). Verification is
+  structural (zip layout + XML well-formedness asserted in the suite);
+  no ODF application is installed on the development machine, so
   "opens in LibreOffice" is unverified — reported as a Tier-2
   equivalence claim, not Tier 1.
 

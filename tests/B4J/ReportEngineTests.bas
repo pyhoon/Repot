@@ -1207,6 +1207,11 @@ public static String checkOdf(String path, String expectedMime, String dumpPath)
             Element root = (Element) entries.item(0);
             if (!expectedMime.equals(root.getAttribute("manifest:media-type")))
                 return "manifest root media type mismatch";
+            // ODF 1.2: the root file-entry must carry manifest:version;
+            // Excel's importer selects the schema version from it and
+            // reports a content problem when it is missing.
+            if (!"1.2".equals(root.getAttribute("manifest:version")))
+                return "manifest root entry missing manifest:version";
             ZipEntry content = zf.getEntry("content.xml");
             if (content == null) return "content.xml missing";
             // well-formedness: parse it; also dump it for B4X-level asserts

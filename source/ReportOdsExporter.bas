@@ -49,7 +49,7 @@ Public Sub Export (DataSetName As String, OutputPath As String) As Boolean
 		' content.xml: the dataset as one table (header row + data rows)
 		Dim content As StringBuilder
 		content.Initialize
-		content.Append("<?xml version=""1.0"" encoding=""UTF-8"" standalone=""yes""?>").Append(CRLF)
+		content.Append("<?xml version=""1.0"" encoding=""UTF-8""?>").Append(CRLF)
 		content.Append("<office:document-content xmlns:office=""urn:oasis:names:tc:opendocument:xmlns:office:1.0"" xmlns:text=""urn:oasis:names:tc:opendocument:xmlns:text:1.0"" xmlns:table=""urn:oasis:names:tc:opendocument:xmlns:table:1.0"" office:version=""1.2"">").Append(CRLF)
 		content.Append("  <office:body>").Append(CRLF)
 		content.Append("    <office:spreadsheet>").Append(CRLF)
@@ -78,11 +78,15 @@ Public Sub Export (DataSetName As String, OutputPath As String) As Boolean
 		File.WriteString(tmp, "content.xml", content.ToString)
 
 		' META-INF/manifest.xml
+		'The root file-entry carries manifest:version: ODF 1.2 consumers
+		'(Excel's importer included) use it to select the schema version
+		'for the package; without it the document is treated as pre-1.2
+		'and Excel reports a content problem on open.
 		Dim manifest As StringBuilder
 		manifest.Initialize
-		manifest.Append("<?xml version=""1.0"" encoding=""UTF-8"" standalone=""yes""?>").Append(CRLF)
+		manifest.Append("<?xml version=""1.0"" encoding=""UTF-8""?>").Append(CRLF)
 		manifest.Append("<manifest:manifest xmlns:manifest=""urn:oasis:names:tc:opendocument:xmlns:manifest:1.0"" manifest:version=""1.2"">").Append(CRLF)
-		manifest.Append("  <manifest:file-entry manifest:full-path=""/"" manifest:media-type=""application/vnd.oasis.opendocument.spreadsheet""/>").Append(CRLF)
+		manifest.Append("  <manifest:file-entry manifest:full-path=""/"" manifest:version=""1.2"" manifest:media-type=""application/vnd.oasis.opendocument.spreadsheet""/>").Append(CRLF)
 		manifest.Append("  <manifest:file-entry manifest:full-path=""content.xml"" manifest:media-type=""text/xml""/>").Append(CRLF)
 		manifest.Append("</manifest:manifest>").Append(CRLF)
 		File.WriteString(File.Combine(tmp, "META-INF"), "manifest.xml", manifest.ToString)

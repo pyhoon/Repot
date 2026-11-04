@@ -36,6 +36,12 @@ accept DOCX.
 - [x] Not verifiable locally: no LibreOffice or Python on this machine,
   so "opens in a real ODF application" is recorded as a verification
   note in compatibility.md rather than claimed.
+- [x] First release testing found Excel (LTSC 2508) reporting "a
+  problem with some content" on the ODS: the manifest's root
+  file-entry lacked `manifest:version="1.2"` (the one structural
+  difference from a documented-working minimal ODS). Fixed in both
+  exporters, asserted by the zip probe, `standalone="yes"` dropped
+  from the XML declarations to match known-good writers.
 
 ## Task 2: ReportOdtExporter — COMPLETE
 - [x] Same class shape as `ReportDocxExporter`; diagnostics on missing
