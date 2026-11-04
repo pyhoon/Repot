@@ -75,7 +75,8 @@ B4JBuilder.exe -Task=Build
 ```
 
 Record the exact command in the pull request and confirm the exit code.
-The engine project also builds with `-Task=BuildLibrary`. See
+Prefer `-Task=Build`; `-Task=BuildLibrary` installs `Repot.jar`/`Repot.xml`
+into the additional libraries folder and shadows the source `.b4xlib`. See
 `docs/testing.md` for the fixture harness and what a valid golden change
 looks like.
 

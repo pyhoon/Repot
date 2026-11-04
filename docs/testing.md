@@ -193,11 +193,11 @@ cd <project folder>
 - Exit code `0` on success, `1` on failure.
 - Jar written to `Objects\<ProjectName>.jar`.
 - Runs without the IDE and without a display.
-- `-Task=BuildLibrary` is verified for the engine project: it needs
-  `#LibraryName` in the project file and writes `Repot.jar` and
-  `Repot.xml` to the B4J Additional folder (`%Additional%\B4J` on this
-  machine), not to the project. Creating the `.b4xlib` is a packaging
-  step, not a builder task.
+- `-Task=BuildLibrary` is verified for the engine project, but it is not
+  used by the repository tooling: it writes `Repot.jar` and `Repot.xml`
+  into the B4J Additional folder (`%Additional%\B4J`), where they shadow
+  the source `.b4xlib` for later builds. Compile checks and packaging use
+  `-Task=Build`, which leaves the jar in `Objects\`.
 
 `tools/run-fixtures.ps1` wraps the whole loop: build, run the checker with
 the fixture path, read `Objects\fixture-check.txt`, and exit `0` only when
@@ -209,7 +209,7 @@ CI shape:
 ```text
 1. tools/run-fixtures.ps1                     # schema lint + engine tests, must exit 0
 2. B4JBuilder -Task=Build on the engine project
-3. B4JBuilder -Task=BuildLibrary on the engine project (packaging check)
+3. B4JBuilder -Task=Build on the engine project (packaging compile check)
 4. java -jar <harness>.jar <fixtures> --golden  # from M3
 5. compare layout JSON; fail on any diff
 6. run verifier scripts for DOCX/XLSX when those exist

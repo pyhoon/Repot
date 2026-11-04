@@ -45,12 +45,26 @@ cd <project folder>
 ## Building a library without the IDE
 
 `-Task=BuildLibrary` is verified on the engine project with B4J 10.7 and
-Java 19:
+Java 19, but it has a side effect: it **installs `Repot.jar` and
+`Repot.xml` into the additional-libraries folder**. Those compiled files
+then shadow the source `.b4xlib` for later builds. The repository tooling
+therefore uses `-Task=Build` (jar in `Objects\`, nothing installed) for
+compile checks and packaging:
+
+```text
+cd source\B4J
+"..."B4JBuilder.exe" -Task=Build
+```
+
+Use `-Task=BuildLibrary` only when you deliberately want the compiled
+library installed for app projects:
 
 ```text
 cd <project folder>
-"C:\Program Files\B4X\B4J\B4JBuilder.exe" -Task=BuildLibrary
+"..."B4JBuilder.exe" -Task=BuildLibrary
 ```
+
+`BuildLibrary` requirements:
 
 - Requires `#LibraryName:` in the project file. Without it the builder
   exits `1` with `#LibraryName attribute must be set`.

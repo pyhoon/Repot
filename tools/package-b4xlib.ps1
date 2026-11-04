@@ -9,6 +9,10 @@
 # Usage:
 #   .\tools\package-b4xlib.ps1            # build + package
 #   .\tools\package-b4xlib.ps1 -NoBuild    # skip the compile check
+#
+# The compile check uses -Task=Build (output in Objects), NOT
+# -Task=BuildLibrary: BuildLibrary installs Repot.jar/Repot.xml into the
+# additional libraries folder, which would shadow the .b4xlib being tested.
 
 param(
     [switch]$NoBuild
@@ -29,8 +33,8 @@ if (-not $NoBuild) {
     $builder = $builderCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
     if (-not $builder) { throw "B4JBuilder not found (looked in $($builderCandidates -join ', '))" }
     Push-Location $b4j
-    & $builder -Task=BuildLibrary
-    if ($LASTEXITCODE -ne 0) { Pop-Location; throw "B4J library build failed (exit $LASTEXITCODE)" }
+    & $builder -Task=Build
+    if ($LASTEXITCODE -ne 0) { Pop-Location; throw "B4J build failed (exit $LASTEXITCODE)" }
     Pop-Location
 }
 

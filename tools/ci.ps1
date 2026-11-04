@@ -36,14 +36,14 @@ function Fail($msg) {
     $script:failed = $true
 }
 
-# Gate 1: B4J library build
+# Gate 1: B4J library compile
 Write-Host ""
-Write-Host "=== B4J library build ===" -ForegroundColor Cyan
+Write-Host "=== B4J library compile ===" -ForegroundColor Cyan
 Push-Location (Join-Path $root "source\B4J")
-& $b4jBuilder -Task=BuildLibrary
+& $b4jBuilder -Task=Build
 $code = $LASTEXITCODE
 Pop-Location
-if ($code -ne 0) { Fail "B4J library build (exit $code)" } else { Write-Host "PASSED" -ForegroundColor Green }
+if ($code -ne 0) { Fail "B4J library compile (exit $code)" } else { Write-Host "PASSED" -ForegroundColor Green }
 
 # Gate 2: B4J fixture suite (only if gate 1 passed)
 if (-not $failed) {
