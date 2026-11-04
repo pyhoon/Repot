@@ -135,7 +135,9 @@ Details: [docs/architecture.md](docs/architecture.md).
 
 ## Quick start
 
-Install `dist/Repot.b4xlib` into your additional libraries folder. On
+Install `dist/Repot.b4xlib` into your additional libraries folder. The
+shared folder `C:\B4X\Additional\B4X` is read by both B4J and B4A, so one
+copy there serves both IDEs; per-IDE folders work too. On
 B4J, PDF export and introspection also need Apache PDFBox: place
 `pdfbox-app-3.0.8.jar` in the additional libraries folder (the b4xlib
 manifest declares it under `B4J.DependsOn`, so the compiler resolves
@@ -144,7 +146,8 @@ Central). B4A needs nothing extra. See
 [docs/dependencies.md](docs/dependencies.md).
 
 Inline preview is a separate, optional package: install
-`dist/RepotViewer.b4xlib` as well. It contains
+`dist/RepotViewer.b4xlib` the same way (one copy in
+`Additional\B4X` covers both IDEs). It contains
 `ReportHtmlViewer`, a B4X custom view that appears in the Layout
 Designer's Custom Views list; B4J needs `jfx` + `jxui`, B4A needs `xui`.
 The core engine library stays headless — the viewer is not part of it.
