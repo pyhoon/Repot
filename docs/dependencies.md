@@ -152,7 +152,7 @@ chosen exporters need:
 
 | Exporter | Extra jars required |
 |----------|---------------------|
-| PDF (`ReportPdfExporter`) | Apache PDFBox 3.0.8 + fontbox + commons-logging (B4J only; B4A uses the HTML print path) |
+| PDF (`ReportPdfExporter`) | Apache PDFBox 3.0.8 + fontbox + commons-logging (B4J only; B4A uses the HTML print path). **Not bundled in the `.b4xlib`**: the host project adds `pdfbox-app-3.0.8.jar` to the additional libraries folder and declares `#AdditionalJar: pdfbox-app-3.0.8.jar` (the b4xlib manifest has no field for raw-jar dependencies; `DependsOn` resolves B4X libraries only). The requirement is documented in the `Repot` facade header, which travels inside the b4xlib |
 | DOCX, XLSX, ODT, ODS, HTML, CSV, JSON, XML | none |
 
 This keeps a PDF-only application from depending on spreadsheet

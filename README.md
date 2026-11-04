@@ -121,6 +121,12 @@ Details: [docs/architecture.md](docs/architecture.md).
 
 ## Quick start
 
+Install `dist/Repot.b4xlib` into your additional libraries folder. On
+B4J, PDF export and introspection also need Apache PDFBox, which is not
+bundled: put `pdfbox-app-3.0.8.jar` in the additional libraries folder
+and add `#AdditionalJar: pdfbox-app-3.0.8.jar` to your main module.
+B4A needs nothing extra. See [docs/dependencies.md](docs/dependencies.md).
+
 Build a report once, then export it to as many formats as needed without
 re-running layout. The facade is synchronous: `Build` and the exporters
 return immediately.

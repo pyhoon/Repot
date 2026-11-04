@@ -8,6 +8,12 @@ Version=10.7
 'build once, then export to any format without re-running layout.
 '
 'Build is synchronous. The underlying modules remain public for advanced use.
+'
+'B4J only: PDF export and introspection compile against Apache PDFBox,
+'which is not bundled. The host project must add the jar to the
+'additional libraries folder and declare it in the main module:
+'  #AdditionalJar: pdfbox-app-3.0.8.jar
+'B4A needs nothing - its PDF path uses the Android Printing library.
 
 Sub Class_Globals
 	Public Diagnostics As ReportDiagnostics
