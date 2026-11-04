@@ -37,11 +37,15 @@ accept DOCX.
   so "opens in a real ODF application" is recorded as a verification
   note in compatibility.md rather than claimed.
 - [x] First release testing found Excel (LTSC 2508) reporting "a
-  problem with some content" on the ODS: the manifest's root
-  file-entry lacked `manifest:version="1.2"` (the one structural
-  difference from a documented-working minimal ODS). Fixed in both
-  exporters, asserted by the zip probe, `standalone="yes"` dropped
-  from the XML declarations to match known-good writers.
+  problem with some content" on the ODS. First fix: the manifest's
+  root file-entry gained `manifest:version="1.2"` (the one structural
+  difference from a documented-working minimal ODS), `standalone="yes"`
+  dropped from the XML declarations — did NOT resolve the prompt.
+  Second fix: added the spec-optional `styles.xml`/`meta.xml` parts
+  and manifest entries (the "LibreOffice-shaped package", matching
+  what LibreOffice and Excel themselves write). Both asserted by the
+  zip probe. Awaiting Excel re-test; if the prompt persists the
+  fallback is a documented Tier-2 note.
 - [x] CJK verification (post-release, same milestone): extraction
   showed the multilang PDF rendered Japanese/Chinese/Korean as `?` —
   the embedded Noto Sans pair has no CJK coverage. Verified the

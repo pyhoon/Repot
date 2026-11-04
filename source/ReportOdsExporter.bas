@@ -88,8 +88,29 @@ Public Sub Export (DataSetName As String, OutputPath As String) As Boolean
 		manifest.Append("<manifest:manifest xmlns:manifest=""urn:oasis:names:tc:opendocument:xmlns:manifest:1.0"" manifest:version=""1.2"">").Append(CRLF)
 		manifest.Append("  <manifest:file-entry manifest:full-path=""/"" manifest:version=""1.2"" manifest:media-type=""application/vnd.oasis.opendocument.spreadsheet""/>").Append(CRLF)
 		manifest.Append("  <manifest:file-entry manifest:full-path=""content.xml"" manifest:media-type=""text/xml""/>").Append(CRLF)
+		manifest.Append("  <manifest:file-entry manifest:full-path=""styles.xml"" manifest:media-type=""text/xml""/>").Append(CRLF)
+		manifest.Append("  <manifest:file-entry manifest:full-path=""meta.xml"" manifest:media-type=""text/xml""/>").Append(CRLF)
 		manifest.Append("</manifest:manifest>").Append(CRLF)
 		File.WriteString(File.Combine(tmp, "META-INF"), "manifest.xml", manifest.ToString)
+
+		' styles.xml / meta.xml: spec-optional but part of every real
+		' producer's package (LibreOffice, Excel); some consumers are
+		' strict about the package shape, so write the minimal parts.
+		Dim styles As StringBuilder
+		styles.Initialize
+		styles.Append("<?xml version=""1.0"" encoding=""UTF-8""?>").Append(CRLF)
+		styles.Append("<office:document-styles xmlns:office=""urn:oasis:names:tc:opendocument:xmlns:office:1.0"" office:version=""1.2"">").Append(CRLF)
+		styles.Append("  <office:styles/>").Append(CRLF)
+		styles.Append("</office:document-styles>").Append(CRLF)
+		File.WriteString(tmp, "styles.xml", styles.ToString)
+
+		Dim meta As StringBuilder
+		meta.Initialize
+		meta.Append("<?xml version=""1.0"" encoding=""UTF-8""?>").Append(CRLF)
+		meta.Append("<office:document-meta xmlns:office=""urn:oasis:names:tc:opendocument:xmlns:office:1.0"" office:version=""1.2"">").Append(CRLF)
+		meta.Append("  <office:meta/>").Append(CRLF)
+		meta.Append("</office:document-meta>").Append(CRLF)
+		File.WriteString(tmp, "meta.xml", meta.ToString)
 
 		' zip: mimetype first and uncompressed, then the parts
 		Dim jo As JavaObject = Me

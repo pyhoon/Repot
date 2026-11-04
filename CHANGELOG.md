@@ -32,12 +32,14 @@ ODT and ODS export (M14). B4J 491 checks / 0 errors, B4A 346 checks /
 
 ### Fixed
 - ODS/ODT packages opened in Microsoft Excel reported "a problem with
-  some content" (recoverable). The package manifest's root file-entry
-  was missing `manifest:version="1.2"`, which ODF 1.2 consumers use to
-  select the schema version; Excel treated the document as pre-1.2.
-  The attribute is now written, the suite's zip probe asserts it, and
-  the XML declarations drop the non-standard `standalone="yes"` to
-  match known-good ODF writers.
+  some content" (recoverable). Two package-shape changes address it:
+  the manifest's root file-entry now carries `manifest:version="1.2"`
+  (which ODF 1.2 consumers use to select the schema version), and the
+  package now includes the spec-optional `styles.xml` and `meta.xml`
+  parts that every real producer (LibreOffice, Excel) writes — the
+  "LibreOffice-shaped package". The suite's zip probe asserts all of
+  it, and the XML declarations drop the non-standard
+  `standalone="yes"` to match known-good ODF writers.
 
 ### Known limitations
 - Cells are written as string cells, matching the XLSX writer's

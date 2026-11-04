@@ -138,9 +138,12 @@ the canvas is abstract. See
   All cells are written as string cells, matching the XLSX writer's
   inline-string behaviour; typed numeric/date cells are a known
   limitation. The manifest's root file-entry carries
-  `manifest:version="1.2"` — without it Excel's ODF importer treats
-  the document as pre-1.2 and reports a content problem on open
-  (found in first release testing; fixed in v1.5.0). Verification is
+  `manifest:version="1.2"` and the package includes the spec-optional
+  `styles.xml`/`meta.xml` parts (the "LibreOffice-shaped package") —
+  both target Excel's ODF importer, which reported a repair prompt on
+  the first release build (found in first release testing; package
+  fixes in v1.5.0; Excel verification is by the maintainer's copy of
+  Excel LTSC). Verification is
   structural (zip layout + XML well-formedness asserted in the suite);
   no ODF application is installed on the development machine, so
   "opens in LibreOffice" is unverified — reported as a Tier-2

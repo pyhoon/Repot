@@ -1267,6 +1267,10 @@ public static String checkOdf(String path, String expectedMime, String dumpPath)
                 return "manifest root entry missing manifest:version";
             ZipEntry content = zf.getEntry("content.xml");
             if (content == null) return "content.xml missing";
+            // the LibreOffice-shaped package: styles.xml and meta.xml are
+            // spec-optional but part of every real producer's package
+            if (zf.getEntry("styles.xml") == null) return "styles.xml missing";
+            if (zf.getEntry("meta.xml") == null) return "meta.xml missing";
             // well-formedness: parse it; also dump it for B4X-level asserts
             InputStream cin = zf.getInputStream(content);
             ByteArrayOutputStream cbos = new ByteArrayOutputStream();
