@@ -1139,48 +1139,78 @@ Private Sub TestOfficeExport
 
 	Dim diags As ReportDiagnostics
 	diags.Initialize
-	Dim docx As ReportDocxExporter
-	docx.Initialize(def, binder, diags)
-	Dim docxPath As String = File.Combine(File.DirApp, "test-items.docx")
-	Check(docx.Export("Items", docxPath), "docx export succeeds")
-	Check(File.Exists(File.DirApp, "test-items.docx"), "docx file exists")
+	'The office exports overwrite their output on every run; when a
+	'previous output is still open in Excel/Word the zip write dies with
+	'a confusing FileNotFoundException. Remove stale outputs up front and
+	'report a lock clearly instead.
+	If OutputWritable("test-items.docx") Then
+		Dim docx As ReportDocxExporter
+		docx.Initialize(def, binder, diags)
+		Dim docxPath As String = File.Combine(File.DirApp, "test-items.docx")
+		Check(docx.Export("Items", docxPath), "docx export succeeds")
+		Check(File.Exists(File.DirApp, "test-items.docx"), "docx file exists")
+	End If
 
-	Dim xlsx As ReportXlsxExporter
-	xlsx.Initialize(def, binder, diags)
-	Dim xlsxPath As String = File.Combine(File.DirApp, "test-items.xlsx")
-	Check(xlsx.Export("Items", xlsxPath), "xlsx export succeeds")
-	Check(File.Exists(File.DirApp, "test-items.xlsx"), "xlsx file exists")
+	If OutputWritable("test-items.xlsx") Then
+		Dim xlsx As ReportXlsxExporter
+		xlsx.Initialize(def, binder, diags)
+		Dim xlsxPath As String = File.Combine(File.DirApp, "test-items.xlsx")
+		Check(xlsx.Export("Items", xlsxPath), "xlsx export succeeds")
+		Check(File.Exists(File.DirApp, "test-items.xlsx"), "xlsx file exists")
+	End If
 
 	'ODT/ODS (v1.5): same dataset through the ODF writers. The zip
 	'structure probe asserts the ODF package rules: mimetype first and
 	'uncompressed, manifest correct, content.xml well-formed with the
 	'expected table structure.
-	Dim odt As ReportOdtExporter
-	odt.Initialize(def, binder, diags)
-	Dim odtPath As String = File.Combine(File.DirApp, "test-items.odt")
-	Check(odt.Export("Items", odtPath), "odt export succeeds")
-	Check(File.Exists(File.DirApp, "test-items.odt"), "odt file exists")
-	Dim odtProblem As String = CheckOdfPackage(odtPath, "application/vnd.oasis.opendocument.text", File.Combine(File.DirApp, "test-items-odt-content.txt"))
-	Check(odtProblem = "", "odt package structure: " & odtProblem)
-	If File.Exists(File.DirApp, "test-items-odt-content.txt") Then
-		Dim odtContent As String = File.ReadString(File.DirApp, "test-items-odt-content.txt")
-		Check(odtContent.IndexOf("table:table") >= 0, "odt content has a table")
-		Check(odtContent.IndexOf("text:p") >= 0, "odt content has paragraphs")
-		Check(odtContent.IndexOf("office:text") >= 0, "odt content is a text body")
+	If OutputWritable("test-items.odt") Then
+		Dim odt As ReportOdtExporter
+		odt.Initialize(def, binder, diags)
+		Dim odtPath As String = File.Combine(File.DirApp, "test-items.odt")
+		Check(odt.Export("Items", odtPath), "odt export succeeds")
+		Check(File.Exists(File.DirApp, "test-items.odt"), "odt file exists")
+		Dim odtProblem As String = CheckOdfPackage(odtPath, "application/vnd.oasis.opendocument.text", File.Combine(File.DirApp, "test-items-odt-content.txt"))
+		Check(odtProblem = "", "odt package structure: " & odtProblem)
+		If File.Exists(File.DirApp, "test-items-odt-content.txt") Then
+			Dim odtContent As String = File.ReadString(File.DirApp, "test-items-odt-content.txt")
+			Check(odtContent.IndexOf("table:table") >= 0, "odt content has a table")
+			Check(odtContent.IndexOf("text:p") >= 0, "odt content has paragraphs")
+			Check(odtContent.IndexOf("office:text") >= 0, "odt content is a text body")
+		End If
 	End If
 
-	Dim ods As ReportOdsExporter
-	ods.Initialize(def, binder, diags)
-	Dim odsPath As String = File.Combine(File.DirApp, "test-items.ods")
-	Check(ods.Export("Items", odsPath), "ods export succeeds")
-	Check(File.Exists(File.DirApp, "test-items.ods"), "ods file exists")
-	Dim odsProblem As String = CheckOdfPackage(odsPath, "application/vnd.oasis.opendocument.spreadsheet", File.Combine(File.DirApp, "test-items-ods-content.txt"))
-	Check(odsProblem = "", "ods package structure: " & odsProblem)
-	If File.Exists(File.DirApp, "test-items-ods-content.txt") Then
-		Dim odsContent As String = File.ReadString(File.DirApp, "test-items-ods-content.txt")
-		Check(odsContent.IndexOf("office:spreadsheet") >= 0, "ods content is a spreadsheet body")
-		Check(odsContent.IndexOf("table:table-cell") >= 0, "ods content has cells")
+	If OutputWritable("test-items.ods") Then
+		Dim ods As ReportOdsExporter
+		ods.Initialize(def, binder, diags)
+		Dim odsPath As String = File.Combine(File.DirApp, "test-items.ods")
+		Check(ods.Export("Items", odsPath), "ods export succeeds")
+		Check(File.Exists(File.DirApp, "test-items.ods"), "ods file exists")
+		Dim odsProblem As String = CheckOdfPackage(odsPath, "application/vnd.oasis.opendocument.spreadsheet", File.Combine(File.DirApp, "test-items-ods-content.txt"))
+		Check(odsProblem = "", "ods package structure: " & odsProblem)
+		If File.Exists(File.DirApp, "test-items-ods-content.txt") Then
+			Dim odsContent As String = File.ReadString(File.DirApp, "test-items-ods-content.txt")
+			Check(odsContent.IndexOf("office:spreadsheet") >= 0, "ods content is a spreadsheet body")
+			Check(odsContent.IndexOf("table:table-cell") >= 0, "ods content has cells")
+		End If
 	End If
+End Sub
+
+'Removes a stale office-export output so the export can overwrite it.
+'When the file is locked (still open in Excel/Word) it records a clear
+'failure and returns False so the export is skipped instead of dying
+'with an opaque FileNotFoundException inside the zip writer.
+Private Sub OutputWritable (Name As String) As Boolean
+	If File.Exists(File.DirApp, Name) = False Then Return True
+	Try
+		File.Delete(File.DirApp, Name)
+	Catch
+		'delete can throw or return silently depending on platform
+	End Try
+	If File.Exists(File.DirApp, Name) Then
+		Check(False, Name & " is locked - close it in Excel/Word and re-run")
+		Return False
+	End If
+	Return True
 End Sub
 
 'Reads an ODF package and validates its structure. Returns "" when the
