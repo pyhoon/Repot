@@ -16,7 +16,7 @@ and what is explicitly best-effort. It is the contract behind the phrase
 | Layout and pagination | 0.1 | 0.1 | 1.0 | -- |
 | PDF export | 0.1 | 0.1 | 1.0 (Printing library, vector canvas, sync, verified) | -- |
 | HTML export (layout mode) | 0.1 | 0.1 | 1.0 | n/a |
-| HTML export (flow mode) | 0.2 | 0.2 | 1.0 | n/a |
+| HTML export (flow mode) | -- (not implemented) | -- (not implemented) | -- (not implemented) | n/a |
 | CSV / JSON export | 0.1 | 0.1 | 1.0 | -- |
 | XML export | 0.2 | 0.2 | 1.0 | -- |
 | DOCX export | 1.0 | 1.0 | 1.0 (verified) | -- |

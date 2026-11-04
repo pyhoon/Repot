@@ -88,7 +88,7 @@ support.
 | Format | Intended use | Status |
 |--------|--------------|--------|
 | PDF | Fixed-layout, print-ready reports | shipped (B4J PDFBox with embedded fonts, RTL text and a mixed-script font set; B4A vector canvas); introspected via PDFBox / `PdfRenderer` |
-| HTML | Preview, web reports, printing | shipped (layout and flow modes) |
+| HTML | Preview, web reports, printing | shipped (fixed-layout: absolutely positioned pages with print CSS; responsive *flow* mode is not implemented) |
 | CSV | Flat tabular data | shipped |
 | JSON | Data interchange and diagnostics | shipped |
 | XML | Structured data interchange | shipped |
@@ -102,7 +102,7 @@ support.
 | Platform | Scope |
 |----------|-------|
 | B4J desktop | Generation, HTML preview, PDF/HTML/data output, print (system viewer), PDF text extraction |
-| B4J server | Headless generation to files or memory; no UI or JavaFX requirement (`examples/server`) |
+| B4J server | Headless generation to files; no UI or JavaFX requirement (`examples/server`); `ReportHtmlExporter.ToHtml` returns a document string |
 | B4A | Same engine; on-device vector PDF export, PDF page-count verification, system print dialog, SAF "Save As" |
 | Browser | Consumes generated HTML; optional lightweight viewer |
 | B4i | Not targeted for 1.0. The architecture should not preclude it, but no claim is made. |

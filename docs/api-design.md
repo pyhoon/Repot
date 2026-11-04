@@ -141,11 +141,13 @@ Planned classes: `ReportPdf`, `ReportHtml`, `ReportCsv`,
 `ReportJson`, `ReportXml`, `ReportDocx`, later
 `ReportXlsx`.
 
-Two HTML modes are selected by option, not by class:
+Two HTML modes are selected by option, not by class. Only the
+fixed-layout mode is implemented: the flow mode below is a design
+proposal and was never built.
 
 ```vb
-Html.SetOption("mode", "layout")   ' faithful, absolutely positioned
-Html.SetOption("mode", "flow")     ' semantic, responsive (v0.2)
+Html.SetOption("mode", "layout")   ' faithful, absolutely positioned (implemented)
+Html.SetOption("mode", "flow")     ' semantic, responsive (proposed, not implemented)
 ```
 
 ## 5. Data providers

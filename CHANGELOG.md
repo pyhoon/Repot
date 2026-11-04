@@ -220,7 +220,7 @@ First release. B4J full feature set; B4A engine suite verified
 - Pagination with render-document emission and two-pass page numbering
   (M3).
 - PDF export via Apache PDFBox 3.0.8 (B4J) (M3).
-- HTML export in layout and flow modes (M4).
+- HTML export in fixed-layout mode (M4).
 - CSV, JSON, XML data exporters (M5).
 - DOCX and XLSX exporters via a minimal OOXML writer (M7).
 - B4A adapter: shared modules with `#If B4A` branches, measurement via
