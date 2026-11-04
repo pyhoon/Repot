@@ -126,7 +126,9 @@ the canvas is abstract. See
   both. The `multilang` fixture now registers CJK subset fonts (see
   `fixtures/_fonts/README.md`) plus the Arabic and Hebrew pairs, and
   the suite asserts that every script row extracts from the PDF with
-  zero `?` substitutions. The subsets cover only the fixture's
+  zero `?` substitutions — including a Traditional Chinese row
+  (繁體中文/學習，國字) drawn from the SC font's unified Han
+  coverage. The subsets cover only the fixture's
   characters; full CJK deployments ship their own complete font.
   Caveat: the exporter loads single-file TTF/OTF fonts
   (`PDType0Font.load`); TrueType collections (`.ttc`) are not read.

@@ -29,7 +29,8 @@ NotoSansSC-Subset-Regular.ttf
   (ofl/notosanssc), subsetted to the multilang fixture's characters.
   Used by: multilang fixture (registered via ReportPdfExporter.AddEmbeddedFont)
   Notes: covers exactly the codepoints used by the multilang fixture
-  (Japanese kana and kanji, Chinese han, the fullwidth comma, plus the
+  (Japanese kana and kanji, Chinese han in both Simplified and
+  Traditional forms, the fullwidth comma, plus the
   Latin/Greek/Cyrillic the source font carries) - NOT a general CJK font.
   A report that needs full CJK coverage ships its own complete font.
   The variable-font tables (gvar, HVAR, avar, fvar, STAT) were stripped

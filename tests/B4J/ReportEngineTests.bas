@@ -789,6 +789,7 @@ Private Sub TestMultilangPdf
 		Check(extracted.Length > 0, "multilang pdf extracts text")
 		Check(CountScript(extracted, 0x3040, 0x30FF) > 0, "multilang pdf extracts kana")
 		Check(CountScript(extracted, 0x4E00, 0x9FFF) > 0, "multilang pdf extracts han")
+		Check(extracted.IndexOf(Chr(0x7E41) & Chr(0x9AD4)) >= 0, "multilang pdf extracts traditional han")
 		Check(CountScript(extracted, 0xAC00, 0xD7AF) > 0, "multilang pdf extracts hangul")
 		Check(CountScript(extracted, 0x0370, 0x03FF) > 0, "multilang pdf extracts greek")
 		Check(CountScript(extracted, 0x0400, 0x04FF) > 0, "multilang pdf extracts cyrillic")

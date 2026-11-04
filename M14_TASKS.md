@@ -57,7 +57,8 @@ accept DOCX.
   fontbox `TTFSubsetter` + a variable-table strip
   (`tools/font-subset/`); the multilang test now registers the CJK
   subsets plus the Arabic/Hebrew pairs and asserts every script row
-  extracts with zero `?`. B4J 499 checks / 0 errors.
+  extracts with zero `?`, including a Traditional Chinese row drawn
+  from the SC font's unified Han coverage. B4J 500 checks / 0 errors.
 
 ## Task 2: ReportOdtExporter — COMPLETE
 - [x] Same class shape as `ReportDocxExporter`; diagnostics on missing

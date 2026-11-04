@@ -25,8 +25,9 @@ ODT and ODS export (M14). B4J 491 checks / 0 errors, B4A 346 checks /
   Noto Sans SC/KR subset fonts (fixture-only, OFL; generated with
   fontbox's `TTFSubsetter`, variable-font tables stripped — see
   `fixtures/_fonts/README.md` and `tools/font-subset/`) plus the Arabic
-  and Hebrew pairs, and the suite asserts every script row — kana, han,
-  hangul, Greek, Cyrillic, Arabic, Hebrew — extracts with zero `?`
+  and Hebrew pairs, and the suite asserts every script row — kana, han
+  (Simplified and Traditional), hangul, Greek, Cyrillic, Arabic, Hebrew
+  — extracts with zero `?`
   substitutions. CJK support requires the host to register a covering
   font; the mechanism itself is script-agnostic.
 

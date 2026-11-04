@@ -5,6 +5,7 @@
     { "Script": "Cyrillic", "Greeting": "Русский", "Note": "Привет, мир" },
     { "Script": "Japanese", "Greeting": "日本語", "Note": "こんにちは世界" },
     { "Script": "Chinese", "Greeting": "中文", "Note": "你好，世界" },
+    { "Script": "Chinese (Trad.)", "Greeting": "繁體中文", "Note": "學習，國字" },
     { "Script": "Arabic", "Greeting": "العربية", "Note": "مرحبا بالعالم" },
     { "Script": "Hebrew", "Greeting": "עברית", "Note": "שלום עולם" },
     { "Script": "Korean", "Greeting": "한국어", "Note": "안녕하세요 세계" }

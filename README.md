@@ -19,7 +19,7 @@ renders to HTML for browsers.
 > documents. Office export covers DOCX, XLSX, ODT and ODS. Tagged
 > `v1.5.0`.**
 >
-> The full engine suite runs on both platforms: **B4J 499 checks,
+> The full engine suite runs on both platforms: **B4J 500 checks,
 > B4A 346 checks, 0 errors on both** (emulator-5554, API 36).
 > Exporters (PDF, HTML, CSV, JSON, XML, DOCX, XLSX, ODT, ODS) shipped in
 > M3–M7 and M14 and run on both platforms. `tools/ci.ps1 -RunEmulator`
