@@ -23,6 +23,9 @@ and what is explicitly best-effort. It is the contract behind the phrase
 | XLSX export | 1.x | 1.x | 1.0 (verified) | -- |
 | Native preview | host WebView (`ReportHtmlExporter.ToHtml`) | n/a | host WebView (`ToHtml`) | n/a |
 | Print | opens the PDF in the system viewer | n/a | 1.0 (system print dialog, `ReportPrint`) | browser |
+| PDF introspection (page count) | 1.0 (PDFBox) | n/a | 1.2 (`PdfRenderer`, `ReportPdfIntrospection`) | -- |
+| Text extraction from PDF | 1.0 (PDFBox) | n/a | -- (Android `PdfRenderer` has no text API) | -- |
+| SaveAs (user-chosen location) | -- | n/a | 1.2 (SAF `CreateDocument`, `ReportSaveAs`) | -- |
 | B4i | -- | -- | -- | -- |
 
 B4i is not claimed. Nothing in the design forbids it, but no support is

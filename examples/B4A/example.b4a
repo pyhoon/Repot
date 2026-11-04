@@ -28,37 +28,10 @@ Version=14.2
 Sub Process_Globals
 End Sub
 
-Sub Activity_Create(FirstTime As Boolean)
-	lbl.Initialize("")
-	lbl.TextSize = 14
-	Activity.AddView(lbl, 10dip, 10dip, 100%x - 20dip, 100%y - 20dip)
-	btnPrint.Initialize("btnPrint")
-	btnPrint.Text = "Print PDF"
-	Activity.AddView(btnPrint, 10dip, 100%y - 60dip, 100%x - 20dip, 50dip)
-	RunExample
-End Sub
-
-Sub Activity_Result (RequestCode As Int, ResultCode As Int, Data As Object)
-	' Handle SAF CreateDocument intent for SaveAsPdf
-	If RequestCode = 1 And ResultCode = Activity.RESULT_OK Then
-		If Data Is Map Then
-			Dim uri As String = Data.Get("result")
-			If uri <> "" Then
-				' Copy PDF to the selected URI
-				Dim success As Boolean = CopyPdfToSaveAsUri(uri)
-				If success Then
-					Log("SaveAs: PDF saved to " & uri)
-				Else
-					Log("SaveAs: failed to save PDF to " & uri)
-				End If
-			End If
-		End If
-	End If
-End Sub
-
 Sub Globals
 	Private lbl As Label
 	Private btnPrint As Button
+	Private btnSave As Button
 	Private mReport As Repot
 	Private mOutDir As String
 End Sub
@@ -66,16 +39,41 @@ End Sub
 Sub Activity_Create(FirstTime As Boolean)
 	lbl.Initialize("")
 	lbl.TextSize = 14
-	Activity.AddView(lbl, 10dip, 10dip, 100%x - 20dip, 100%y - 80dip)
+	Activity.AddView(lbl, 10dip, 10dip, 100%x - 20dip, 100%y - 130dip)
+	btnSave.Initialize("btnSave")
+	btnSave.Text = "Save As PDF"
+	Activity.AddView(btnSave, 10dip, 100%y - 110dip, 100%x - 20dip, 50dip)
 	btnPrint.Initialize("btnPrint")
 	btnPrint.Text = "Print PDF"
 	Activity.AddView(btnPrint, 10dip, 100%y - 60dip, 100%x - 20dip, 50dip)
 	RunExample
 End Sub
 
+Sub Activity_Result (RequestCode As Int, ResultCode As Int, Data As Object)
+	'SAF CreateDocument result: pick the chosen location and copy the PDF.
+	Dim uri As String = ReportSaveAs.HandleActivityResult(RequestCode, ResultCode, Data)
+	If uri <> "" Then
+		If ReportSaveAs.CopyFileToUri(mOutDir, "invoice.pdf", uri) Then
+			Log("SaveAs: PDF saved to " & uri)
+			lbl.Text = "PDF saved to user-chosen location"
+		Else
+			Log("SaveAs: failed to save PDF to " & uri)
+		End If
+	End If
+End Sub
+
 Sub btnPrint_Click
 	If mReport = Null Then Return
 	Log("print: " & mReport.PrintPdf(mOutDir, "invoice.pdf", "Repot invoice"))
+End Sub
+
+Sub btnSave_Click
+	If mReport = Null Then Return
+	Dim i As Intent = mReport.SaveAsPdfIntent("application/pdf", "invoice.pdf")
+	If i <> Null Then
+		ReportSaveAs.StartForResult(i, ReportSaveAs.DefaultRequestCode)
+		Log("SaveAs: SAF picker opened")
+	End If
 End Sub
 
 Sub RunExample
@@ -127,27 +125,6 @@ Sub RunExample
 	Else
 		lbl.Text = "PDF export failed"
 	End If
-End Sub
-
-Private Sub CopyPdfToSaveAsUri (Uri As String) As Boolean
-	'Copy the last exported PDF to the given content URI (SAF result).
-	'Read the PDF from the last export path and write to the new URI.
-	'For simplicity, this reads from the most recent PDF export location.
-	#If B4A
-	'Get the last exported PDF path - in a real app, track this in a global
-	'For now, use the internal fixtures folder as a placeholder
-	Dim pdfPath As String = File.Combine(File.DirInternal, "fixtures", "invoice-basic", "invoice.pdf")
-	If File.Exists(pdfPath) Then
-		'Create a new file in the SAF URI location
-		'Note: Full SAF URI file write requires FileProvider or direct URI handling
-		'This is a simplified implementation
-		Dim dstDir As String = File.GetParent(pdfPath)
-		Dim dstFile As String = File.Combine(dstDir, "invoice_copy.pdf")
-		File.Copy(pdfPath, dstFile, True)
-		Return True
-	End If
-	#End If
-	Return False
 End Sub
 
 Private Sub CopyAssets

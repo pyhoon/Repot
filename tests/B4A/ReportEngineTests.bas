@@ -707,6 +707,7 @@ Private Sub TestPdfExport
 	If File.Exists(outDir, "test-invoice.pdf") Then
 		#If B4A
 		Check(File.Size(outDir, "test-invoice.pdf") > 0, "invoice pdf is non-empty")
+		Check(ReportPdfIntrospection.GetPdfPageCount(outPath) = 1, "invoice pdf introspection counts one page")
 		#Else
 		Check(pdf.PageCount(outPath) = 1, "invoice pdf has one page")
 		Dim txt As String = pdf.ExtractText(outPath)
@@ -761,6 +762,7 @@ Private Sub TestPdfExport
 	If File.Exists(loutDir, "test-listing.pdf") Then
 		#If B4A
 		Check(File.Size(loutDir, "test-listing.pdf") > 0, "listing pdf is non-empty")
+		Check(ReportPdfIntrospection.GetPdfPageCount(loutPath) >= 2, "listing pdf introspection counts the pages")
 		#Else
 		Check(lpdf.PageCount(loutPath) = ldoc.PageCount, "listing pdf page count matches layout")
 		#End If

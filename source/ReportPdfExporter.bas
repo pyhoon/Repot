@@ -104,18 +104,29 @@ Public Sub PageCount (Path As String) As Int
 	#If B4A
 	Return 0
 	#End If
-	Dim jo As JavaObject
-	jo.InitializeStatic("b4j.example.reportpdfexporter")
-	Return jo.RunMethod("pageCount", Array(Path))
+	Try
+		Dim jo As JavaObject
+		jo.InitializeStatic("b4j.example.reportpdfexporter")
+		Return jo.RunMethod("pageCount", Array(Path))
+	Catch
+		'Introspection returns 0 for unreadable or missing files; the
+		'export path reports its own diagnostics separately.
+		Return 0
+	End Try
 End Sub
 
 Public Sub ExtractText (Path As String) As String
 	#If B4A
 	Return ""
 	#End If
-	Dim jo As JavaObject
-	jo.InitializeStatic("b4j.example.reportpdfexporter")
-	Return jo.RunMethod("extractText", Array(Path))
+	Try
+		Dim jo As JavaObject
+		jo.InitializeStatic("b4j.example.reportpdfexporter")
+		Return jo.RunMethod("extractText", Array(Path))
+	Catch
+		'See PageCount; unreadable files yield "".
+		Return ""
+	End Try
 End Sub
 
 #If B4J

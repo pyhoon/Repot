@@ -244,7 +244,7 @@ module copy (`tests/B4A/ReportEngineTests.bas`, compiled with a
 `tests/B4A/Files/fixtures/` and copied to internal storage at runtime,
 because asset folders cannot be listed or read directly.
 
-Capability matrix (2026-11-02, B4ABuilder v14.20, emulator-5554,
+Capability matrix (2026-11-04, B4ABuilder v14.20, emulator-5554,
 API 36):
 
 | Capability | B4J | B4A |
@@ -252,15 +252,18 @@ API 36):
 | Loading, validation, parameters, binding | pass | pass |
 | Layout + pagination (HTML/CSV/JSON/XML exports) | pass | pass |
 | DOCX / XLSX export | pass | pass |
-| PDF export, extracted text, goldens | pass | not applicable (`E-PDF-001` guard) |
+| PDF export, extracted text, goldens | pass | export pass; text extraction not possible (`PdfRenderer` has no text API) |
+| PDF introspection (page count) | pass (PDFBox, via facade `GetPdfPageCount`) | pass (`ReportPdfIntrospection`, `PdfRenderer`) |
 | Layout goldens (AWT baselines) | pass | not applicable |
 | Fixture-level validation | pass | not applicable |
 
 This accounts for the check-count delta between platforms:
-**B4J 407 checks, B4A 325 checks, 0 errors on both.** PDF remains
-B4J-only for v1.x; on B4A the HTML print path is the documented
-rendering route, and `ReportPdfExporter.Export` returns `False` with
-diagnostic `E-PDF-001`.
+**B4J 411 checks, B4A 327 checks, 0 errors on both** (v1.2.0: B4A gained
+the two introspection checks on exported fixture PDFs; B4J gained four
+facade bridging checks). PDF rendering on B4A goes through the
+`Printing` library vector canvas (M10); introspection reads the file
+back through `android.graphics.pdf.PdfRenderer`, and the missing-file
+contract (0 / `""`) is fail-silent on both platforms.
 
 Emulator workflow:
 
@@ -269,7 +272,7 @@ build:   cd tests\B4A; "C:\Program Files\B4X\B4A\B4ABuilder.exe" -task=Build -ob
 install: C:\android\sdk\platform-tools\adb.exe install -r Objects\tests.apk
 restart: adb shell am force-stop b4a.example; adb logcat -c
 run:     adb shell am start -n b4a.example/.main
-read:    adb logcat -d   →  PASS engine (325 checks), errors=0
+read:    adb logcat -d   →  PASS engine (327 checks), errors=0
 ```
 
 The suite's pass/fail status is written to `fixture-check.txt` in

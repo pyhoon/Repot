@@ -69,6 +69,14 @@ Implemented in v1.1:
 | `PrintPdf(Dir, File, Job)` | B4A system print dialog; B4J opens the viewer |
 | `PrintHtml(Job)` | B4A prints the rendered HTML |
 
+Implemented in v1.2 (PDF verification and saving):
+
+| Method | Purpose |
+|--------|---------|
+| `GetPdfPageCount(Path) As Int` | Pages in an exported PDF (B4J PDFBox, B4A `PdfRenderer`); 0 when unreadable |
+| `ExtractPdfText(Path) As String` | PDFBox text extraction on B4J; B4A returns `""` (Android's `PdfRenderer` has no text API) |
+| `SaveAsPdfIntent(Mime, Title) As Object` | B4A: SAF `CreateDocument` intent for the host to launch; B4J: `Null` (use the export path directly) |
+
 Planned:
 
 | Method | Purpose |

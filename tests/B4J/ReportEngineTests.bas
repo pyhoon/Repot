@@ -802,6 +802,12 @@ Private Sub TestFacade
 	Check(r.ExportHtml(File.Combine(outDir, "facade.html")), "facade exports html")
 	Check(r.ExportPdf(File.Combine(outDir, "facade.pdf")), "facade exports pdf")
 	Check(r.ExportCsv(File.Combine(outDir, "facade.csv")), "facade exports csv")
+	Dim pdfCount As Int = r.GetPdfPageCount(File.Combine(outDir, "facade.pdf"))
+	Check(pdfCount = 1, "facade counts pdf pages (got " & pdfCount & ")")
+	Dim pdfText As String = r.ExtractPdfText(File.Combine(outDir, "facade.pdf"))
+	Check(pdfText.IndexOf("INVOICE") >= 0, "facade extracts pdf text")
+	Check(r.ExtractPdfText(File.Combine(outDir, "missing.pdf")) = "", "facade extract on missing file is empty")
+	Check(r.GetPdfPageCount(File.Combine(outDir, "missing.pdf")) = 0, "facade page count on missing file is zero")
 End Sub
 
 Private Sub TestHtmlExport

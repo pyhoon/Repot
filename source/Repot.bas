@@ -146,41 +146,45 @@ Public Sub ExportPdf (OutputPath As String) As Boolean
 	Return ex.Export(Result.RenderDocument, OutputPath)
 End Sub
 
-'SaveAs: open the system file picker and copy the PDF to the user-chosen location.
-'Returns the new path, or empty string if cancelled.
-'Must be called from Activity_Result (B4A) or has no effect (B4J).
-Public Sub SaveAsPdf (OriginalPath As String = "") As String
+'PDF introspection on an exported file. Returns the page count (0 when
+'the file cannot be read). B4A walks the file with PdfRenderer; B4J uses
+'the PDFBox static helper in ReportPdfExporter.
+Public Sub GetPdfPageCount (Path As String) As Int
 	#If B4A
-	'TODO: B4A activity should start an Android SAF CreateDocument intent:
-	'  Dim intent As Intent
-	'  intent.Initialize("android.intent.action.CreateDocument", "")
-	'  intent.PutExtra("android.intent.extra.MIME_TYPE", "application/pdf")
-	'  intent.PutExtra("android.intent.extra.TITLE", "report.pdf")
-	'  Activity.StartActivityForResult(intent, 1)
-	'The Activity_Result sub should then call SaveAsPdf_Result(RequestCode, ResultCode, Data)
-	Log("SaveAs: B4A - implement SAF CreateDocument intent in Activity_Result")
-	Return ""
+	Return ReportPdfIntrospection.GetPdfPageCount(Path)
 	#Else If B4J
-	'B4J: return the original path (the user can use the IDE file save dialog)
-	Log("SaveAs: B4J - use the existing path or IDE save dialog")
-	Return OriginalPath
+	Dim ex As ReportPdfExporter
+	ex.Initialize(Diagnostics)
+	Return ex.PageCount(Path)
 	#End If
+	Return 0
 End Sub
 
-'B4A activity result handler for the SaveAs file picker.
-'Must be called from Activity_Result sub.
-'The B4A activity should implement the SAF CreateDocument intent and
-'call SaveAsPdf_Result from its Activity_Result event. This sub is not
-'included in the engine module because the Activity object is not available
-'in code modules. The B4A activity code should be:
-'
-'Sub Activity_Result (RequestCode As Int, ResultCode As Int, IntentData As Object)
-'  If RequestCode = 1 And ResultCode = Activity.RESULT_OK Then
-'    If IntentData Is Map Then
-'      SaveAsPdf_Result(RequestCode, ResultCode, IntentData)
-'    End If
-'  End If
-'End Sub
+'Extracts text from an exported PDF. B4J-biased operation through PDFBox;
+'android's PdfRenderer has no text API, so B4A returns "".
+Public Sub ExtractPdfText (Path As String) As String
+	#If B4A
+	Return ""
+	#Else If B4J
+	Dim ex As ReportPdfExporter
+	ex.Initialize(Diagnostics)
+	Return ex.ExtractText(Path)
+	#End If
+	Return ""
+End Sub
+
+'SaveAs: returns the SAF CreateDocument intent the host must launch for a
+'result, or the chosen path directly on B4J (Null when the host must act,
+'"" when the caller passed an empty title, "" when the launch code belongs
+'to the host). See ReportSaveAs for the full wiring.
+Public Sub SaveAsPdfIntent (Mime As String, Title As String) As Object
+	#If B4A
+	Return ReportSaveAs.CreateDocumentIntent(Mime, Title)
+	#Else If B4J
+	Log("SaveAs: B4J has no SAF; use the existing OutputPath or an IDE save dialog")
+	Return Null
+	#End If
+End Sub
 
 Public Sub ExportCsv (OutputPath As String) As Boolean
 	Dim ex As ReportDataExporter

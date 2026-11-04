@@ -1,4 +1,4 @@
-﻿AppType=StandardJava
+AppType=StandardJava
 Build1=Default,b4j.example
 Group=Default Group
 Library1=jcore
@@ -50,13 +50,15 @@ Module48=|relative|..\..\source\ReportVersion
 Module49=|relative|..\..\source\ReportXlsxExporter
 Module5=|relative|..\..\source\ReportBandLayout
 Module50=|relative|..\..\source\Repot
+Module51=|relative|..\..\source\ReportPdfIntrospection
+Module52=|relative|..\..\source\ReportSaveAs
 Module6=|relative|..\..\source\ReportDataBinder
 Module7=|relative|..\..\source\ReportDataExporter
 Module8=|relative|..\..\source\ReportDataSet
 Module9=|relative|..\..\source\ReportDataSetDef
 NumberOfFiles=0
 NumberOfLibraries=3
-NumberOfModules=50
+NumberOfModules=52
 Version=10.7
 @EndOfDesignText@
 'Repot fixture checker and engine unit-test harness.

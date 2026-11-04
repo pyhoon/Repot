@@ -1,4 +1,4 @@
-﻿Build1=Default,b4a.example
+Build1=Default,b4a.example
 Group=Default Group
 Library1=core
 Library2=javaobject
@@ -53,13 +53,15 @@ Module49=|relative|..\..\source\ReportXlsxExporter
 Module5=|relative|..\..\source\ReportBandLayout
 Module50=|relative|..\..\source\Repot
 Module51=|relative|..\..\source\Utility
+Module52=|relative|..\..\source\ReportPdfIntrospection
+Module53=|relative|..\..\source\ReportSaveAs
 Module6=|relative|..\..\source\ReportDataBinder
 Module7=|relative|..\..\source\ReportDataExporter
 Module8=|relative|..\..\source\ReportDataSet
 Module9=|relative|..\..\source\ReportDataSetDef
 NumberOfFiles=0
 NumberOfLibraries=5
-NumberOfModules=51
+NumberOfModules=53
 Version=14.2
 @EndOfDesignText@
 #Region  Project Attributes 

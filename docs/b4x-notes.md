@@ -170,6 +170,45 @@ cd <project folder>
   `am start -n b4a.example/.main` → wait for the run → `logcat -d` and
   filter for the PASSED/FAILED summary lines.
 
+## B4A facts verified in M11 (PdfRenderer and SAF)
+
+- **`android.graphics.pdf.PdfRenderer` reads exported PDFs (API 16+).**
+  Open path: `ParcelFileDescriptor.open(File, MODE_READ_ONLY)` →
+  `PdfRenderer(fd)` → `getPageCount()`. All reachable through
+  `JavaObject.InitializeStatic` / `InitializeNewInstance`; no inline
+  Java needed. `MODE_READ_ONLY` is `0x10000000` (268435456). Both the
+  renderer and the descriptor must be `close()`d, and the file must not
+  be open for writing elsewhere while the renderer holds it.
+- **`PdfRenderer` has no text API.** It renders pages only. PDF text
+  extraction therefore stays B4J-only (PDFBox static helpers in
+  `ReportPdfExporter`); the facade `ExtractPdfText` returns `""` on B4A
+  by contract, without an error.
+- **Introspection is fail-silent by contract.** A missing or invalid
+  file yields 0 pages / `""` — introspection is a verification helper,
+  not the validation channel (`ReportDiagnostics` remains that). Both
+  B4A reflection and the PDFBox statics are wrapped in `Try/Catch` for
+  this (PDFBox throws its own exception on a missing file).
+- **SAF `CreateDocument` needs no permissions.** Action string
+  `"android.intent.action.CREATE_DOCUMENT"` (API 19+), mime via
+  `Intent.SetType`, suggested name via
+  `PutExtra("android.intent.extra.TITLE", name)`, and
+  `AddCategory("android.intent.category.OPENABLE")`.
+- **`StartActivityForResult` is not a B4A core keyword.** The verified
+  launch is reflection: `JavaObject.InitializeContext` then
+  `RunMethod("startActivityForResult", Array(intent, code))` — that is
+  the Activity's own method. `Activity_Result(RequestCode, ResultCode,
+  Data As Object)` receives an `Intent`; `Intent.GetData` is the chosen
+  `content://` Uri string. `RESULT_OK == -1`.
+- **Writing to the picked Uri:** `Context.getContentResolver` →
+  `Uri.parse(uri)` → `openOutputStream(parsed)` → `File.Copy2(
+  File.OpenInput(dir, name), stream)` → close the stream. No
+  `FileProvider` involved for the host's own exported file (FileProvider
+  is only needed for *sharing* with other apps, e.g. the M10 print path).
+- **B4J has no `Intent` type.** Shared-module signatures must take and
+  return `As Object` for intent values, with the B4A-side
+  `Dim intent As Intent = I` cast inside `#If B4A` (learned from an
+  `Intent`-typed signature failing the B4J BuildLibrary).
+
 
 - A module file is a `.bas` file next to the project file, listed as
   `ModuleN=Name`.
