@@ -1,6 +1,6 @@
 # Dependency Audit
 
-Last reviewed: 2026-11-02.
+Last reviewed: 2026-11-05.
 
 Policy: no dependency enters the repository until it has an entry here.
 Every entry records version, licence, platform support, size impact,
@@ -93,8 +93,8 @@ runtime or its jars inherits AGPL obligations. Do not copy from it.
 
 | Candidate | Licence | Android | Decision |
 |-----------|---------|---------|----------|
-| Own minimal OOXML writer (zip + XML) | n/a | yes | **preferred for DOCX/XLSX**; needs validation against Word and LibreOffice |
-| Own minimal ODF writer (zip + XML) | n/a | yes | **adopted for ODT/ODS (v1.5)**: same pattern as the OOXML writers — `mimetype` first entry uncompressed, manifest, content.xml; no ODF Toolkit |
+| Own minimal OOXML writer (zip + XML) | n/a | yes | **preferred for DOCX/XLSX**; validated against Word via Excel COM in `tools/verify-office.ps1` (cell types, `NumberFormat`, `=SUM(D2:D5) = 2449.95`). LibreOffice verification remains Tier 2 (not installed on dev machine).
+| Own minimal ODF writer (zip + XML) | n/a | yes | **adopted for ODT/ODS (v1.5/v1.7)**: same pattern as the OOXML writers — `mimetype` first entry uncompressed, manifest, content.xml; no ODF Toolkit. v1.7 (ADR 0011) adds typed cells (`office:value-type` float/date/boolean + `office:automatic-styles` data styles via `table:style-name`). LibreOffice verification remains Tier 2.
 | Apache POI | Apache-2.0 | poor | rejected for the engine; too heavy, Android-hostile |
 | docx4j | Apache-2.0 | no | rejected: JAXB and size |
 | ODF Toolkit (Apache) | Apache-2.0 | no | not adopted: the minimal ODF writer covers the dataset-table need; revisit only if full ODF styling is demanded |
@@ -132,6 +132,7 @@ export time. Fonts that forbid embedding are rejected with a diagnostic.
 | Tool | Purpose | Notes |
 |------|---------|-------|
 | Python + python-docx / openpyxl | independent verification of generated office files | test-time only |
+| `tools/verify-office.ps1` | Excel COM read-back: cell types, `NumberFormat`, `=SUM(D2:D5)` on a temp copy | Windows only; part of M16 verification (not shipped, not CI-gated) |
 | `qpdf` or `pdfinfo` | PDF structural validation | test-time only, optional |
 | Git, GitHub Actions or local runner | CI | no runtime dependency |
 
