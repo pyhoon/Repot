@@ -391,11 +391,12 @@ Private Sub ParseDataSets (dsList As List, def As ReportDefinition)
 				Diagnostics.AddError("E-TPL-072", "field entry must be an object", fpath)
 				Continue
 			End If
-			CheckKeys(fm, "|name|type|", fpath)
+			CheckKeys(fm, "|name|type|format|", fpath)
 			Dim f As ReportFieldDef
 			f.Initialize
 			f.Name = ReportJsonUtil.StringAt(fm, "name", "")
 			f.DataType = ReportJsonUtil.StringAt(fm, "type", "string").Trim.ToLowerCase
+			f.FormatMap = ReportJsonUtil.MapAt(fm, "format")
 			If f.Name.Length = 0 Then
 				Diagnostics.AddError("E-TPL-073", "field has no name", fpath)
 			Else If ds.FieldByName(f.Name) <> Null Then

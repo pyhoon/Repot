@@ -61,9 +61,10 @@ Module6=|relative|..\..\source\ReportDataBinder
 Module7=|relative|..\..\source\ReportDataExporter
 Module8=|relative|..\..\source\ReportDataSet
 Module9=|relative|..\..\source\ReportDataSetDef
+Module56=|relative|..\..\source\ReportSpreadsheet
 NumberOfFiles=0
 NumberOfLibraries=5
-NumberOfModules=55
+NumberOfModules=56
 Version=14.2
 @EndOfDesignText@
 #Region  Project Attributes 

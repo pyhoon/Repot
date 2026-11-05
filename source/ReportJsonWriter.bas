@@ -172,6 +172,7 @@ Private Sub DataSetsToList (DataSets As Map) As List
 			fm.Initialize
 			fm.Put("name", f.Name)
 			fm.Put("type", f.DataType)
+			If f.FormatMap.Size > 0 Then fm.Put("format", f.FormatMap)
 			fields.Add(fm)
 		Next
 		m.Put("fields", fields)

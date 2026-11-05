@@ -216,11 +216,22 @@ parameters fail the build with a diagnostic.
 |----------|-------|
 | `name` | Referenced by expressions and by `SetDataSource` in the host app |
 | `kind` | `rows` (default) or `single` |
-| `fields` | `name` and `type`; types are advisory and validated on bind |
+| `fields` | `name` and `type`; types are advisory and validated on bind. A field may also carry an optional `format` |
 | `aggregates` | `name`, `function` (`sum`, `count`, `min`, `max`, `avg`), optional `field` |
 
 A `single` dataset has exactly one record. `Customer.Name` is valid
 regardless of the current section.
+
+A field's optional `format` is display metadata for the data exporters
+(XLSX and ODS), using the same shape as the style and element `format`
+(`type`, `decimals`, `grouping`, `prefix`, `suffix`, `pattern`,
+`trueText`, `falseText`). Layout ignores it. When it is absent the
+exporters use defaults by declared type: `integer` → `0`,
+`decimal` → `0.00`, `date` → `yyyy-MM-dd`, `datetime` →
+`yyyy-MM-dd HH:mm:ss`, `boolean` and `string` → unformatted. Cell types
+themselves follow the bound value (see
+[ADR 0011](decisions/0011-spreadsheet-cell-types.md)), so a `decimal`
+field still exports as a number without a `format`.
 
 Aggregates are declared with `name`, `function` (`sum`, `count`, `min`,
 `max`, `avg`) and, for everything except `count`, a `field`. Scope is

@@ -215,6 +215,36 @@ Public Sub FormatNumber (Value As Double, Decimals As Int) As String
 	Return s
 End Sub
 
+'Inserts thousands separators in the integer part of an invariant
+'number string; the fraction part is returned unchanged. Shared by the
+'layout's number format and the spreadsheet exporters' display text.
+Public Sub AddGrouping (s As String) As String
+	Dim dot As Int = s.IndexOf(".")
+	Dim intPart As String
+	Dim fracPart As String
+	If dot >= 0 Then
+		intPart = s.SubString2(0, dot)
+		fracPart = s.SubString(dot)
+	Else
+		intPart = s
+		fracPart = ""
+	End If
+	Dim negative As Boolean = intPart.StartsWith("-")
+	If negative Then intPart = intPart.SubString(1)
+	Dim out As StringBuilder
+	out.Initialize
+	Dim i As Int = intPart.Length - 1
+	Dim count As Int = 0
+	Do While i >= 0
+		If count > 0 And count Mod 3 = 0 Then out.Insert(0, ",")
+		out.Insert(0, intPart.SubString2(i, i + 1))
+		count = count + 1
+		i = i - 1
+	Loop
+	If negative Then out.Insert(0, "-")
+	Return out.ToString & fracPart
+End Sub
+
 'Returns [width, height] in points for a named page size, or an empty list.
 Public Sub PageSize (Name As String) As List
 	Dim l As List

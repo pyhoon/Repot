@@ -21,6 +21,7 @@ End Sub
 Public Sub Run (FixturesDir As String)
 	mFixtures = FixturesDir
 	TestUnits
+	TestSpreadsheetCells
 	TestRenderDocument
 	TestMeasurement
 	TestBandLayout
@@ -68,6 +69,71 @@ Private Sub TestUnits
 	CheckText("10", ReportUnits.FormatNumber(10, 0), "integer formatting")
 	CheckText("1.20", ReportUnits.FormatNumber(1.2, 2), "trailing zero formatting")
 	CheckText("34.0157", ReportUnits.FormatNumber(ReportUnits.ParseLength("12mm", 0), 4), "12mm formatted")
+End Sub
+
+'--------------------------------------------------------------- spreadsheet cells
+
+Private Sub TestSpreadsheetCells
+	CheckText("2026-11-05", ReportSpreadsheet.OdfDateValue("2026-11-05"), "ODF date value is ISO")
+	CheckText("2026-11-05T13:30:00", ReportSpreadsheet.OdfDateValue("2026-11-05T13:30:00"), "ODF datetime value keeps the time")
+	Check(ReportSpreadsheet.DateParts("2026-02-30").Size = 0, "invalid ISO date is rejected")
+	Check(ReportSpreadsheet.DateParts("05/11/2026").Size = 0, "non-ISO date stays text")
+
+	CheckNear(46331, ReportSpreadsheet.ExcelSerial("2026-11-05"), 0.000001, "Excel serial for 2026-11-05")
+	CheckNear(61, ReportSpreadsheet.ExcelSerial("1900-03-01"), 0.000001, "Excel serial after the 1900 leap bug")
+	CheckNear(46331.5625, ReportSpreadsheet.ExcelSerial("2026-11-05 13:30:00"), 0.000001, "Excel serial keeps the time")
+	CheckNear(0, ReportSpreadsheet.ExcelSerial("not a date"), 0.000001, "a non-date has no serial")
+
+	Dim decimalField As ReportFieldDef
+	decimalField.Initialize
+	decimalField.DataType = "decimal"
+	Dim dateField As ReportFieldDef
+	dateField.Initialize
+	dateField.DataType = "date"
+	Dim boolField As ReportFieldDef
+	boolField.Initialize
+	boolField.DataType = "boolean"
+	Dim textField As ReportFieldDef
+	textField.Initialize
+	textField.DataType = "string"
+
+	CheckText("number", ReportSpreadsheet.CellKind(12.5, decimalField), "decimal value is numeric")
+	CheckText("date", ReportSpreadsheet.CellKind("2026-11-05", dateField), "ISO date string is a date cell")
+	CheckText("boolean", ReportSpreadsheet.CellKind(True, boolField), "boolean value is boolean")
+	CheckText("text", ReportSpreadsheet.CellKind("2026-11-05", textField), "date text in a string field stays text")
+	CheckText("empty", ReportSpreadsheet.CellKind(Null, decimalField), "Null is an empty cell")
+
+	Dim money As Map
+	money.Initialize
+	money.Put("type", "number")
+	money.Put("decimals", 2)
+	money.Put("grouping", True)
+	money.Put("prefix", "$")
+	CheckText("""$""#,##0.00", ReportSpreadsheet.ExcelFormatCode(money, "decimal"), "money format code")
+	CheckText("$1,200.00", ReportSpreadsheet.DisplayText(1200, money, "decimal"), "money display text")
+	Dim plain As Map
+	plain.Initialize
+	CheckText("TRUE", ReportSpreadsheet.DisplayText(True, plain, "boolean"), "boolean display text")
+	CheckText("-1234.50", ReportSpreadsheet.DisplayText(-1234.5, plain, "decimal"), "default decimal display text")
+	CheckText("-$1,234.50", ReportSpreadsheet.DisplayText(-1234.5, money, "decimal"), "negative money puts the sign before the prefix")
+
+	Dim dateFmt As Map
+	dateFmt.Initialize
+	dateFmt.Put("type", "date")
+	dateFmt.Put("pattern", "yyyy-MM-dd")
+	CheckText("yyyy-mm-dd", ReportSpreadsheet.ExcelFormatCode(dateFmt, "date"), "date format code")
+	CheckText("2026-11-05", ReportSpreadsheet.DisplayText("2026-11-05", dateFmt, "date"), "date display text")
+
+	Dim style As String = ReportSpreadsheet.OdfNumberStyle("N1", money, "decimal")
+	Check(style.IndexOf("number:decimal-places=""2""") >= 0, "ODF number style has decimals")
+	Check(style.IndexOf("number:grouping=""true""") >= 0, "ODF number style has grouping")
+	Check(style.IndexOf("<number:text>$</number:text>") >= 0, "ODF number style has the prefix")
+
+	Dim dateStyle As String = ReportSpreadsheet.OdfDateStyle("D1", "yyyy-MM-dd")
+	Check(dateStyle.IndexOf("<number:year") >= 0, "ODF date style has a year")
+	Check(dateStyle.IndexOf("<number:month") >= 0, "ODF date style has a month")
+	Check(dateStyle.IndexOf("<number:day") >= 0, "ODF date style has a day")
+	Check(dateStyle.IndexOf("<number:text>-</number:text>") >= 0, "ODF date style quotes separators")
 End Sub
 
 '--------------------------------------------------------------- render document

@@ -58,9 +58,10 @@ Module6=|relative|..\..\source\ReportDataBinder
 Module7=|relative|..\..\source\ReportDataExporter
 Module8=|relative|..\..\source\ReportDataSet
 Module9=|relative|..\..\source\ReportDataSetDef
+Module55=|relative|..\..\source\ReportSpreadsheet
 NumberOfFiles=0
 NumberOfLibraries=3
-NumberOfModules=54
+NumberOfModules=55
 Version=10.7
 @EndOfDesignText@
 'Repot fixture checker and engine unit-test harness.

@@ -454,7 +454,7 @@ Private Sub FormatValue (Raw As Object, El As ReportElement, St As ReportStyle) 
 		Dim d As Double = 0
 		If IsNumber(Raw) Then d = Raw
 		Dim s As String = ReportUnits.FormatNumber(d, decimals)
-		If grouping Then s = AddGrouping(s)
+		If grouping Then s = ReportUnits.AddGrouping(s)
 		Return prefix & s & suffix
 	Else If typ = "date" Then
 		Dim pattern As String = "yyyy-MM-dd"
@@ -481,30 +481,6 @@ Private Sub FormatValue (Raw As Object, El As ReportElement, St As ReportStyle) 
 	End If
 	If Raw = Null Then Return ""
 	Return Raw
-End Sub
-
-Private Sub AddGrouping (s As String) As String
-	Dim dot As Int = s.IndexOf(".")
-	Dim intPart As String
-	Dim fracPart As String
-	If dot >= 0 Then
-		intPart = s.SubString2(0, dot)
-		fracPart = s.SubString(dot)
-	Else
-		intPart = s
-		fracPart = ""
-	End If
-	Dim out As StringBuilder
-	out.Initialize
-	Dim i As Int = intPart.Length - 1
-	Dim count As Int = 0
-	Do While i >= 0
-		If count > 0 And count Mod 3 = 0 Then out.Insert(0, ",")
-		out.Insert(0, intPart.SubString2(i, i + 1))
-		count = count + 1
-		i = i - 1
-	Loop
-	Return out.ToString & fracPart
 End Sub
 
 Private Sub FormatDate (ticks As Long, pattern As String) As String
