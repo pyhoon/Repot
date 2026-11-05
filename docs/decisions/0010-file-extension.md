@@ -1,7 +1,7 @@
 # ADR 0010 — File extension: `.repot` (was `.b4xr`)
 
-- Status: proposed
-- Date: 2026-11-01
+- Status: accepted
+- Date: 2026-11-05
 
 ## Context
 
