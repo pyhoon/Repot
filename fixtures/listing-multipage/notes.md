@@ -45,3 +45,12 @@ pagination is wrong.
   the one that has to be rewritten, and that is an ADR-level change.
 - The data is generated, so it is committed as JSON and treated as
   immutable. Regenerating it must produce byte-identical output.
+
+## Golden history
+
+- 2026-11-05 (**v1.6**): regenerated. Same cause as `invoice-basic`:
+  the font stack prefers DejaVu Sans but the M3 golden recorded Arial.
+  Only `font` and `baseline` changed (626 text ops); page count (3),
+  page-break positions, and every x/y/width/height are unchanged.
+- Goldens therefore require **DejaVu Sans** to be installed.
+

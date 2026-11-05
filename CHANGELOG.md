@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.6.0 — M15 (release pending; suite blocked by font baselines)
+## 1.6.0 — M15
 
 Inline HTML preview for B4J desktop, and the facade accessor it needs.
 
@@ -49,6 +49,13 @@ Inline HTML preview for B4J desktop, and the facade accessor it needs.
   Verified on an API 36 emulator: chosen file is 21,121 bytes.
 - Added `ReportSaveAs.SaveToDownloads` (MediaStore `Downloads`, API 29+)
   for hosts that cannot wait for an activity result; no picker needed.
+- Layout goldens regenerated (2026-11-05). The M3 goldens recorded
+  `font: Arial`, but the fixture font stacks prefer DejaVu Sans, so on a
+  machine that has it every text op disagreed on `font` and `baseline`.
+  Only those fields changed (plus one wrap point in `invoice-basic`);
+  page counts, page breaks and all box geometry are identical. The goldens
+  now require DejaVu Sans to be installed — see each fixture's `notes.md`
+  and `docs/testing.md`.
 
 ### Known limitations
 - The B4J viewer is compile-verified but has not been run in a GUI on the

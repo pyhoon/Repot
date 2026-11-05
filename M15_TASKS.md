@@ -1,8 +1,9 @@
 # v1.6.0: Inline HTML Preview (M15)
 
-**Current stage:** implementation complete on both platforms (compile-level);
-release pending the layout-golden font decision. v1.5.0 remains the last
-tagged release.
+**Current stage:** complete. The layout goldens were regenerated against
+the fixture font stack's preferred family (DejaVu Sans), so the suite is
+green (510 checks, 0 failures) and the release gate is cleared. v1.5.0
+remains the last tagged release.
 
 **Scope delivered:** `Repot.GetHtml` plus a separate optional
 `RepotViewer.b4xlib` containing one viewer module with two native
@@ -57,31 +58,34 @@ duplicate layout and drift, so it stays out of scope.
   facade, then `mViewer.LoadHtml(r.GetHtml)`.
 - [ ] Not run in a GUI here (headless verification only).
 
-## Task 5: Tests — COMPLETE (suite caveat)
+## Task 5: Tests — COMPLETE
 - [x] `TestHtmlPreview` (+6 checks): non-empty, contains `INVOICE` /
   page-break CSS / `</html>`, byte-identical to the `ExportHtml` file.
-- [x] Engine suite: **510 checks, 2 failures**.
-- [ ] **Blocked:** `invoice-basic` and `listing-multipage` goldens record
-  `font: Arial`; this machine resolves `DejaVu Sans`, changing baselines.
-  Pre-existing, unrelated to M15. Decision: regenerate with a documented
-  font baseline, or make measurement deterministic by bundling the font.
+- [x] Engine suite: **510 checks, 0 failures**.
+- [x] Layout goldens regenerated (2026-11-05). The M3 goldens recorded
+  `font: Arial` because they were produced on a machine without DejaVu
+  Sans, while the templates list `["DejaVu Sans", "Arial", "sans-serif"]`.
+  Only `font`/`baseline` changed, plus one wrap point in `invoice-basic`;
+  page counts, break positions and all box geometry are unchanged. See the
+  `Golden history` section in each fixture's `notes.md`. Goldens now
+  require DejaVu Sans to be installed.
 
 ## Task 6: Docs, version, packaging
 - [x] `compatibility.md`: inline-preview row for B4J **and** B4A at 1.6.
-  `api-design.md`: `GetHtml`. `README.md`: platform row, layout (`ui/`,
-  `B4J-preview/`), two-package install note, "What 1.6 delivers".
-  `CHANGELOG.md`: 1.6.0 entry, release-pending caveat.
+  `api-design.md`: `GetHtml`. `README.md`: platform row, layout (`preview/`),
+  two-package install note, "What 1.6 delivers".
+  `CHANGELOG.md`: 1.6.0 entry.
 - [x] Version 1.6 (`ReportVersion.bas`, `#LibraryVersion: 1.6` both
   projects, core manifest `Version=1.6`, viewer manifest `Version=1.6`).
-- [x] `dist/RepotViewer.b4xlib` packaged (1,244 bytes).
-- [ ] `dist/Repot.b4xlib` not yet repackaged (decision pending).
-- [ ] No tag/commit: the harness blocks writes inside `.git`; commit via
-  GitHub Desktop.
+- [x] `dist/RepotViewer.b4xlib` and `dist/Repot.b4xlib` packaged and
+  installed to `C:\B4X\Additional\B4X`.
 
-## Acceptance — met at code/compile level, release gated
+## Acceptance — met
 
 - [x] `GetHtml` returns the exact exported document (suite).
 - [x] Core library still compiles headless (B4J exit 0).
 - [x] B4J preview app compiles; B4A viewer branch compiles (exit 0).
-- [ ] Full suite green: blocked by the two font-baseline goldens.
-- [ ] Visual runs (B4J window, B4A emulator): pending manual checks.
+- [x] Full suite green (510 checks, 0 failures).
+- [x] B4A visual run (emulator-5554, API 36): the invoice renders inline,
+  fits the screen width, and Save As writes a 21 KB PDF.
+- [ ] B4J visual run (desktop window) still a manual check.

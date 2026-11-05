@@ -241,6 +241,14 @@ A golden change is a behaviour change and must be reviewed as such:
    rendered page in the pull request, even though the test itself is
    geometry-based.
 
+**Font requirement.** Layout goldens are font-dependent: the fixtures list
+`["DejaVu Sans", "Arial", "sans-serif"]`, so a machine with DejaVu Sans
+lays text out slightly differently from one that falls back to Arial
+(different `baseline` values, an occasional wrap point). The committed
+goldens are the DejaVu Sans result. On a machine without DejaVu Sans the
+two layout goldens will not match; install the font (it ships with
+LibreOffice and most Linux distributions) rather than editing the goldens.
+
 ## 7. Cross-platform (B4A) — verified M8
 
 The same engine modules compile and run on B4A. The suite lives in

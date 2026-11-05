@@ -5,11 +5,14 @@
 **Ecosystem:** B4X (B4J first, B4A second)\
 **Template format:** Versioned JSON, `.repot` extension\
 **License:** MIT, all components\
-**Current stage:** v1.5.0 (M10–M14 complete). B4A vector PDF via the
-Printing library, PDF introspection via PdfRenderer, SAF SaveAs; B4J PDF
-embeds TrueType fonts, renders RTL text (bidi + Arabic shaping), and
-accepts a mixed-script font set; office export covers DOCX, XLSX, ODT and
-ODS. B4J 500 checks, B4A 346 checks, 0 errors on both.
+**Current stage:** v1.6.0 (M15 complete). Inline HTML preview: `GetHtml`
+on the facade plus an optional `RepotViewer.b4xlib` custom view (B4J
+`fx.WebView`, B4A core `WebView`) that fits the page to the view width,
+with SAF Save As fixed on B4A. Engine suite 510 checks, 0 failures.
+Earlier: B4A vector PDF via the Printing library, PDF introspection via
+PdfRenderer, SAF SaveAs; B4J PDF embeds TrueType fonts, renders RTL text
+(bidi + Arabic shaping), and accepts a mixed-script font set; office
+export covers DOCX, XLSX, ODT and ODS.
 
 ---
 

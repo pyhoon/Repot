@@ -49,3 +49,16 @@ Money values are round numbers so a human can verify the total by eye:
 - `logo.png` is a placeholder. Resource resolution must stay inside this
   directory.
 - Goldens are generated in M3; this file defines what they must show.
+
+## Golden history
+
+- 2026-11-05 (**v1.6**): regenerated. The font stack is
+  `["DejaVu Sans", "Arial", "sans-serif"]`, so the intended resolution is
+  DejaVu Sans; the M3 golden was produced on a machine without it and
+  recorded `Arial` with smaller baselines. Regenerating on a machine with
+  DejaVu Sans changes only `font`, `baseline`, and one wrap point: the
+  long description now breaks after "licensed" instead of "hardware,".
+  Box geometry (x/y/width/height) and the line count are unchanged, and
+  the page still shows `Page 1 of 1`.
+- Goldens therefore require **DejaVu Sans** to be installed. Without it
+  the fallback is Arial and the layout golden will not match.
