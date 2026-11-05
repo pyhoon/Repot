@@ -1,4 +1,4 @@
-﻿B4J=true
+B4J=true
 Group=Export
 ModulesStructureVersion=1
 Type=Class
@@ -54,7 +54,9 @@ Private Sub BuildHtml (Doc As ReportRenderDocument) As String
 	Dim sb As StringBuilder
 	sb.Initialize
 	sb.Append("<!DOCTYPE html>").Append(CRLF)
-	sb.Append("<html><head><meta charset=""utf-8""><title>Report</title>").Append(CRLF)
+	sb.Append("<html><head><meta charset=""utf-8"">")
+	sb.Append("<meta name=""viewport"" content=""width=device-width, initial-scale=1"">")
+	sb.Append("<title>Report</title>").Append(CRLF)
 	sb.Append("<style>").Append(CRLF)
 	sb.Append("body{margin:0;font-family:sans-serif;}").Append(CRLF)
 	sb.Append(".page{position:relative;margin:0 auto;page-break-after:always;overflow:hidden;}").Append(CRLF)

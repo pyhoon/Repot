@@ -21,6 +21,13 @@ Inline HTML preview for B4J desktop, and the facade accessor it needs.
   verified by a B4ABuilder run (exit 0).
 - `TestHtmlPreview` in the engine suite: `GetHtml` is non-empty, contains
   the document markers, and is byte-identical to the `ExportHtml` file.
+- HTML output now includes
+  `<meta name="viewport" content="width=device-width, initial-scale=1">`,
+  so a phone browser no longer lays the page out at desktop width.
+- The viewer scales the page to the view width by default (CSS `zoom`
+  inserted into the string handed to the WebView only — the exported file
+  is untouched) and re-fits on resize. Verified on an API 36 emulator: the
+  whole A4 page, including the right-hand columns, is visible.
 
 ### Changed
 - The viewer is deliberately **not** shipped in the core `.b4xlib`:
