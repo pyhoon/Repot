@@ -1,4 +1,4 @@
-﻿B4A=true
+B4A=true
 Group=Tests
 ModulesStructureVersion=1
 Type=Class
@@ -33,6 +33,9 @@ Public Sub Run (FixturesDir As String)
 	TestGoldens
 	#End If
 	TestPdfExport
+	#If B4A
+	TestSaveAs
+	#End If
 	TestMultilangPdf
 	TestRtlPdf
 	TestMixedScriptsPdf
@@ -770,6 +773,75 @@ Private Sub TestPdfExport
 		#End If
 	End If
 End Sub
+'--------------------------------------------------------------- save as (B4A)
+'
+'Covers the pieces of ReportSaveAs that are testable without the SAF
+'picker: intent construction, the MediaStore write, and the stream copy
+'into a content:// URI (including truncation). The picker itself and the
+'IOnActivityResult round-trip still need a device and a user.
+#If B4A
+Private Sub TestSaveAs
+	Dim dir As String = File.DirInternal
+	Dim longText As String = "REPOT-SAVEAS-LONG"
+	Dim k As Int
+	For k = 1 To 10
+		longText = longText & "-0123456789"
+	Next
+	Dim shortText As String = "REPOT-SAVEAS-SHORT"
+	File.WriteString(dir, "saveas-long.txt", longText)
+	File.WriteString(dir, "saveas-short.txt", shortText)
+
+	Dim uri As String = ReportSaveAs.SaveToDownloads(dir, "saveas-long.txt", "text/plain")
+	Check(uri <> "", "SaveToDownloads returns a content uri")
+	If uri = "" Then Return
+	Check(ReadUriLine(uri) = longText, "SaveToDownloads copies the whole file")
+
+	Check(ReportSaveAs.CopyFileToUri(dir, "saveas-short.txt", uri), "CopyFileToUri reports success")
+	Check(ReadUriLine(uri) = shortText, "CopyFileToUri replaces the content (no leftovers)")
+
+	Dim i As Intent = ReportSaveAs.CreateDocumentIntent("application/pdf", "report.pdf")
+	Check(i <> Null, "CreateDocumentIntent returns an intent")
+	If i <> Null Then
+		Dim jo As JavaObject = i
+		Check(jo.RunMethod("getAction", Null) = "android.intent.action.CREATE_DOCUMENT", "SaveAs intent action")
+		Check(jo.RunMethod("getType", Null) = "application/pdf", "SaveAs intent mime")
+	End If
+
+	DeleteUri(uri)
+End Sub
+
+'Reads the first line of a content:// URI (payloads above are single-line).
+Private Sub ReadUriLine (Uri As String) As String
+	Dim ctx As JavaObject
+	ctx.InitializeContext
+	Dim resolver As JavaObject = ctx.RunMethod("getContentResolver", Null)
+	Dim uriJO As JavaObject
+	uriJO.InitializeStatic("android.net.Uri")
+	Dim u As Object = uriJO.RunMethod("parse", Array(Uri))
+	Dim ins As InputStream = resolver.RunMethod("openInputStream", Array(u))
+	Dim tr As TextReader
+	tr.Initialize(ins)
+	Dim s As String = tr.ReadLine
+	ins.Close
+	Return s
+End Sub
+
+'Removes the MediaStore row so repeated runs do not accumulate files.
+Private Sub DeleteUri (Uri As String)
+	Try
+		Dim ctx As JavaObject
+		ctx.InitializeContext
+		Dim resolver As JavaObject = ctx.RunMethod("getContentResolver", Null)
+		Dim uriJO As JavaObject
+		uriJO.InitializeStatic("android.net.Uri")
+		Dim u As Object = uriJO.RunMethod("parse", Array(Uri))
+		resolver.RunMethod("delete", Array(u, Null))
+	Catch
+		Log("saveas cleanup failed: " & LastException.Message)
+	End Try
+End Sub
+#End If
+
 '--------------------------------------------------------------- html export
 
 Private Sub TestMultilangPdf

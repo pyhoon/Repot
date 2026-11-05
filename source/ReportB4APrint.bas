@@ -45,7 +45,13 @@ Public Sub PrintVectorPdf(Doc As ReportRenderDocument, OutputPath As String, Sou
 	pdf.WriteToStream(out)
 	out.Close
 	pdf.Close
-	Return File.Exists(dir, name)
+	' Existence alone is not success: the stream is created before anything
+	' is written, so a failed write leaves a 0-byte file that "exists".
+	If File.Size(dir, name) <= 0 Then
+		Log("PrintVectorPdf: wrote a 0-byte PDF to " & OutputPath)
+		Return False
+	End If
+	Return True
 End Sub
 
 Private Sub DrawOp (canvas As Canvas, op As ReportDrawOp)

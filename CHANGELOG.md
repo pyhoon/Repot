@@ -64,6 +64,16 @@ tagged release publishes the viewer.
   page counts, page breaks and all box geometry are identical. The goldens
   now require DejaVu Sans to be installed — see each fixture's `notes.md`
   and `docs/testing.md`.
+- B4A test coverage for the Save As path (`TestSaveAs`, +7 checks):
+  intent construction, the MediaStore write round-trip, and the
+  content-URI copy including truncation. The picker round-trip and the
+  print dialog stay manual, documented in `docs/testing.md`.
+- `tools/run-b4a-tests.ps1`: builds, installs, launches and gates on the
+  B4A summary line, so a B4A regression can no longer hide behind a
+  successful compile. Exits non-zero when the summary is missing, so a
+  crash is not a pass.
+- `ReportB4APrint.PrintVectorPdf` returns `False` (and logs) when the
+  written PDF is 0 bytes; existence alone is no longer success.
 
 ### Known limitations
 - The B4J viewer is compile-verified but has not been run in a GUI on the

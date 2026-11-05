@@ -268,6 +268,8 @@ API 36):
 | DOCX / XLSX export | pass | pass |
 | PDF export, extracted text, goldens | pass | export pass; text extraction not possible (`PdfRenderer` has no text API) |
 | PDF introspection (page count) | pass (PDFBox, via facade `GetPdfPageCount`) | pass (`ReportPdfIntrospection`, `PdfRenderer`) |
+| SAF Save As: intent, MediaStore write, content-URI copy | n/a | pass (`TestSaveAs`); picker round-trip is manual |
+| B4A suite runner | `tools/run-fixtures.ps1` | `tools/run-b4a-tests.ps1` |
 | RTL text (bidi reordering, Arabic shaping) | pass (v1.3, `rtl-arabic` + `rtl-hebrew`) | pass (system text stack shapes at draw; export + page count verified) |
 | Mixed-script font set (per-run embedded fonts) | pass (v1.4, `mixed-scripts`) | pass (system fallback; export + page count verified) |
 | CJK scripts (Japanese/Chinese/Korean) | pass (v1.5, `multilang` extracts kana/han/hangul incl. Traditional han, zero `?`) | pass (system text stack covers CJK at draw; export + page count verified) |
@@ -276,16 +278,41 @@ API 36):
 | Fixture-level validation | pass | not applicable |
 
 This accounts for the check-count delta between platforms:
-**B4J 500 checks, B4A 346 checks, 0 errors on both** (v1.5.0: both
-platforms gained the ODT/ODS office-export checks, and the B4J
-`multilang` test grew extraction assertions for every script row —
-kana, han, hangul, Greek, Cyrillic, Arabic, Hebrew — through the
-registered font set, so CJK glyph coverage is regression-tested;
+**B4J 510 checks, B4A 353 checks, 0 errors on both** (v1.6.0 adds the B4A
+`TestSaveAs` checks; v1.5.0: both platforms gained the ODT/ODS office-export
+checks, and the B4J `multilang` test grew extraction assertions for every
+script row — kana, han, hangul, Greek, Cyrillic, Arabic, Hebrew — through
+the registered font set, so CJK glyph coverage is regression-tested;
 B4A asserts export + existence like the DOCX/XLSX tests).
 PDF rendering on B4A goes through the `Printing` library vector canvas
 (M10); introspection reads the file back through
 `android.graphics.pdf.PdfRenderer`, and the missing-file contract
 (0 / `""`) is fail-silent on both platforms.
+
+### Save As coverage
+
+`TestSaveAs` (B4A only) covers the parts of `ReportSaveAs` that do not need
+a user at the SAF picker:
+
+- `CreateDocumentIntent` builds an `ACTION_CREATE_DOCUMENT` intent with the
+  requested mime.
+- `SaveToDownloads` writes the file through MediaStore; the test reads it
+  back from the returned `content://` URI and compares the content.
+- `CopyFileToUri` overwrites that URI with a shorter payload, which also
+  proves the stream is truncated (`"wt"`) instead of leaving a tail.
+
+**Not automated:** the `IOnActivityResult` round-trip and the picker UI
+itself, and `PrintPdf`'s system print dialog. Both need a device and a tap.
+Manual check after changing that code:
+
+```text
+1. Launch preview/B4A, tap "Save As PDF", pick a location, tap SAVE.
+2. adb shell ls -l /sdcard/Download   → the file must be non-zero.
+```
+
+Regression guard in the engine: `ReportB4APrint.PrintVectorPdf` returns
+`False` and logs when the written PDF is 0 bytes, so "the file exists" can
+no longer be reported as a successful export.
 
 Emulator workflow:
 
@@ -294,8 +321,12 @@ build:   cd tests\B4A; "C:\Program Files\B4X\B4A\B4ABuilder.exe" -task=Build -ob
 install: C:\android\sdk\platform-tools\adb.exe install -r Objects\tests.apk
 restart: adb shell am force-stop b4a.example; adb logcat -c
 run:     adb shell am start -n b4a.example/.main
-read:    adb logcat -d   →  PASS engine (346 checks), errors=0
+read:    adb logcat -d   →  PASS engine (353 checks), errors=0
 ```
+
+or, in one step, `tools/run-b4a-tests.ps1` (builds, installs, launches,
+waits for the summary line and exits non-zero on failures or on a missing
+summary — so a crash cannot look like a pass).
 
 The suite's pass/fail status is written to `fixture-check.txt` in
 `File.DirInternal` and echoed to the log; the B4A test app also renders
