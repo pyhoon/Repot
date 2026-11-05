@@ -6,10 +6,10 @@
 </p>
 
 <p align="center">
-  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.5.0-blue" alt="version 1.5.0"></a>
+  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.6.0-blue" alt="version 1.6.0"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license"></a>
-  <img src="https://img.shields.io/badge/B4J-500%20checks%20%2F%200%20errors-success" alt="B4J 500 checks, 0 errors">
-  <img src="https://img.shields.io/badge/B4A-346%20checks%20%2F%200%20errors-success" alt="B4A 346 checks, 0 errors">
+  <img src="https://img.shields.io/badge/B4J-510%20checks%20%2F%200%20errors-success" alt="B4J 510 checks, 0 errors">
+  <img src="https://img.shields.io/badge/B4A-353%20checks%20%2F%200%20errors-success" alt="B4A 353 checks, 0 errors">
 </p>
 
 # Repot
@@ -22,22 +22,28 @@ by the host application into paginated documents and structured exports.
 The same template works from B4J desktop, B4J server, and B4A, and
 renders to HTML for browsers.
 
-> **Project status: v1.5.0 (M10–M14 complete). A `Repot` facade
-> (load → bind → build → export/print) is implemented. B4A produces
-> vector PDF synchronously through the `Printing` library, can verify
-> exported PDFs (`GetPdfPageCount` via `PdfRenderer`), prints through
-> the system print dialog, and saves to a user-chosen location through
-> the Storage Access Framework (`ReportSaveAs`). The B4J PDF embeds
-> TrueType fonts, renders right-to-left text (bidi reordering + Arabic
-> shaping), and accepts a set of embedded fonts for mixed-script
-> documents. Office export covers DOCX, XLSX, ODT and ODS. Tagged
-> `v1.5.0`.**
+> **Project status: v1.6.0 (M15 complete).** The `Repot` facade
+> (load → bind → build → export/print) is stable. v1.6.0 adds
+> `Repot.GetHtml` (the exact HTML that `ExportHtml` writes), a viewport
+> meta in the HTML output, and fixes B4A Save As, which could leave a
+> 0-byte file. B4A produces vector PDF synchronously through the
+> `Printing` library, verifies exported PDFs (`GetPdfPageCount` via
+> `PdfRenderer`), prints through the system print dialog, and saves to a
+> user-chosen location through the Storage Access Framework
+> (`ReportSaveAs`). The B4J PDF embeds TrueType fonts, renders
+> right-to-left text (bidi reordering + Arabic shaping), and accepts a
+> set of embedded fonts for mixed-script documents. Office export covers
+> DOCX, XLSX, ODT and ODS. Tagged `v1.6.0`.
 >
-> The full engine suite runs on both platforms: **B4J 500 checks,
-> B4A 346 checks, 0 errors on both** (emulator-5554, API 36).
-> Exporters (PDF, HTML, CSV, JSON, XML, DOCX, XLSX, ODT, ODS) shipped in
-> M3–M7 and M14 and run on both platforms. `tools/ci.ps1 -RunEmulator`
-> is the cross-platform gate and exits 0. See [CHANGELOG.md](CHANGELOG.md).
+> **Release scope:** v1.6.0 ships the core `Repot.b4xlib` only.
+> `RepotViewer.b4xlib` and the `preview/` projects are test artifacts for
+> the inline-preview work and are not released.
+>
+> The full engine suite runs on both platforms: **B4J 510 checks,
+> B4A 353 checks, 0 errors on both** (emulator-5554, API 36).
+> `tools/ci.ps1` is the B4J gate; add `-RunEmulator` (or run
+> `tools/run-b4a-tests.ps1`) for the B4A suite, which fails when the
+> summary line never appears. See [CHANGELOG.md](CHANGELOG.md).
 
 ## Why this exists
 
@@ -101,7 +107,7 @@ support.
 
 | Platform | Scope |
 |----------|-------|
-| B4J desktop | Generation, inline HTML preview (`ReportHtmlViewer`), HTML/PDF/data output, print (system viewer), PDF text extraction |
+| B4J desktop | Generation, HTML/PDF/data output, print (system viewer), PDF text extraction; inline preview only as a test artifact (`preview/`, not released) |
 | B4J server | Headless generation to files; no UI or JavaFX requirement (`examples/server`); `ReportHtmlExporter.ToHtml` returns a document string |
 | B4A | Same engine; on-device vector PDF export, PDF page-count verification, system print dialog, SAF "Save As" |
 | Browser | Consumes generated HTML; optional lightweight viewer |
@@ -238,21 +244,21 @@ Repot/
 │   └── B4A/                     Same suite on device/emulator
 ├── examples/
 │   ├── B4J/                     Desktop example
-│   ├── B4J-preview/             Inline HTML preview example (M15)
 │   ├── B4A/                     Android example (export, print, SaveAs)
 │   └── server/                  B4J HTTP server serving rendered reports
-├── preview/                     Viewer: module + designer projects
+├── preview/                     Test artifact: viewer module + designer apps
 │   ├── ReportHtmlViewer.bas     Designer-addable custom view (B4J + B4A)
 │   ├── B4J/                     B4J preview app (designer-added view)
 │   └── B4A/                     B4A preview app (designer-added view)
 ├── fixtures/                    Templates, data and notes; layout/export goldens
-├── dist/                        Packaged Repot.b4xlib and RepotViewer.b4xlib
-└── tools/                       Developer scripts (ci.ps1, run-fixtures.ps1, packaging)
+├── dist/                        Repot.b4xlib (released) + RepotViewer.b4xlib (test artifact)
+└── tools/                       Developer scripts (ci.ps1, run-fixtures.ps1, run-b4a-tests.ps1, packaging)
 ```
 
-The engine ships as one `.b4xlib` containing all public modules; the
-optional viewer ships separately as `RepotViewer.b4xlib` so the core
-library never pulls in a UI stack. The B4J
+The engine ships as one `.b4xlib` containing all public modules. The
+viewer module lives in `preview/` and is packaged separately
+(`RepotViewer.b4xlib`) so the core library never pulls in a UI stack; it
+is a test artifact, not a released package. The B4J
 and B4A library projects both reference the shared modules in `source/`
 through relative module references, so one source base serves both
 targets. Exporters are ordinary modules inside the library, not separate
@@ -360,24 +366,37 @@ The office-formats family is complete:
   Chinese and Korean render in the B4J PDF whenever a covering font is
   registered (`AddEmbeddedFont`).
 
-## What 1.6 delivers
+## What 1.6 delivered
 
-Inline preview for B4J desktop, and the accessor that makes it trustworthy:
+The accessor that makes a preview trustworthy, plus the fixes the preview
+work exposed. **The viewer itself is a test artifact, not a release.**
 
 - `Repot.GetHtml` returns the same HTML document `ExportHtml` writes.
   One render document, one exporter pass — a preview cannot differ from
   the exported file.
-- `ReportHtmlViewer` (`RepotViewer.b4xlib`) is a B4X **custom view**:
-  add it in the Layout Designer like any other control (`PageFinished`
-  event exposed), or create it in code with `CreateView(Parent)`. It has
-  native backends for B4J (`fx.WebView`) and B4A (core `WebView`), and is
-  kept out of the headless core library.
-- `preview/B4J` shows the facade → `GetHtml` → inline preview
-  flow end to end.
-- B4A keeps the vector PDF path; an on-device HTML preview widget is not
-  planned (Android has no `fx.WebView`).
+- HTML output carries `<meta name="viewport" content="width=device-width,
+  initial-scale=1">`, so the fixed-width page is no longer laid out at
+  desktop width on a phone.
+- B4A Save As no longer writes 0-byte files. B4A does not deliver SAF
+  results to `Activity_Result`, so `ReportSaveAs.StartForResult` now takes
+  the host's BA and `IOnActivityResult` event and the host uses
+  `Wait For`; `CopyFileToUri` opens the stream with `"wt"`. Verified on an
+  emulator: a 21 KB PDF at the chosen location.
+  `ReportSaveAs.SaveToDownloads` is the no-picker alternative.
+- `ReportB4APrint.PrintVectorPdf` fails when the written PDF is 0 bytes;
+  existence alone is no longer treated as success.
+- Layout goldens were regenerated against the fixtures' preferred font
+  (DejaVu Sans). Only `font`/`baseline` changed, plus one wrap point.
+- B4A coverage for the Save As path (`TestSaveAs`) and
+  `tools/run-b4a-tests.ps1`, which fails when the summary line is missing.
 
-The viewer is compile-verified; `GetHtml` is covered by the engine suite.
+**Test artifacts (not shipped):** `ReportHtmlViewer` in `RepotViewer.b4xlib`
+(a B4X custom view: `DesignerCreateView` + `PageFinished`, B4J
+`fx.WebView` / B4A core `WebView`, scales the page to the view width) and
+the `preview/B4J` + `preview/B4A` apps. The B4A preview was run on an
+emulator (renders inline, fits width, Save As 21 KB). The B4J preview is
+compile-verified only — this machine's JDK has no JavaFX runtime, so the
+window cannot start.
 
 ## License, support, and contributions
 

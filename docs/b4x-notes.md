@@ -18,10 +18,10 @@ project requirement.
 | B4J IDE | 10.7 (`B4J.exe` 10.7.0.0) |
 | B4JBuilder | reports `B4JBuilder v10.70` |
 | Java used by B4J | 19, `C:\Java\jdk-19.0.2\bin` (from `b4xV5.ini`) |
-| B4J install | `C:\Program Files\B4X\B4J` |
-| Additional libraries | `C:\B4X\Additional` |
+| B4J install | `C:\Program Files\Anywhere Software\B4J` (this machine; `Program Files\B4X\...` also seen — scripts try both) |
+| Additional libraries | `C:\B4X\Additional` (shared folder `Additional\B4X` is read by both IDEs) |
 | B4ABuilder | reports `B4ABuilder v14.20` |
-| B4A install | `C:\Program Files\B4X\B4A` |
+| B4A install | `C:\Program Files\Anywhere Software\B4A` (same caveat) |
 | Android SDK | android-36 (verified on emulator-5554) |
 | adb | `C:\android\sdk\platform-tools\adb.exe` |
 
@@ -29,8 +29,12 @@ project requirement.
 
 ```text
 cd <project folder>
-"C:\Program Files\B4X\B4J\B4JBuilder.exe" -Task=Build
+"C:\Program Files\Anywhere Software\B4J\B4JBuilder.exe" -Task=Build
 ```
+
+If the builder is under `C:\Program Files\B4X\B4J` instead, use that path;
+`tools/ci.ps1`, `tools/run-fixtures.ps1`, `tools/run-b4a-tests.ps1` and the
+packaging scripts resolve either root automatically.
 
 - Exit code `0` on success, `1` on failure. Verified on the fixture
   checker project.
@@ -84,7 +88,7 @@ Verified in M8 against the engine library project and the B4A test suite:
 
 ```text
 cd <project folder>
-"C:\Program Files\B4X\B4A\B4ABuilder.exe" -task=Build -obfuscate=False
+"C:\Program Files\Anywhere Software\B4A\B4ABuilder.exe" -task=Build -obfuscate=False
 ```
 
 - Exit code `0` on success, `1` on failure.

@@ -67,24 +67,10 @@ if (-not $SkipB4A -and -not $failed) {
         if (Test-Path $adb) {
             Write-Host ""
             Write-Host "=== B4A emulator run ===" -ForegroundColor Cyan
-            Push-Location (Join-Path $root "tests\B4A")
-            & $b4aBuilder -task=Build -obfuscate=False
-            $b = $LASTEXITCODE
-            Pop-Location
-            if ($b -ne 0) { Fail "B4A test build (exit $b)" }
-            else {
-                & $adb install -r (Join-Path $root "tests\B4A\Objects\tests.apk") | Out-Null
-                & $adb shell am force-stop b4a.example | Out-Null
-                & $adb logcat -c | Out-Null
-                & $adb shell am start -n b4a.example/.main | Out-Null
-                Start-Sleep -Seconds 20
-                $log = & $adb logcat -d
-                if ($log -match "PASS engine" -and $log -match "errors=0") {
-                    Write-Host "PASSED" -ForegroundColor Green
-                } else {
-                    Fail "B4A emulator run"
-                }
-            }
+            # The runner builds tests\B4A, installs, waits for the summary
+            # line and fails when it is missing (a crash is not a pass).
+            & (Join-Path $root "tools\run-b4a-tests.ps1")
+            if ($LASTEXITCODE -ne 0) { Fail "B4A emulator run (exit $LASTEXITCODE)" }
         } else {
             Write-Host "adb not found at $adb; skipping emulator run." -ForegroundColor Yellow
         }

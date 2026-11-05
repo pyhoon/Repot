@@ -10,7 +10,7 @@
 fix, and regenerated layout goldens. The inline-preview custom view
 (`RepotViewer.b4xlib`) and the `preview/` apps stay in the repository as
 test artifacts and are not shipped. Engine suite 510 checks, 0 failures
-(B4A 346, 0). Earlier: B4A vector PDF via the Printing library, PDF
+(B4A 353, 0). Earlier: B4A vector PDF via the Printing library, PDF
 introspection via PdfRenderer; B4J PDF embeds TrueType fonts, renders RTL
 text (bidi + Arabic shaping), and accepts a mixed-script font set; office
 export covers DOCX, XLSX, ODT and ODS.
@@ -178,7 +178,8 @@ per week. They are planning ranges, not commitments.
 | M11 | B4A PDF introspection, facade bridges, SAF SaveAs | 1–2 weeks |
 | M12 | RTL text and complex-script Arabic shaping (B4J PDF) | 1–2 weeks |
 | M13 | Mixed-script embedded font set + configurable RTL base direction | 1–2 weeks |
-| M14 | ODT and ODS export via own minimal writers (office family symmetry) | 1–2 weeks |
+| M14 | ODT and ODS export via own minimal writers (office family symmetry) | done |
+| M15 | `Repot.GetHtml` + inline preview viewer (viewer kept as a test artifact), viewport meta, B4A Save As fix | done, v1.6.0 |
 
 Indicative: v0.1 at M0–M5 (about 10–13 weeks); v1.0 at M0–M9 (about
 17–24 weeks). B4A depth is the largest source of variance. Current
@@ -212,17 +213,31 @@ Strategy, fixture layout, and the pixel-diff prohibition are in
   office files opened by a real parser.
 - Headless builds use `B4JBuilder.exe -Task=Build`, verified on 2026-10-31
   with B4J 10.7 and Java 19. It exits non-zero on failure and is suitable
-  for a CI runner. Exact output behaviour is recorded in
-  [b4x-notes.md](docs/b4x-notes.md).
-- `source/RepotTests` lints the fixtures against the draft schema and
-  is driven by `tools/run-fixtures.ps1`, which maps the result file to a
-  process exit code. Layout goldens are added in M3.
+  for a CI runner. Do **not** use `-Task=BuildLibrary` for checks: it
+  installs `Repot.jar`/`Repot.xml` into the additional-libraries folder,
+  where they shadow the source `.b4xlib`. Exact output behaviour is
+  recorded in [b4x-notes.md](docs/b4x-notes.md).
+- B4J: the suite lives in `tests/B4J` and is driven by
+  `tools/run-fixtures.ps1`, which maps the result file to a process exit
+  code (`fixtures=7 checks=510 errors=0` at v1.6.0).
+- B4A: the same suite in `tests/B4A`, driven by
+  `tools/run-b4a-tests.ps1` (build, install, wait for the summary line,
+  fail when it is missing — a crash is not a pass). `tools/ci.ps1
+  -RunEmulator` calls it.
+- Layout goldens are font-dependent: the fixtures list DejaVu Sans first,
+  so the committed goldens require that font (see
+  [docs/testing.md](docs/testing.md) §6).
 
 ## 10. Packaging and distribution
 
 One `.b4xlib` for the engine and all exporters, plus the jars each
 exporter needs. Rationale and consequences:
 [ADR 0006](docs/decisions/0006-packaging.md).
+
+v1.6.0 ships that one library. The inline-preview viewer
+(`RepotViewer.b4xlib`) is packaged by `tools/package-viewer-b4xlib.ps1`
+from `preview/`, but it is a test artifact and is **not** released: it
+would pull a UI stack into consumers that only need the engine.
 
 Distribution is through the B4X forum, GitHub releases, and the
 repository itself. No activation, no trial, no registration.
@@ -488,7 +503,7 @@ clip, ellipsis, min height, align override, field content
 
 ---
 
-## 15. After 1.5 — unscheduled (M15+)
+## 15. After 1.6 — unscheduled (M16+)
 
 These are the items from §7.4 that remain unscheduled. None has a
 committed date. Each needs evidence of demand before it is started;

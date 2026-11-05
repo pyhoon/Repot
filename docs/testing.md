@@ -187,7 +187,7 @@ Java 19:
 
 ```text
 cd <project folder>
-"C:\Program Files\B4X\B4J\B4JBuilder.exe" -Task=Build
+"C:\Program Files\Anywhere Software\B4J\B4JBuilder.exe" -Task=Build
 ```
 
 - Exit code `0` on success, `1` on failure.
@@ -317,7 +317,7 @@ no longer be reported as a successful export.
 Emulator workflow:
 
 ```text
-build:   cd tests\B4A; "C:\Program Files\B4X\B4A\B4ABuilder.exe" -task=Build -obfuscate=False
+build:   cd tests\B4A; "C:\Program Files\Anywhere Software\B4A\B4ABuilder.exe" -task=Build -obfuscate=False
 install: C:\android\sdk\platform-tools\adb.exe install -r Objects\tests.apk
 restart: adb shell am force-stop b4a.example; adb logcat -c
 run:     adb shell am start -n b4a.example/.main
