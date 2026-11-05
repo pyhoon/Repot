@@ -1,4 +1,4 @@
-Build1=Default,b4a.example
+﻿Build1=Default,b4a.example
 File1=1.bal
 FileGroup1=Default Group
 Group=Default Group
@@ -110,7 +110,7 @@ Private Sub SavePdfWithPicker
 	ion = ba.CreateEvent("anywheresoftware.b4a.IOnActivityResult", "ion", Null)
 	ReportSaveAs.StartForResult(ba, ion, i)
 	Wait For ion_Event (MethodName As String, Args() As Object)
-	If Args(0) = -1 Then 'RESULT_OK
+	If -1 = Args(0) Then 'RESULT_OK
 		Dim result As Intent = Args(1)
 		Dim uri As String = result.GetData
 		If ReportSaveAs.CopyFileToUri(mOutDir, "invoice.pdf", uri) Then
@@ -168,18 +168,11 @@ Sub RunExample
 	End If
 	Log("Rendered " & res.PageCount & " page(s), " & res.RecordCount & " record(s)")
 
-	'Dim jo As JavaObject = ReportHtmlViewer1.Webview
-	'Dim settings As JavaObject = jo.RunMethod("getSettings", Null)
-	'settings.RunMethod("setAllowFileAccess", Array(True))
-	'settings.RunMethod("setAllowUniversalAccessFromFileURLs", Array(True))
-
 	' Inline preview: the exact HTML ExportHtml would write.
+	' Convert image to Base64 to bypass loading image blocked by Android Webview
 	Dim html As String = mReport.GetHtml
 	Dim su As StringUtils
 	Dim newImageUri As String = su.EncodeBase64(File.ReadBytes(fixDir, "logo.png"))
-	'Log($"file://${File.Combine(File.DirInternal, "logo.png")}"$)
-	'Dim newImageUri As String = $"file://${File.Combine(fixDir, "logo.png")}"$
-	'Log(newImageUri)
 	html = html.Replace("logo.png", "data:image/png;base64, " & newImageUri)
 	If ReportHtmlViewer1.LoadHtml(html) = False Then
 		lbl.Text = "Viewer could not load the document"
@@ -209,17 +202,3 @@ Private Sub LoadJsonMap(dir As String, name As String) As Map
 	parser.Initialize(File.ReadString(dir, name))
 	Return parser.NextObject
 End Sub
-
-'WebV.LoadHtml("<html><body background='" & WebViewAssetFile("image.jpg") & "'></body></html>")
-'
-'
-'Sub WebViewAssetFile (FileName As String) As String
-'	Dim jo As JavaObject
-'	jo.InitializeStatic("anywheresoftware.b4a.objects.streams.File")
-'	If jo.GetField("virtualAssetsFolder") = Null Then
-'		Return "file:///android_asset/" & FileName.ToLowerCase
-'	Else
-'		Return "file://" & File.Combine(jo.GetField("virtualAssetsFolder"), _
-'       jo.RunMethod("getUnpackedVirtualAssetFile", Array As Object(FileName)))
-'	End If
-'End Sub
