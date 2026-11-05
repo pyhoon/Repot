@@ -5,15 +5,12 @@
 **Ecosystem:** B4X (B4J first, B4A second)\
 **Template format:** Versioned JSON, `.repot` extension\
 **License:** MIT, all components\
-**Current stage:** v1.6.0 (M15 complete). Releases the core library only:
-`GetHtml` on the facade, viewport meta in the HTML, the B4A SAF Save As
-fix, and regenerated layout goldens. The inline-preview custom view
+**Current stage:** v1.7.0 (M16 complete). Releases the core library only:
+typed XLSX/ODS cells with field display formats (ADR 0011 accepted), verified
+through Excel COM (`tools/verify-office.ps1`). The inline-preview custom view
 (`RepotViewer.b4xlib`) and the `preview/` apps stay in the repository as
-test artifacts and are not shipped. Engine suite 510 checks, 0 failures
-(B4A 353, 0). Earlier: B4A vector PDF via the Printing library, PDF
-introspection via PdfRenderer; B4J PDF embeds TrueType fonts, renders RTL
-text (bidi + Arabic shaping), and accepts a mixed-script font set; office
-export covers DOCX, XLSX, ODT and ODS.
+test artifacts and are not shipped. Engine suite 578 checks, 0 failures
+(B4A 353, 0).
 
 ---
 
