@@ -1,9 +1,11 @@
 # v1.6.0: Inline HTML Preview (M15)
 
-**Current stage:** complete. The layout goldens were regenerated against
-the fixture font stack's preferred family (DejaVu Sans), so the suite is
-green (510 checks, 0 failures) and the release gate is cleared. v1.5.0
-remains the last tagged release.
+**Current stage:** complete. v1.6.0 releases the **core `Repot.b4xlib`
+changes** (`GetHtml`, viewport meta, B4A Save As fix, regenerated goldens).
+`RepotViewer.b4xlib` and `preview/` are kept as test artifacts and are not
+shipped. The layout goldens were regenerated against the fixtures'
+preferred family (DejaVu Sans), so the suite is green (510 checks, 0
+failures). v1.5.0 remains the previous tagged release.
 
 **Scope delivered:** `Repot.GetHtml` plus a separate optional
 `RepotViewer.b4xlib` containing one viewer module with two native
@@ -88,4 +90,9 @@ duplicate layout and drift, so it stays out of scope.
 - [x] Full suite green (510 checks, 0 failures).
 - [x] B4A visual run (emulator-5554, API 36): the invoice renders inline,
   fits the screen width, and Save As writes a 21 KB PDF.
-- [ ] B4J visual run (desktop window) still a manual check.
+- [ ] B4J visual run: **not possible on this machine.** `java -jar
+  preview.jar` fails with "JavaFX runtime components are missing": the
+  configured JDK (`C:\Java\jdk-19.0.2`) has no JavaFX and B4J ships only
+  the `jFX.jar` wrapper, not the runtime. Not a release gate — v1.6.0
+  ships the core library only (see CHANGELOG "Release scope"); the viewer
+  and `preview/` remain test artifacts.

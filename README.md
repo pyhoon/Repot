@@ -145,12 +145,14 @@ it from there; the jar itself is not bundled — download from Maven
 Central). B4A needs nothing extra. See
 [docs/dependencies.md](docs/dependencies.md).
 
-Inline preview is a separate, optional package: install
-`dist/RepotViewer.b4xlib` the same way (one copy in
-`Additional\B4X` covers both IDEs). It contains
-`ReportHtmlViewer`, a B4X custom view that appears in the Layout
-Designer's Custom Views list; B4J needs `jfx` + `jxui`, B4A needs `xui`.
-The core engine library stays headless — the viewer is not part of it.
+Inline preview is **not part of the shipped library**. `RepotViewer.b4xlib`
+and the `preview/` projects are test artifacts for the inline-preview work:
+they build, and the B4A branch is verified on an emulator, but v1.6.0
+releases only the core `Repot.b4xlib`. If you build the viewer yourself
+(`tools/package-viewer-b4xlib.ps1`), install it the same way — one copy in
+`Additional\B4X` covers both IDEs. It contains `ReportHtmlViewer`, a B4X
+custom view for the Layout Designer's Custom Views list; B4J needs
+`jfx` + `jxui`, B4A needs `xui`. The core engine library stays headless.
 
 Build a report once, then export it to as many formats as needed without
 re-running layout. The facade is synchronous: `Build` and the exporters

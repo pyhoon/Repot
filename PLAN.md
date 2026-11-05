@@ -5,13 +5,14 @@
 **Ecosystem:** B4X (B4J first, B4A second)\
 **Template format:** Versioned JSON, `.repot` extension\
 **License:** MIT, all components\
-**Current stage:** v1.6.0 (M15 complete). Inline HTML preview: `GetHtml`
-on the facade plus an optional `RepotViewer.b4xlib` custom view (B4J
-`fx.WebView`, B4A core `WebView`) that fits the page to the view width,
-with SAF Save As fixed on B4A. Engine suite 510 checks, 0 failures.
-Earlier: B4A vector PDF via the Printing library, PDF introspection via
-PdfRenderer, SAF SaveAs; B4J PDF embeds TrueType fonts, renders RTL text
-(bidi + Arabic shaping), and accepts a mixed-script font set; office
+**Current stage:** v1.6.0 (M15 complete). Releases the core library only:
+`GetHtml` on the facade, viewport meta in the HTML, the B4A SAF Save As
+fix, and regenerated layout goldens. The inline-preview custom view
+(`RepotViewer.b4xlib`) and the `preview/` apps stay in the repository as
+test artifacts and are not shipped. Engine suite 510 checks, 0 failures
+(B4A 346, 0). Earlier: B4A vector PDF via the Printing library, PDF
+introspection via PdfRenderer; B4J PDF embeds TrueType fonts, renders RTL
+text (bidi + Arabic shaping), and accepts a mixed-script font set; office
 export covers DOCX, XLSX, ODT and ODS.
 
 ---
@@ -495,7 +496,7 @@ see the risk of scope creep in §12.
 
 | Item | Why it is not yet scheduled | What it would need |
 |------|---------------------------|-------------------|
-| Browser viewer component | M15 ships an optional `RepotViewer.b4xlib` (B4J fx.WebView, B4A core WebView) over `Repot.GetHtml`; a browser/JS-side viewer remains unscheduled | Separate UI package, not an engine change |
+| Browser viewer component | M15 built a test artifact `RepotViewer.b4xlib` (B4J fx.WebView, B4A core WebView) over `Repot.GetHtml`; not shipped with v1.6.0. A browser/JS-side viewer remains unscheduled | Separate UI package, not an engine change |
 | Subreports | Needs a nested-layout pass and its own data binding; the render document has no nesting yet | ADR + render-document extension |
 | Charts and cross-tabs | Needs a chart primitive in the render document | ADR + new draw op type |
 | Drill-down or interactive HTML | Needs a second, interactive HTML mode | Separate pipeline from fixed-layout |

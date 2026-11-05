@@ -4,21 +4,29 @@
 
 Inline HTML preview for B4J desktop, and the facade accessor it needs.
 
+### Release scope
+
+v1.6.0 releases the **core `Repot.b4xlib`** changes only (`GetHtml`,
+viewport meta, B4A Save As fix, regenerated goldens). `RepotViewer.b4xlib`
+and the `preview/` apps are kept as **test artifacts** for the inline
+preview work: they are buildable and the emulator run is recorded here,
+but they are not shipped as a library or included in the release. No
+tagged release publishes the viewer.
+
 ### Added
 - `Repot.GetHtml`: returns the exact HTML document `ExportHtml` writes
   (same render document, same `ReportHtmlExporter` pass), so a preview
   cannot drift from the exported file.
-- `RepotViewer.b4xlib` (separate optional package,
-  `tools/package-viewer-b4xlib.ps1`): `ReportHtmlViewer` as a B4X
-  **custom view** — `DesignerCreateView` plus
+- `RepotViewer.b4xlib` (test artifact, `tools/package-viewer-b4xlib.ps1`):
+  `ReportHtmlViewer` as a B4X **custom view** — `DesignerCreateView` plus
   `#Event: PageFinished`, so it is added directly in the Layout Designer.
   One module serves both platforms (B4J `fx.WebView`, B4A core
   `WebView`); APIs verified against `jFX.xml` and `Core.xml`.
   Manifest: `Supported Platforms=B4A,B4J`.
 - `preview/B4J/preview.b4j`: the reference use case — builds
   invoice-basic through the facade and shows `GetHtml` inline.
-- `preview/B4A/RepotViewer.b4a`: compile-check project; the B4A branch is
-  verified by a B4ABuilder run (exit 0).
+- `preview/B4A/RepotViewer.b4a`: the same flow on Android, with the
+  designer-added viewer, SAF Save As and Print PDF.
 - `TestHtmlPreview` in the engine suite: `GetHtml` is non-empty, contains
   the document markers, and is byte-identical to the `ExportHtml` file.
 - HTML output now includes
