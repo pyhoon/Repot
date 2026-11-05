@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.6.0-blue" alt="version 1.6.0"></a>
+  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.7.0-blue" alt="version 1.7.0"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license"></a>
   <img src="https://img.shields.io/badge/B4J-510%20checks%20%2F%200%20errors-success" alt="B4J 510 checks, 0 errors">
   <img src="https://img.shields.io/badge/B4A-353%20checks%20%2F%200%20errors-success" alt="B4A 353 checks, 0 errors">
@@ -33,13 +33,14 @@ renders to HTML for browsers.
 > (`ReportSaveAs`). The B4J PDF embeds TrueType fonts, renders
 > right-to-left text (bidi reordering + Arabic shaping), and accepts a
 > set of embedded fonts for mixed-script documents. Office export covers
-> DOCX, XLSX, ODT and ODS. Tagged `v1.6.0`.
+> DOCX, XLSX, ODT and ODS, with typed XLSX/ODS cells since v1.7.0.
+> Tagged `v1.7.0`.
 >
-> **Release scope:** v1.6.0 ships the core `Repot.b4xlib` only.
+> **Release scope:** v1.7.0 ships the core `Repot.b4xlib` only.
 > `RepotViewer.b4xlib` and the `preview/` projects are test artifacts for
 > the inline-preview work and are not released.
 >
-> The full engine suite runs on both platforms: **B4J 510 checks,
+> The full engine suite runs on both platforms: **B4J 578 checks,
 > B4A 353 checks, 0 errors on both** (emulator-5554, API 36).
 > `tools/ci.ps1` is the B4J gate; add `-RunEmulator` (or run
 > `tools/run-b4a-tests.ps1`) for the B4A suite, which fails when the

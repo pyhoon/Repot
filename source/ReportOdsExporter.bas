@@ -46,28 +46,105 @@ Public Sub Export (DataSetName As String, OutputPath As String) As Boolean
 		#End If
 		File.MakeDir(tmp, "META-INF")
 
+		' One cell style and one column style per field, plus the number/date
+		' data styles they reference. Names are positional, so output is
+		' deterministic. Excel ignores the cached text:p for display: it
+		' needs the data style attached through table:style-name.
+		Dim colCount As Int = ds.Definition.Fields.Size
+		Dim widths As List
+		widths.Initialize
+		Dim hasStyle As List
+		hasStyle.Initialize
+		Dim isDate As List
+		isDate.Initialize
+		Dim ci As Int = 1
+		For Each f As ReportFieldDef In ds.Definition.Fields
+			Dim w As Int = f.Name.Length
+			For Each rec0 As Map In ds.Records
+				Dim t0 As String = ReportSpreadsheet.DisplayText(rec0.Get(f.Name), f.FormatMap, f.DataType)
+				If t0.Length > w Then w = t0.Length
+			Next
+			If w < 8 Then w = 8
+			If w > 60 Then w = 60
+			widths.Add(w + 2)
+
+			Dim code As String = ReportSpreadsheet.ExcelFormatCode(f.FormatMap, f.DataType)
+			hasStyle.Add(code <> "General")
+			isDate.Add(ReportSpreadsheet.IsDateFormat(f.FormatMap, f.DataType))
+			ci = ci + 1
+		Next
+
 		' content.xml: the dataset as one table (header row + data rows)
 		Dim content As StringBuilder
 		content.Initialize
 		content.Append("<?xml version=""1.0"" encoding=""UTF-8""?>").Append(CRLF)
-		content.Append("<office:document-content xmlns:office=""urn:oasis:names:tc:opendocument:xmlns:office:1.0"" xmlns:text=""urn:oasis:names:tc:opendocument:xmlns:text:1.0"" xmlns:table=""urn:oasis:names:tc:opendocument:xmlns:table:1.0"" office:version=""1.2"">").Append(CRLF)
+		content.Append("<office:document-content xmlns:office=""urn:oasis:names:tc:opendocument:xmlns:office:1.0"" xmlns:text=""urn:oasis:names:tc:opendocument:xmlns:text:1.0"" xmlns:table=""urn:oasis:names:tc:opendocument:xmlns:table:1.0"" xmlns:style=""urn:oasis:names:tc:opendocument:xmlns:style:1.0"" xmlns:number=""urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0"" office:version=""1.2"">").Append(CRLF)
+		content.Append("  <office:automatic-styles>").Append(CRLF)
+		ci = 1
+		For Each f As ReportFieldDef In ds.Definition.Fields
+			Dim hs As Boolean = hasStyle.Get(ci - 1)
+			Dim fd As Boolean = isDate.Get(ci - 1)
+			If hs Then
+				If fd Then
+					content.Append("    ").Append(ReportSpreadsheet.OdfDateStyleFor("D" & ci, f.FormatMap, f.DataType)).Append(CRLF)
+					content.Append("    <style:style style:name=""ce").Append(ci).Append(""" style:family=""table-cell"" style:data-style-name=""D").Append(ci).Append("""/>").Append(CRLF)
+				Else
+					content.Append("    ").Append(ReportSpreadsheet.OdfNumberStyle("N" & ci, f.FormatMap, f.DataType)).Append(CRLF)
+					content.Append("    <style:style style:name=""ce").Append(ci).Append(""" style:family=""table-cell"" style:data-style-name=""N").Append(ci).Append("""/>").Append(CRLF)
+				End If
+			End If
+			ci = ci + 1
+		Next
+		ci = 1
+		For Each f As ReportFieldDef In ds.Definition.Fields
+			Dim wv As Double = widths.Get(ci - 1)
+			Dim cm As Double = wv * 0.21
+			content.Append("    <style:style style:name=""co").Append(ci).Append(""" style:family=""table-column""><style:table-column-properties style:column-width=""").Append(ReportUnits.FormatNumber(cm, 2)).Append("cm""/>").Append("</style:style>").Append(CRLF)
+			ci = ci + 1
+		Next
+		content.Append("  </office:automatic-styles>").Append(CRLF)
 		content.Append("  <office:body>").Append(CRLF)
 		content.Append("    <office:spreadsheet>").Append(CRLF)
 		content.Append("      <table:table table:name=""Report"">").Append(CRLF)
-		Dim colCount As Int = ds.Definition.Fields.Size
-		content.Append("        <table:table-column table:number-columns-repeated=""").Append(colCount).Append("""/>").Append(CRLF)
+		ci = 1
+		For Each f As ReportFieldDef In ds.Definition.Fields
+			content.Append("        <table:table-column table:style-name=""co").Append(ci).Append("""/>").Append(CRLF)
+			ci = ci + 1
+		Next
 		' header row
 		content.Append("        <table:table-row>")
 		For Each f As ReportFieldDef In ds.Definition.Fields
 			content.Append("<table:table-cell office:value-type=""string""><text:p>").Append(XmlEscape(f.Name)).Append("</text:p></table:table-cell>")
 		Next
 		content.Append("</table:table-row>").Append(CRLF)
-		' data rows
+		' data rows: the cell type follows the bound value
 		For Each rec As Map In ds.Records
 			content.Append("        <table:table-row>")
+			ci = 1
 			For Each f As ReportFieldDef In ds.Definition.Fields
 				Dim v As Object = rec.Get(f.Name)
-				content.Append("<table:table-cell office:value-type=""string""><text:p>").Append(XmlEscape(ValueToString(v))).Append("</text:p></table:table-cell>")
+				Dim kind As String = ReportSpreadsheet.CellKind(v, f)
+				Dim txt As String = ReportSpreadsheet.DisplayText(v, f.FormatMap, f.DataType)
+				If kind = "empty" Then
+					content.Append("<table:table-cell/>")
+				Else If kind = "number" Then
+					Dim d As Double = v
+					content.Append("<table:table-cell table:style-name=""ce").Append(ci).Append(""" office:value-type=""float"" office:value=""").Append(ReportSpreadsheet.InvariantNumber(d)).Append("""><text:p>").Append(XmlEscape(txt)).Append("</text:p></table:table-cell>")
+				Else If kind = "date" Then
+					content.Append("<table:table-cell table:style-name=""ce").Append(ci).Append(""" office:value-type=""date"" office:date-value=""").Append(ReportSpreadsheet.OdfDateValue(v)).Append("""><text:p>").Append(XmlEscape(txt)).Append("</text:p></table:table-cell>")
+				Else If kind = "boolean" Then
+					Dim b As Boolean = v
+					content.Append("<table:table-cell office:value-type=""boolean"" office:boolean-value=""")
+					If b Then
+						content.Append("true")
+					Else
+						content.Append("false")
+					End If
+					content.Append("""><text:p>").Append(XmlEscape(txt)).Append("</text:p></table:table-cell>")
+				Else
+					content.Append("<table:table-cell office:value-type=""string""><text:p>").Append(XmlEscape(txt)).Append("</text:p></table:table-cell>")
+				End If
+				ci = ci + 1
 			Next
 			content.Append("</table:table-row>").Append(CRLF)
 		Next

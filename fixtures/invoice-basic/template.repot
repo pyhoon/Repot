@@ -44,9 +44,9 @@
       "kind": "rows",
       "fields": [
         { "name": "Description", "type": "string" },
-        { "name": "Quantity", "type": "decimal" },
-        { "name": "UnitPrice", "type": "decimal" },
-        { "name": "Amount", "type": "decimal" }
+        { "name": "Quantity", "type": "decimal", "format": { "type": "number", "decimals": 0 } },
+        { "name": "UnitPrice", "type": "decimal", "format": { "type": "number", "decimals": 2, "grouping": true } },
+        { "name": "Amount", "type": "decimal", "format": { "type": "number", "decimals": 2, "grouping": true } }
       ],
       "aggregates": [
         { "name": "NetTotal", "function": "sum", "field": "Amount" },

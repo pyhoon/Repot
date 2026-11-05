@@ -180,7 +180,7 @@ per week. They are planning ranges, not commitments.
 | M13 | Mixed-script embedded font set + configurable RTL base direction | 1–2 weeks |
 | M14 | ODT and ODS export via own minimal writers (office family symmetry) | done |
 | M15 | `Repot.GetHtml` + inline preview viewer (viewer kept as a test artifact), viewport meta, B4A Save As fix | done, v1.6.0 |
-| M16 | Typed XLSX/ODS cells: numbers, booleans and dates with field display formats | planned, v1.7.0 |
+| M16 | Typed XLSX/ODS cells: numbers, booleans and dates with field display formats | done, v1.7.0 |
 
 Indicative: v0.1 at M0–M5 (about 10–13 weeks); v1.0 at M0–M9 (about
 17–24 weeks). B4A depth is the largest source of variance. Current
@@ -521,8 +521,10 @@ see the risk of scope creep in §12.
 | B4i | Not targeted; architecture should not preclude it | A platform adapter |
 | ODF application verification | No LibreOffice on the dev machine; verification is structural (Tier-2) | A build machine or a second opinion |
 
-Typed office cells were scheduled as M16 (v1.7.0); see `M16_TASKS.md`
-and ADR 0011. The remaining items stay demand-gated: none is started
-until a user, a fixture or a integration attempt shows it is needed.
+| Typed office cells were scheduled as M16 (v1.7.0); see `M16_TASKS.md`
+and ADR 0011. They are implemented and verified (B4J 578 checks, 0 errors;
+Excel COM read-back confirms types, formats and `=SUM(D2:D5) = 2449.95`).
+The remaining items stay demand-gated: none is started until a user, a
+fixture or an integration attempt shows it is needed.
 The office-formats family (DOCX, XLSX, ODT, ODS) is otherwise symmetric,
 and RTL/mixed-script coverage in the B4J PDF is complete.

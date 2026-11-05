@@ -213,7 +213,9 @@ CI shape:
 4. java -jar <harness>.jar <fixtures> --golden  # from M3
 5. compare layout JSON; fail on any diff
 6. run verifier scripts for DOCX/XLSX when those exist
-7. publish the diff as an artifact
+7. `tools/verify-office.ps1` (Excel COM: cell types, `NumberFormat`,
+   `=SUM(D2:D5) = 2449.95` on a temp copy)
+8. publish the diff as an artifact
 ```
 
 The harness is a B4J console application; it does not need the IDE. Tests
@@ -273,17 +275,16 @@ API 36):
 | RTL text (bidi reordering, Arabic shaping) | pass (v1.3, `rtl-arabic` + `rtl-hebrew`) | pass (system text stack shapes at draw; export + page count verified) |
 | Mixed-script font set (per-run embedded fonts) | pass (v1.4, `mixed-scripts`) | pass (system fallback; export + page count verified) |
 | CJK scripts (Japanese/Chinese/Korean) | pass (v1.5, `multilang` extracts kana/han/hangul incl. Traditional han, zero `?`) | pass (system text stack covers CJK at draw; export + page count verified) |
-| ODT/ODS export (ODF package structure) | pass (v1.5, zip + XML probe in-suite) | pass (export + existence) |
+| ODT/ODS export (ODF package structure + typed ODS cells) | pass (v1.7, zip + XML probe in-suite + `verify-office.ps1`) | pass (export + existence) |
 | Layout goldens (AWT baselines) | pass | not applicable |
 | Fixture-level validation | pass | not applicable |
 
 This accounts for the check-count delta between platforms:
-**B4J 510 checks, B4A 353 checks, 0 errors on both** (v1.6.0 adds the B4A
-`TestSaveAs` checks; v1.5.0: both platforms gained the ODT/ODS office-export
-checks, and the B4J `multilang` test grew extraction assertions for every
-script row — kana, han, hangul, Greek, Cyrillic, Arabic, Hebrew — through
-the registered font set, so CJK glyph coverage is regression-tested;
-B4A asserts export + existence like the DOCX/XLSX tests).
+**B4J 578 checks, B4A 353 checks, 0 errors on both** (v1.7 adds the
+B4J typed-cell checks in `TestOfficeTypedCells` and the invoice
+assertions in `TestOfficeExport`; the `tests/B4A` test module is a
+separate copy and keeps the v1.6.0 count until the emulator gate can run
+it again).
 PDF rendering on B4A goes through the `Printing` library vector canvas
 (M10); introspection reads the file back through
 `android.graphics.pdf.PdfRenderer`, and the missing-file contract

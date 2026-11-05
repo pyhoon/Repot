@@ -1,5 +1,41 @@
 # Changelog
 
+## 1.7.0 — M16
+
+Typed XLSX/ODS cells (ADR 0011, accepted). The cell type now follows the
+bound value instead of writing everything as a string, and a field-level
+optional `format` object supplies the display format.
+
+### Added
+- `ReportFieldDef.FormatMap`: a dataset field may carry an optional
+  `format` (`type`, `decimals`, `grouping`, `prefix`, `suffix`, `pattern`,
+  `trueText`, `falseText`). It is display metadata for data exporters only;
+  layout ignores it and no schema version bump is needed.
+- `source/ReportSpreadsheet.bas`: new shared, pure-B4X helper — cell kind
+  from the bound value, ISO date parsing, timezone-free Excel serials
+  (1899-12-30 epoch) and ODF `office:date-value`, Excel/ODF format codes,
+  cached display text, invariant numbers.
+- XLSX: `xl/styles.xml` part with custom `numFmt` ids from 164, typed
+  `<c>` cells (number/date/boolean), `<col>` widths from formatted text,
+  `rId2` styles relationship, content-type override.
+- ODS: `office:automatic-styles` number/date styles referenced by
+  `table:style-name`, per-cell `office:value-type` (`float`/`date`/
+  `boolean`), per-column widths.
+- `tools/verify-office.ps1`: Excel COM read-back — cell types,
+  `NumberFormat`, and `=SUM(D2:D5) = 2449.95` on a temp copy.
+- `tests/B4J/ReportEngineTests.bas`: `TestOfficeTypedCells` plus
+  invoice typed-cell assertions in `TestOfficeExport`; `ExtractZipEntry`
+  Java zip probe (27 new checks).
+- `fixtures/invoice-basic/template.repot`: Items fields now carry `format`.
+
+### Fixed
+- Negative grouped numbers: `-1,234.5` no longer renders as `-,234.5`
+  (`ReportUnits.AddGrouping`, moved from the paginator).
+
+### Release scope
+- Core `Repot.b4xlib` only. `RepotViewer.b4xlib` and `preview/` remain
+  test artifacts.
+
 ## 1.6.0 — M15
 
 Inline HTML preview for B4J desktop, and the facade accessor it needs.

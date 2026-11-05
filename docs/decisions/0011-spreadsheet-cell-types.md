@@ -1,7 +1,8 @@
 # ADR 0011 - Spreadsheet cell types and field display formats
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-11-05
+- Accepted: 2026-11-05 (M16 implemented and verified)
 
 ## Context
 

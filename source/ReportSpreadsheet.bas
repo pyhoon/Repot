@@ -100,6 +100,16 @@ Public Sub OdfDateValue (Value As Object) As String
 	Return out
 End Sub
 
+'Invariant numeric text for an XML value: dot decimal separator, no
+'locale formatting. A trailing ".0" is dropped so integers stay tidy;
+'scientific notation is left as the platform renders it (Excel accepts
+'it in <v>).
+Public Sub InvariantNumber (Value As Double) As String
+	Dim s As String = Value
+	If s.EndsWith(".0") Then s = s.SubString2(0, s.Length - 2)
+	Return s
+End Sub
+
 'Number format parts for the ODF styles: decimals, grouping, prefix and
 'suffix. Defaults follow the declared type.
 Public Sub NumberParts (Fmt As Map, DeclaredType As String) As Map
@@ -210,6 +220,23 @@ Public Sub OdfDateStyle (Name As String, Pattern As String) As String
 	out.Append(OdfDateTokens(Pattern))
 	out.Append("</number:date-style>")
 	Return out.ToString
+End Sub
+
+'True when the field's display format is a date pattern rather than a
+'number format. Used to choose between an ODF date style and a number
+'style.
+Public Sub IsDateFormat (Fmt As Map, DeclaredType As String) As Boolean
+	Dim typ As String = ""
+	If Fmt.ContainsKey("type") Then typ = Fmt.Get("type")
+	If typ = "date" Then Return True
+	If typ = "number" Or typ = "text" Or typ = "boolean" Then Return False
+	Return (DeclaredType = "date" Or DeclaredType = "datetime")
+End Sub
+
+'ODF automatic-style fragment for a date cell style, with the pattern
+'resolved from the field definition.
+Public Sub OdfDateStyleFor (Name As String, Fmt As Map, DeclaredType As String) As String
+	Return OdfDateStyle(Name, DatePattern(Fmt, DeclaredType))
 End Sub
 
 Public Sub XmlEscape (s As String) As String

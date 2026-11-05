@@ -50,7 +50,7 @@ Get-ChildItem -Path $src -Filter "*.bas" -File |
 
 # Manifest.
 $manifest = @"
-Version=1.6
+Version=1.7
 B4J.DependsOn=Json, JavaObject, pdfbox-app-3.0.8
 B4A.DependsOn=Json, JavaObject, Printing, FileProvider
 "@

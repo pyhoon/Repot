@@ -20,9 +20,9 @@ and what is explicitly best-effort. It is the contract behind the phrase
 | CSV / JSON export | 0.1 | 0.1 | 1.0 | -- |
 | XML export | 0.2 | 0.2 | 1.0 | -- |
 | DOCX export | 1.0 | 1.0 | 1.0 (verified) | -- |
-| XLSX export | 1.x | 1.x | 1.0 (verified) | -- |
+| XLSX export | 1.7 | 1.7 | 1.7 (verified: typed number/date/boolean cells, `xl/styles.xml`, custom `numFmt` from 164, `verify-office.ps1`) | -- |
 | ODT export | 1.5 | 1.5 | 1.5 | -- |
-| ODS export | 1.5 | 1.5 | 1.5 | -- |
+| ODS export | 1.5 | 1.5 | 1.7 (verified: typed cells via `office:value-type` + automatic data styles, `verify-office.ps1`) | -- |
 | Inline preview widget | 1.6 (`RepotViewer.b4xlib`: designer-addable custom view over fx.WebView; needs `jfx`,`jxui`) | -- (host renders HTML itself) | 1.6 (`RepotViewer.b4xlib`: same custom view over the core WebView; needs `xui`) | n/a |
 | Native preview | host WebView (`ReportHtmlExporter.ToHtml`) | n/a | host WebView (`ToHtml`) | n/a |
 | Print | opens the PDF in the system viewer | n/a | 1.0 (system print dialog, `ReportPrint`) | browser |
@@ -137,25 +137,31 @@ the canvas is abstract. See
   text stack shapes, reorders and falls back across fonts at draw time;
   the RTL and mixed-script fixtures export through the vector canvas
   with introspected page counts.
-- ODT/ODS export (v1.5): minimal ODF 1.2 writers in the same style as
+- ODT/ODS export (v1.5/v1.7): minimal ODF 1.2 writers in the same style as
   the DOCX/XLSX ones — a zip package with `mimetype` (first entry,
   uncompressed, as ODF requires), `META-INF/manifest.xml` and
   `content.xml`, no third-party library. The dataset becomes one
   `table:table` (ODT: inside `office:text`; ODS: inside
   `office:spreadsheet`) with a header row from the field definitions.
-  All cells are written as string cells, matching the XLSX writer's
-  inline-string behaviour; typed numeric/date cells are a known
-  limitation. The manifest's root file-entry carries
-  `manifest:version="1.2"` and the package includes the spec-optional
-  `styles.xml`/`meta.xml` parts (the "LibreOffice-shaped package") —
-  both target Excel's ODF importer, which reported a repair prompt on
-  the first release build (found in first release testing; fixed in
-  v1.5.0 and verified in Excel LTSC 2508: the prompt is gone after
-  adding the two parts). Verification is
-  structural (zip layout + XML well-formedness asserted in the suite);
-  no ODF application is installed on the development machine, so
-  "opens in LibreOffice" is unverified — reported as a Tier-2
-  equivalence claim, not Tier 1.
+  Since v1.7 (ADR 0011) ODS cells are typed: numbers carry
+  `office:value-type="float"`, dates `office:date-value` and booleans
+  `office:boolean-value`, each referenced through a `table:style-name`
+  to an `office:automatic-styles` data style (Excel's ODF importer shows
+  the raw serial unless the style is attached). Column widths come from
+  the formatted text. XLSX gained the same typing at v1.7: an
+  `xl/styles.xml` part with custom `numFmt` ids from 164, typed `<c>`
+  cells, `<col>` widths, and the `rId2` styles relationship. Both are
+  verified through Excel COM in `tools/verify-office.ps1` (cell types,
+  `NumberFormat`, and `=SUM(D2:D5) = 2449.95` on a temp copy).
+  The manifest's root file-entry carries `manifest:version="1.2"` and
+  the package includes the spec-optional `styles.xml`/`meta.xml` parts
+  (the "LibreOffice-shaped package") — both target Excel's ODF importer,
+  which reported a repair prompt on the first release build; the prompt
+  is gone after adding the two parts. Verification is structural (zip
+  layout + XML well-formedness asserted in the suite) plus the Excel
+  COM read-back; no ODF application is installed on the development
+  machine, so "opens in LibreOffice" is unverified — reported as a
+  Tier-2 equivalence claim, not Tier 1.
 
 ## 4. Fidelity tiers
 

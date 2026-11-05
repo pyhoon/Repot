@@ -37,6 +37,7 @@ Public Sub Run (FixturesDir As String)
 	TestHtmlPreview
 	TestDataExport
 	TestOfficeExport
+	TestOfficeTypedCells
 	TestExpressions
 	TestGrouping
 	TestFixturesLoadAndRoundTrip
@@ -116,6 +117,8 @@ Private Sub TestSpreadsheetCells
 	CheckText("TRUE", ReportSpreadsheet.DisplayText(True, plain, "boolean"), "boolean display text")
 	CheckText("-1234.50", ReportSpreadsheet.DisplayText(-1234.5, plain, "decimal"), "default decimal display text")
 	CheckText("-$1,234.50", ReportSpreadsheet.DisplayText(-1234.5, money, "decimal"), "negative money puts the sign before the prefix")
+	CheckText("1200", ReportSpreadsheet.InvariantNumber(1200), "invariant number drops a zero fraction")
+	CheckText("46331.5", ReportSpreadsheet.InvariantNumber(46331.5), "invariant number keeps a real fraction")
 
 	Dim dateFmt As Map
 	dateFmt.Initialize
@@ -134,6 +137,9 @@ Private Sub TestSpreadsheetCells
 	Check(dateStyle.IndexOf("<number:month") >= 0, "ODF date style has a month")
 	Check(dateStyle.IndexOf("<number:day") >= 0, "ODF date style has a day")
 	Check(dateStyle.IndexOf("<number:text>-</number:text>") >= 0, "ODF date style quotes separators")
+	Check(ReportSpreadsheet.IsDateFormat(dateFmt, "date"), "a date format is a date")
+	Check(ReportSpreadsheet.IsDateFormat(dateFmt, "string"), "an explicit date format wins over the declared type")
+	Check(ReportSpreadsheet.IsDateFormat(plain, "datetime"), "a declared datetime gets a date style by default")
 End Sub
 
 '--------------------------------------------------------------- render document
@@ -1289,6 +1295,22 @@ Private Sub TestOfficeExport
 		Dim xlsxPath As String = File.Combine(File.DirApp, "test-items.xlsx")
 		Check(xlsx.Export("Items", xlsxPath), "xlsx export succeeds")
 		Check(File.Exists(File.DirApp, "test-items.xlsx"), "xlsx file exists")
+		'Field formats load from the template and reach the cells: Quantity
+		'is 0 decimals, UnitPrice/Amount are #,##0.00. Values stay numeric.
+		Dim itemsDef As ReportDataSetDef = def.DataSetByName("Items")
+		If itemsDef <> Null Then
+			Dim amountField As ReportFieldDef = itemsDef.FieldByName("Amount")
+			Check(amountField <> Null, "invoice has an Amount field")
+			If amountField <> Null Then
+				Check(amountField.FormatMap.Get("decimals") = 2, "invoice field format is loaded")
+			End If
+		End If
+		Dim invSheetDump As String = File.Combine(File.DirApp, "test-items-sheet.xml")
+		If ExtractZipEntry(xlsxPath, "xl/worksheets/sheet1.xml", invSheetDump) Then
+			Dim invSheet As String = File.ReadString(File.DirApp, "test-items-sheet.xml")
+			Check(invSheet.IndexOf("<c r=""B2"" s=""1""><v>1</v></c>") >= 0, "invoice quantity is a styled number")
+			Check(invSheet.IndexOf("<c r=""D2"" s=""2""><v>1200</v></c>") >= 0, "invoice amount is a styled number")
+		End If
 	End If
 
 	'ODT/ODS (v1.5): same dataset through the ODF writers. The zip
@@ -1323,6 +1345,9 @@ Private Sub TestOfficeExport
 			Dim odsContent As String = File.ReadString(File.DirApp, "test-items-ods-content.txt")
 			Check(odsContent.IndexOf("office:spreadsheet") >= 0, "ods content is a spreadsheet body")
 			Check(odsContent.IndexOf("table:table-cell") >= 0, "ods content has cells")
+			'Amount is the fourth field, so it uses the ce4 data style.
+			Check(odsContent.IndexOf("office:value-type=""float"" office:value=""1200""") >= 0, "invoice amount is a typed ODS number")
+			Check(odsContent.IndexOf("table:style-name=""ce4""") >= 0, "invoice amount carries its ODS number style")
 		End If
 	End If
 End Sub
@@ -1353,6 +1378,146 @@ End Sub
 Private Sub CheckOdfPackage (Path As String, ExpectedMime As String, DumpPath As String) As String
 	Dim jo As JavaObject = Me
 	Return jo.RunMethod("checkOdf", Array(Path, ExpectedMime, DumpPath))
+End Sub
+
+'Copies one entry out of a zip package (XLSX or ODF) so the B4X layer
+'can assert on the XML without zip access.
+Private Sub ExtractZipEntry (ZipPath As String, Entry As String, DumpPath As String) As Boolean
+	Dim jo As JavaObject = Me
+	Dim o As Object = jo.RunMethod("extractEntry", Array(ZipPath, Entry, DumpPath))
+	Dim ok As Boolean = o
+	Return ok
+End Sub
+
+'Typed spreadsheet cells: the cell type follows the bound value and the
+'shape of the package follows Excel's requirements (styles part, custom
+'numFmt ids, automatic data styles in ODF).
+Private Sub TestOfficeTypedCells
+	Dim money As Map
+	money.Initialize
+	money.Put("type", "number")
+	money.Put("decimals", 2)
+	money.Put("grouping", True)
+
+	Dim dateFmt As Map
+	dateFmt.Initialize
+	dateFmt.Put("type", "date")
+	dateFmt.Put("pattern", "yyyy-MM-dd")
+
+	Dim def As ReportDefinition
+	def.Initialize
+	def.Id = "typed.cells"
+	def.Name = "Typed cells"
+
+	Dim dsDef As ReportDataSetDef
+	dsDef.Initialize
+	dsDef.Name = "Rows"
+	dsDef.Fields.Add(NewField("Amount", "decimal", money))
+	dsDef.Fields.Add(NewField("Due", "date", dateFmt))
+	dsDef.Fields.Add(NewField("Paid", "boolean", EmptyMap))
+	dsDef.Fields.Add(NewField("Note", "string", EmptyMap))
+	def.DataSets.Put("Rows", dsDef)
+
+	Dim binder As ReportDataBinder
+	binder.Initialize(def)
+
+	Dim rows As List
+	rows.Initialize
+	rows.Add(TypedRow(1200, "2026-11-05", True, "Paid in full"))
+	rows.Add(TypedRow(-1234.5, "1900-03-01", False, Null))
+	rows.Add(TypedRow(99.95, "2026-11-05T13:30:00", True, "Wire"))
+	binder.SetDataSource("Rows", rows)
+	Check(binder.Validate, "typed dataset binds")
+
+	Dim diags As ReportDiagnostics
+	diags.Initialize
+
+	Dim xlsx As ReportXlsxExporter
+	xlsx.Initialize(def, binder, diags)
+	Dim xlsxPath As String = File.Combine(File.DirApp, "typed-cells.xlsx")
+	Check(xlsx.Export("Rows", xlsxPath), "typed xlsx export succeeds")
+
+	Dim sheetDump As String = File.Combine(File.DirApp, "typed-cells-sheet.xml")
+	Check(ExtractZipEntry(xlsxPath, "xl/worksheets/sheet1.xml", sheetDump), "xlsx sheet entry exists")
+	If File.Exists(File.DirApp, "typed-cells-sheet.xml") Then
+		Dim sheet As String = File.ReadString(File.DirApp, "typed-cells-sheet.xml")
+		Check(sheet.IndexOf("<c r=""A2"" s=""1""><v>1200</v></c>") >= 0, "xlsx number cell is numeric and styled")
+		Check(sheet.IndexOf("<c r=""B2"" s=""2""><v>46331</v></c>") >= 0, "xlsx date cell is a serial")
+		Check(sheet.IndexOf("<c r=""C2"" t=""b""><v>1</v></c>") >= 0, "xlsx true is a boolean cell")
+		Check(sheet.IndexOf("<c r=""D2"" t=""inlineStr"">") >= 0, "xlsx text cell stays text")
+		Check(sheet.IndexOf("<c r=""A3"" s=""1""><v>-1234.5</v></c>") >= 0, "xlsx negative number keeps its sign")
+		Check(sheet.IndexOf("<c r=""C3"" t=""b""><v>0</v></c>") >= 0, "xlsx false is still a boolean cell")
+		Check(sheet.IndexOf("<c r=""D3""/>") >= 0, "xlsx null is an empty cell")
+		Check(sheet.IndexOf("<c r=""B4"" s=""2""><v>46331.5625</v></c>") >= 0, "xlsx datetime serial keeps the time")
+		Check(sheet.IndexOf("customWidth=""1""") >= 0, "xlsx writes column widths")
+	End If
+
+	Dim stylesDump As String = File.Combine(File.DirApp, "typed-cells-styles.xml")
+	Check(ExtractZipEntry(xlsxPath, "xl/styles.xml", stylesDump), "xlsx styles part exists")
+	If File.Exists(File.DirApp, "typed-cells-styles.xml") Then
+		Dim stylesXml As String = File.ReadString(File.DirApp, "typed-cells-styles.xml")
+		Check(stylesXml.IndexOf("formatCode=""#,##0.00""") >= 0, "xlsx money format code")
+		Check(stylesXml.IndexOf("formatCode=""yyyy-mm-dd""") >= 0, "xlsx date format code")
+		Check(stylesXml.IndexOf("numFmtId=""164""") >= 0, "xlsx custom formats start at 164")
+	End If
+
+	Dim ctDump As String = File.Combine(File.DirApp, "typed-cells-ct.xml")
+	Check(ExtractZipEntry(xlsxPath, "[Content_Types].xml", ctDump), "xlsx content types exist")
+	If File.Exists(File.DirApp, "typed-cells-ct.xml") Then
+		Dim ct As String = File.ReadString(File.DirApp, "typed-cells-ct.xml")
+		Check(ct.IndexOf("/xl/styles.xml") >= 0, "xlsx content types declare styles")
+	End If
+
+	Dim relDump As String = File.Combine(File.DirApp, "typed-cells-rels.xml")
+	Check(ExtractZipEntry(xlsxPath, "xl/_rels/workbook.xml.rels", relDump), "xlsx workbook rels exist")
+	If File.Exists(File.DirApp, "typed-cells-rels.xml") Then
+		Dim rels As String = File.ReadString(File.DirApp, "typed-cells-rels.xml")
+		Check(rels.IndexOf("rId2") >= 0 And rels.IndexOf("styles.xml") >= 0, "xlsx workbook links the styles part")
+	End If
+
+	Dim ods As ReportOdsExporter
+	ods.Initialize(def, binder, diags)
+	Dim odsPath As String = File.Combine(File.DirApp, "typed-cells.ods")
+	Check(ods.Export("Rows", odsPath), "typed ods export succeeds")
+
+	Dim odsDump As String = File.Combine(File.DirApp, "typed-cells-content.xml")
+	Check(ExtractZipEntry(odsPath, "content.xml", odsDump), "ods content entry exists")
+	If File.Exists(File.DirApp, "typed-cells-content.xml") Then
+		Dim content As String = File.ReadString(File.DirApp, "typed-cells-content.xml")
+		Check(content.IndexOf("office:value-type=""float"" office:value=""1200""") >= 0, "ods number cell is typed")
+		Check(content.IndexOf("office:value-type=""date"" office:date-value=""2026-11-05""") >= 0, "ods date cell is typed")
+		Check(content.IndexOf("office:value-type=""boolean"" office:boolean-value=""true""") >= 0, "ods boolean cell is typed")
+		Check(content.IndexOf("<table:table-cell/>") >= 0, "ods null is an empty cell")
+		Check(content.IndexOf("<number:number-style style:name=""N1"">") >= 0, "ods number style is declared")
+		Check(content.IndexOf("<number:date-style style:name=""D2"">") >= 0, "ods date style is declared")
+		Check(content.IndexOf("table:style-name=""ce1""") >= 0, "ods number cell uses its style")
+		Check(content.IndexOf("style:column-width=") >= 0, "ods writes column widths")
+	End If
+End Sub
+
+Private Sub TypedRow (Amount As Double, Due As String, Paid As Boolean, Note As Object) As Map
+	Dim m As Map
+	m.Initialize
+	m.Put("Amount", Amount)
+	m.Put("Due", Due)
+	m.Put("Paid", Paid)
+	m.Put("Note", Note)
+	Return m
+End Sub
+
+Private Sub NewField (FieldName As String, DataType As String, Fmt As Map) As ReportFieldDef
+	Dim f As ReportFieldDef
+	f.Initialize
+	f.Name = FieldName
+	f.DataType = DataType
+	f.FormatMap = Fmt
+	Return f
+End Sub
+
+Private Sub EmptyMap As Map
+	Dim m As Map
+	m.Initialize
+	Return m
 End Sub
 
 'Extracts the text layer of a PDF through PDFBox so B4X-level tests can
@@ -1454,8 +1619,24 @@ public static String checkOdf(String path, String expectedMime, String dumpPath)
         return e.getClass().getSimpleName() + ": " + e.getMessage();
     }
 }
+public static boolean extractEntry(String zipPath, String entryName, String dumpPath) throws Exception {
+    ZipFile zf = new ZipFile(zipPath);
+    try {
+        ZipEntry e = zf.getEntry(entryName);
+        if (e == null) return false;
+        InputStream in = zf.getInputStream(e);
+        FileOutputStream out = new FileOutputStream(dumpPath);
+        byte[] buf = new byte[8192];
+        int n;
+        while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+        in.close();
+        out.close();
+        return true;
+    } finally {
+        zf.close();
+    }
+}
 #End If
-'--------------------------------------------------------------- expressions
 
 Private Sub TestExpressions
 	Dim ctx As ReportEvalContext
