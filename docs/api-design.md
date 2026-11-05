@@ -76,7 +76,8 @@ Implemented in v1.2 (PDF verification and saving):
 |--------|---------|
 | `GetPdfPageCount(Path) As Int` | Pages in an exported PDF (B4J PDFBox, B4A `PdfRenderer`); 0 when unreadable |
 | `ExtractPdfText(Path) As String` | PDFBox text extraction on B4J; B4A returns `""` (Android's `PdfRenderer` has no text API) |
-| `SaveAsPdfIntent(Mime, Title) As Object` | B4A: SAF `CreateDocument` intent for the host to launch; B4J: `Null` (use the export path directly) |
+| `SaveAsPdfIntent(Mime, Title) As Object` | B4A: SAF `CreateDocument` intent; launch it with `ReportSaveAs.StartForResult(BA, Ion, Intent)` and wait for `ion_Event` (B4A never delivers SAF results to `Activity_Result`). B4J: `Null` (use the export path directly) |
+| `ReportSaveAs.SaveToDownloads(Dir, Name, Mime) As String` | B4A: writes straight to public Downloads through MediaStore (API 29+) and returns the URI; no picker, no `Wait For` |
 
 Planned:
 

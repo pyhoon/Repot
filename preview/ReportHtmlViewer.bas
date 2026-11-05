@@ -53,7 +53,7 @@ End Sub
 'End Sub
 
 Private Sub Base_Resize (Width As Double, Height As Double)
-
+	
 End Sub
 
 Private Sub BuildWebView
@@ -65,6 +65,10 @@ Private Sub mWv_PageFinished (Url As String)
 	If mCallBack = Null Then Return
 	If mEventName = "" Then Return
 	CallSub2(mCallBack, mEventName & "_PageFinished", Url)
+End Sub
+
+Public Sub getWebview As WebView
+	Return mWv
 End Sub
 
 'Loads the HTML document. Returns False when the view was never created.

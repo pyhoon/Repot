@@ -180,21 +180,36 @@ Report.ExportCsv(File.Combine(DirApp, "items.csv")) ' DefaultDataSet; ExportCsvO
 Log(Report.GetPdfPageCount(File.Combine(DirApp, "invoice.pdf")))
 ```
 
-On B4A, printing and saving to a user-chosen location need one line of
-host wiring each:
+On B4A, printing and saving to a user-chosen location need a little host
+wiring (no permissions, no manifest entry):
 
 ```vb
 Report.PrintPdf(DirApp, "invoice.pdf", "Invoice")          ' system print dialog
 
-' Save As: launch the SAF picker, then handle the result
+' Save As: launch the SAF picker and wait for its IOnActivityResult event.
+' B4A does NOT deliver SAF results to Activity_Result.
 Dim i As Intent = Report.SaveAsPdfIntent("application/pdf", "invoice.pdf")
-ReportSaveAs.StartForResult(i, ReportSaveAs.DefaultRequestCode)
+Dim ba As JavaObject = GetBA
+ion = ba.CreateEvent("anywheresoftware.b4a.IOnActivityResult", "ion", Null)
+ReportSaveAs.StartForResult(ba, ion, i)
+Wait For ion_Event (MethodName As String, Args() As Object)
+If Args(0) = -1 Then    ' RESULT_OK
+    Dim result As Intent = Args(1)
+    ReportSaveAs.CopyFileToUri(DirApp, "invoice.pdf", result.GetData)
+End If
 
-Sub Activity_Result (RequestCode As Int, ResultCode As Int, Data As Object)
-    Dim uri As String = ReportSaveAs.HandleActivityResult(RequestCode, ResultCode, Data)
-    If uri <> "" Then ReportSaveAs.CopyFileToUri(DirApp, "invoice.pdf", uri)
+Private Sub GetBA As JavaObject
+    Dim jo As JavaObject
+    Dim cls As String = Me
+    cls = cls.SubString("class ".Length)
+    jo.InitializeStatic(cls)
+    Return jo.GetField("processBA")
 End Sub
 ```
+
+`ReportSaveAs.SaveToDownloads(Dir, Name, Mime)` is an alternative that
+writes straight to the public Downloads collection (MediaStore, API 29+)
+and returns the URI — no picker and no `Wait For`.
 
 Examples using the same invoice template on all three platforms live in
 `examples/B4J`, `examples/B4A`, and `examples/server` (an HTTP server

@@ -1,4 +1,4 @@
-﻿Build1=Default,b4a.example
+Build1=Default,b4a.example
 Group=Default Group
 Library1=core
 Library2=repot
@@ -34,6 +34,7 @@ Sub Globals
 	Private btnSave As Button
 	Private mReport As Repot
 	Private mOutDir As String
+	Private ion As Object
 End Sub
 
 Sub Activity_Create(FirstTime As Boolean)
@@ -49,19 +50,6 @@ Sub Activity_Create(FirstTime As Boolean)
 	RunExample
 End Sub
 
-Sub Activity_Result (RequestCode As Int, ResultCode As Int, Data As Object)
-	'SAF CreateDocument result: pick the chosen location and copy the PDF.
-	Dim uri As String = ReportSaveAs.HandleActivityResult(RequestCode, ResultCode, Data)
-	If uri <> "" Then
-		If ReportSaveAs.CopyFileToUri(mOutDir, "invoice.pdf", uri) Then
-			Log("SaveAs: PDF saved to " & uri)
-			lbl.Text = "PDF saved to user-chosen location"
-		Else
-			Log("SaveAs: failed to save PDF to " & uri)
-		End If
-	End If
-End Sub
-
 Sub btnPrint_Click
 	If mReport = Null Then Return
 	Log("print: " & mReport.PrintPdf(mOutDir, "invoice.pdf", "Repot invoice"))
@@ -70,10 +58,35 @@ End Sub
 Sub btnSave_Click
 	If mReport = Null Then Return
 	Dim i As Intent = mReport.SaveAsPdfIntent("application/pdf", "invoice.pdf")
-	If i <> Null Then
-		ReportSaveAs.StartForResult(i, ReportSaveAs.DefaultRequestCode)
-		Log("SaveAs: SAF picker opened")
+	If i = Null Then Return
+	'B4A does not deliver SAF results to Activity_Result; use an
+	'IOnActivityResult event and Wait For it (Erel's SaveAs pattern).
+	Dim ba As JavaObject = GetBA
+	ion = ba.CreateEvent("anywheresoftware.b4a.IOnActivityResult", "ion", Null)
+	ReportSaveAs.StartForResult(ba, ion, i)
+	Wait For ion_Event (MethodName As String, Args() As Object)
+	If Args(0) = -1 Then 'RESULT_OK
+		Dim result As Intent = Args(1)
+		Dim uri As String = result.GetData
+		If ReportSaveAs.CopyFileToUri(mOutDir, "invoice.pdf", uri) Then
+			Log("SaveAs: PDF saved to " & uri)
+			lbl.Text = "PDF saved to user-chosen location"
+		Else
+			Log("SaveAs: failed to save PDF to " & uri)
+			lbl.Text = "SaveAs failed"
+		End If
+	Else
+		lbl.Text = "Save cancelled"
 	End If
+End Sub
+
+'The module's BA, needed to create the activity-result event.
+Private Sub GetBA As JavaObject
+	Dim jo As JavaObject
+	Dim cls As String = Me
+	cls = cls.SubString("class ".Length)
+	jo.InitializeStatic(cls)
+	Return jo.GetField("processBA")
 End Sub
 
 Sub RunExample

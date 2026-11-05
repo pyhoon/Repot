@@ -1,4 +1,4 @@
-﻿B4A=true
+B4A=true
 Group=Core
 ModulesStructureVersion=1
 Type=Code
@@ -6,29 +6,38 @@ Version=10.7
 @EndOfDesignText@
 ' SaveAs support via the Android Storage Access Framework (SAF).
 '
-' The engine never owns an Activity, so the host wires two pieces:
+' The engine never owns an Activity, and B4A does NOT deliver SAF results
+' to Activity_Result. The host therefore creates an IOnActivityResult
+' event on its own BA and waits for it (Erel's SaveAs pattern):
 '
-'   1) Start the picker:
+'   1) In the Activity module:
+'        Private ion As Object
+'
 '        Dim i As Intent = ReportSaveAs.CreateDocumentIntent("application/pdf", "report.pdf")
-'        ReportSaveAs.StartForResult(i, ReportSaveAs.DefaultRequestCode)
+'        Dim ba As JavaObject = GetBA
+'        ion = ba.CreateEvent("anywheresoftware.b4a.IOnActivityResult", "ion", Null)
+'        ReportSaveAs.StartForResult(ba, ion, i)
+'        Wait For ion_Event (MethodName As String, Args() As Object)
+'        If Args(0) = -1 Then ' RESULT_OK
+'          Dim result As Intent = Args(1)
+'          ReportSaveAs.CopyFileToUri(File.DirDefaultExternal, "invoice.pdf", result.GetData)
+'        End If
 '
-'   2) In the Activity module:
-'        Sub Activity_Result (RequestCode As Int, ResultCode As Int, Data As Object)
-'          Dim uri As String = ReportSaveAs.HandleActivityResult(RequestCode, ResultCode, Data)
-'          If uri <> "" Then
-'            ReportSaveAs.CopyFileToUri(File.DirDefaultExternal, "invoice.pdf", uri)
-'          End If
+'        Private Sub GetBA As JavaObject
+'          Dim jo As JavaObject
+'          Dim cls As String = Me
+'          cls = cls.SubString("class ".Length)
+'          jo.InitializeStatic(cls)
+'          Return jo.GetField("processBA")
 '        End Sub
 '
 ' Facts verified against the installed libraries / Android SDK:
 '  - ACTION_CREATE_DOCUMENT ("android.intent.action.CREATE_DOCUMENT", API 19+).
 '  - EXTRA_TITLE = "android.intent.extra.TITLE"; mime via Intent.SetType.
-'  - Activity_Result data is an Intent; Intent.GetData returns the
-'    chosen content:// Uri as a string (core.xml).
+'  - No permissions and no manifest entry are needed.
 '  - RESULT_OK == -1 (android.app.Activity).
-'  - Copying: ContentResolver.openOutputStream(Uri) via JavaObject;
-'    File.Copy2 / File.OpenInput are core.
-'  - No permissions are required for ACTION_CREATE_DOCUMENT.
+'  - Copying: ContentResolver.openOutputStream(Uri, "wt") ("wt" truncates a
+'    file the picker pre-created); File.Copy2 / File.OpenInput are core.
 
 Sub Process_Globals
 	Public DefaultRequestCode As Int = 7001
@@ -53,18 +62,23 @@ Public Sub CreateDocumentIntent (Mime As String, Title As String) As Object
 	#End If
 End Sub
 
-'Starts the intent for a result on the current activity and arms this
-'handler for that request code (reflection reaches
-'Activity.startActivityForResult). Hosts that launch the intent
-'themselves call ArmCode first. On B4A pass an Intent; any other value is
-'ignored.
-Public Sub StartForResult (I As Object, Code As Int)
+'Starts the picker so the host gets an activity result. B4A does not
+'deliver SAF results to Activity_Result; the host creates an
+'IOnActivityResult event on its own BA and waits for it:
+'
+'    Dim ba As JavaObject = GetBA
+'    ion = ba.CreateEvent("anywheresoftware.b4a.IOnActivityResult", "ion", Null)
+'    ReportSaveAs.StartForResult(ba, ion, i)
+'    Wait For ion_Event (MethodName As String, Args() As Object)
+'    If Args(0) = -1 Then ReportSaveAs.CopyFileToUri(Dir, Name, Args(1).GetData)
+'
+'GetBA is: Dim jo As JavaObject = Me : cls = jo.SubString("class ".Length)
+'           jo.InitializeStatic(cls) : Return jo.GetField("processBA")
+Public Sub StartForResult (BaObj As Object, IonObj As Object, IntentObj As Object)
 	#If B4A
-	mArmed = Code
-	Dim intent As Intent = I
-	Dim jo As JavaObject
-	jo.InitializeContext
-	jo.RunMethod("startActivityForResult", Array(intent, Code))
+	If BaObj = Null Or IonObj = Null Then Return
+	Dim jo As JavaObject = BaObj
+	jo.RunMethod("startActivityForResult", Array(IonObj, IntentObj))
 	#End If
 End Sub
 
@@ -88,6 +102,44 @@ Public Sub HandleActivityResult (RequestCode As Int, ResultCode As Int, Data As 
 	#End If
 End Sub
 
+'Saves a file straight into the public Downloads collection (API 29+)
+'through MediaStore and returns the created content:// URI, or "" on
+'failure. No picker and no Activity result, so it works even when the
+'host cannot receive Activity_Result.
+Public Sub SaveToDownloads (SrcDir As String, SrcName As String, Mime As String) As String
+	#If B4A
+	If File.Exists(SrcDir, SrcName) = False Then Return ""
+	Try
+		Dim ctx As JavaObject
+		ctx.InitializeContext
+		Dim resolver As JavaObject = ctx.RunMethod("getContentResolver", Null)
+		Dim ms As JavaObject
+		ms.InitializeStatic("android.provider.MediaStore$Downloads")
+		Dim coll As Object = ms.GetField("EXTERNAL_CONTENT_URI")
+		Dim values As JavaObject
+		values.InitializeNewInstance("android.content.ContentValues", Null)
+		values.RunMethod("put", Array("_display_name", SrcName))
+		values.RunMethod("put", Array("mime_type", Mime))
+		values.RunMethod("put", Array("relative_path", "Download/"))
+		Dim uri As Object = resolver.RunMethod("insert", Array(coll, values))
+		If uri = Null Then
+			Log("SaveToDownloads: insert returned Null")
+			Return ""
+		End If
+		Dim stream As OutputStream = resolver.RunMethod("openOutputStream", Array(uri))
+		File.Copy2(File.OpenInput(SrcDir, SrcName), stream)
+		stream.Close
+		Dim jo As JavaObject = uri
+		Return jo.RunMethod("toString", Null)
+	Catch
+		Log("SaveToDownloads failed: " & LastException.Message)
+		Return ""
+	End Try
+	#Else
+	Return ""
+	#End If
+End Sub
+
 'Copies a file from app-visible storage into the content URI chosen in
 'the SAF picker (openOutputStream, no permissions needed).
 Public Sub CopyFileToUri (SrcDir As String, SrcName As String, Uri As String) As Boolean
@@ -100,7 +152,7 @@ Public Sub CopyFileToUri (SrcDir As String, SrcName As String, Uri As String) As
 		Dim uriJO As JavaObject
 		uriJO.InitializeStatic("android.net.Uri")
 		Dim valid As JavaObject = uriJO.RunMethod("parse", Array(Uri))
-		Dim stream As OutputStream = resolver.RunMethod("openOutputStream", Array(valid))
+		Dim stream As OutputStream = resolver.RunMethod("openOutputStream", Array(valid, "wt"))
 		File.Copy2(File.OpenInput(SrcDir, SrcName), stream)
 		stream.Close
 		Return True

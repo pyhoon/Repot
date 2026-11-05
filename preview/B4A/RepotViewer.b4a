@@ -3,14 +3,15 @@ File1=1.bal
 FileGroup1=Default Group
 Group=Default Group
 Library1=core
-Library2=repot
+Library2=javaobject
 Library3=json
-Library4=javaobject
-Library5=xui
-Library6=repotviewer
+Library4=repot
+Library5=repotviewer
+Library6=xui
+Library7=stringutils
 ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="36"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~CreateResourceFromFile(Macro, Themes.LightTheme)~\n~AddApplicationText(~\n~<provider android:name="android.support.v4.content.FileProvider" android:authorities="$PACKAGE$.provider" android:exported="false" android:grantUriPermissions="true">~\n~    <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/provider_paths" />~\n~</provider>)~\n~CreateResource(xml, provider_paths,~\n~<files-path name="name" path="shared" />)~\n~'End of default text.~\n~
 NumberOfFiles=1
-NumberOfLibraries=6
+NumberOfLibraries=7
 NumberOfModules=0
 Version=14.2
 @EndOfDesignText@
@@ -30,7 +31,7 @@ Version=14.2
 
 #Region  Activity Attributes
 	#FullScreen: False
-	#IncludeTitle: True
+	#IncludeTitle: False
 #End Region
 
 #Region Project Copyright
@@ -49,6 +50,7 @@ Sub Globals
 	Private btnSave As Button
 	Private mReport As Repot
 	Private mOutDir As String
+	Private ion As Object
 End Sub
 
 Sub Activity_Create (FirstTime As Boolean)
@@ -64,17 +66,19 @@ Sub Activity_Create (FirstTime As Boolean)
 
 	btnSave.Initialize("btnSave")
 	btnSave.Text = "Save As PDF"
-	Activity.AddView(btnSave, 8dip, 100%y - 86dip, (100%x - 24dip) / 2, 38dip)
+	Activity.AddView(btnSave, 8dip, 100%y - 86dip, (100%x - 24dip) / 2, 50dip)
 
 	btnPrint.Initialize("btnPrint")
 	btnPrint.Text = "Print PDF"
-	Activity.AddView(btnPrint, 8dip + (100%x - 24dip) / 2 + 8dip, 100%y - 86dip, (100%x - 24dip) / 2, 38dip)
+	Activity.AddView(btnPrint, 8dip + (100%x - 24dip) / 2 + 8dip, 100%y - 86dip, (100%x - 24dip) / 2, 50dip)
 
 	RunExample
 End Sub
 
 Sub Activity_Result (RequestCode As Int, ResultCode As Int, Data As Object)
-	'SAF CreateDocument result: pick the chosen location and copy the PDF.
+	'Optional SAF path: kept for hosts that do receive Activity_Result.
+	'On B4A 14 the picker result never reaches this sub, so the Save button
+	'uses ReportSaveAs.SaveToDownloads instead.
 	Dim uri As String = ReportSaveAs.HandleActivityResult(RequestCode, ResultCode, Data)
 	If uri <> "" Then
 		If ReportSaveAs.CopyFileToUri(mOutDir, "invoice.pdf", uri) Then
@@ -94,11 +98,40 @@ End Sub
 
 Sub btnSave_Click
 	If mReport = Null Then Return
+	SavePdfWithPicker
+End Sub
+
+'SAF SaveAs without permissions: B4A needs an IOnActivityResult event,
+'not Activity_Result. Pattern from Erel's "SaveAs" snippet.
+Private Sub SavePdfWithPicker
 	Dim i As Intent = mReport.SaveAsPdfIntent("application/pdf", "invoice.pdf")
-	If i <> Null Then
-		ReportSaveAs.StartForResult(i, ReportSaveAs.DefaultRequestCode)
-		Log("SaveAs: SAF picker opened")
+	If i = Null Then Return
+	Dim ba As JavaObject = GetBA
+	ion = ba.CreateEvent("anywheresoftware.b4a.IOnActivityResult", "ion", Null)
+	ReportSaveAs.StartForResult(ba, ion, i)
+	Wait For ion_Event (MethodName As String, Args() As Object)
+	If Args(0) = -1 Then 'RESULT_OK
+		Dim result As Intent = Args(1)
+		Dim uri As String = result.GetData
+		If ReportSaveAs.CopyFileToUri(mOutDir, "invoice.pdf", uri) Then
+			Log("SaveAs: saved to " & uri)
+			lbl.Text = "PDF saved"
+		Else
+			Log("SaveAs: copy failed")
+			lbl.Text = "SaveAs failed"
+		End If
+	Else
+		lbl.Text = "Save cancelled"
 	End If
+End Sub
+
+'The module's BA (needed to create the activity-result event).
+Private Sub GetBA As JavaObject
+	Dim jo As JavaObject
+	Dim cls As String = Me
+	cls = cls.SubString("class ".Length)
+	jo.InitializeStatic(cls)
+	Return jo.GetField("processBA")
 End Sub
 
 Sub RunExample
@@ -135,15 +168,27 @@ Sub RunExample
 	End If
 	Log("Rendered " & res.PageCount & " page(s), " & res.RecordCount & " record(s)")
 
+	'Dim jo As JavaObject = ReportHtmlViewer1.Webview
+	'Dim settings As JavaObject = jo.RunMethod("getSettings", Null)
+	'settings.RunMethod("setAllowFileAccess", Array(True))
+	'settings.RunMethod("setAllowUniversalAccessFromFileURLs", Array(True))
+
 	' Inline preview: the exact HTML ExportHtml would write.
-	If ReportHtmlViewer1.LoadHtml(mReport.GetHtml) = False Then
+	Dim html As String = mReport.GetHtml
+	Dim su As StringUtils
+	Dim newImageUri As String = su.EncodeBase64(File.ReadBytes(fixDir, "logo.png"))
+	'Log($"file://${File.Combine(File.DirInternal, "logo.png")}"$)
+	'Dim newImageUri As String = $"file://${File.Combine(fixDir, "logo.png")}"$
+	'Log(newImageUri)
+	html = html.Replace("logo.png", "data:image/png;base64, " & newImageUri)
+	If ReportHtmlViewer1.LoadHtml(html) = False Then
 		lbl.Text = "Viewer could not load the document"
 		Return
 	End If
 
 	Dim vPath As String = File.Combine(outDir, "invoice.pdf")
 	If mReport.ExportPdf(vPath) Then
-		Log("PDF -> " & vPath)
+		Log("PDF -> " & vPath & " (" & File.Size(outDir, "invoice.pdf") & " bytes)")
 		lbl.Text = res.PageCount & " page(s) - PDF ready"
 	Else
 		lbl.Text = "PDF export failed"
@@ -164,3 +209,17 @@ Private Sub LoadJsonMap(dir As String, name As String) As Map
 	parser.Initialize(File.ReadString(dir, name))
 	Return parser.NextObject
 End Sub
+
+'WebV.LoadHtml("<html><body background='" & WebViewAssetFile("image.jpg") & "'></body></html>")
+'
+'
+'Sub WebViewAssetFile (FileName As String) As String
+'	Dim jo As JavaObject
+'	jo.InitializeStatic("anywheresoftware.b4a.objects.streams.File")
+'	If jo.GetField("virtualAssetsFolder") = Null Then
+'		Return "file:///android_asset/" & FileName.ToLowerCase
+'	Else
+'		Return "file://" & File.Combine(jo.GetField("virtualAssetsFolder"), _
+'       jo.RunMethod("getUnpackedVirtualAssetFile", Array As Object(FileName)))
+'	End If
+'End Sub

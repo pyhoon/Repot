@@ -32,10 +32,22 @@ Inline HTML preview for B4J desktop, and the facade accessor it needs.
   (`Program Files\B4X` or `Program Files\Anywhere Software`) instead of
   hardcoding one.
 
+### Fixed
+- B4A Save As wrote a **0-byte** file: B4A 14 does not deliver SAF results
+  to `Activity_Result`, so the copy never ran, and
+  `openOutputStream(uri)` does not truncate the empty file the picker
+  creates. `ReportSaveAs.StartForResult` now takes the host's BA and
+  `IOnActivityResult` event (`BA.startActivityForResult`), the host uses
+  `Wait For ion_Event`, and `CopyFileToUri` opens the stream with `"wt"`.
+  Verified on an API 36 emulator: chosen file is 21,121 bytes.
+- Added `ReportSaveAs.SaveToDownloads` (MediaStore `Downloads`, API 29+)
+  for hosts that cannot wait for an activity result; no picker needed.
+
 ### Known limitations
 - The B4J viewer is compile-verified but has not been run in a GUI on the
   build machine; `GetHtml` itself is covered by the suite. The B4A branch
-  is compile-verified only (no emulator run in this milestone).
+  was run on an API 36 emulator: the report renders inline and Save As
+  writes a 21 KB PDF.
 - `Destroy` on B4A removes the viewer by the index recorded at
   `Initialize`; removing other views from the same panel first would
   invalidate that index.

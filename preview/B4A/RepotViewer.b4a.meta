@@ -1,9 +1,6 @@
 ﻿ModuleBookmarks0=
-ModuleBookmarks1=
-ModuleBreakpoints0=
-ModuleBreakpoints1=
+ModuleBreakpoints0=63,82
 ModuleClosedNodes0=
-ModuleClosedNodes1=
-NavigationStack=Main,Process_Globals,16,0,Main,Activity_Resume,38,0,Visual Designer,1.bal,-100,2,Main,Globals,27,0,Main,Activity_Pause,95,0,Main,LoadJsonMap,85,0,Main,Activity_Create,34,4,Main,CopyAssets,89,0,ReportHtmlViewer,DesignerCreateView,39,0,Main,LogDiagnostics,79,0
+NavigationStack=Main,LoadJsonMap,158,0,Main,Globals,34,0,Main,CopyAssets,149,1,Visual Designer,1.bal,-100,2,Main,Activity_Create,42,0,Main,RunExample,127,6
 SelectedBuild=0
-VisibleModules=1
+VisibleModules=
