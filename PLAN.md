@@ -180,6 +180,7 @@ per week. They are planning ranges, not commitments.
 | M13 | Mixed-script embedded font set + configurable RTL base direction | 1–2 weeks |
 | M14 | ODT and ODS export via own minimal writers (office family symmetry) | done |
 | M15 | `Repot.GetHtml` + inline preview viewer (viewer kept as a test artifact), viewport meta, B4A Save As fix | done, v1.6.0 |
+| M16 | Typed XLSX/ODS cells: numbers, booleans and dates with field display formats | planned, v1.7.0 |
 
 Indicative: v0.1 at M0–M5 (about 10–13 weeks); v1.0 at M0–M9 (about
 17–24 weeks). B4A depth is the largest source of variance. Current
@@ -503,7 +504,7 @@ clip, ellipsis, min height, align override, field content
 
 ---
 
-## 15. After 1.6 — unscheduled (M16+)
+## 15. After 1.6 - unscheduled (M17+)
 
 These are the items from §7.4 that remain unscheduled. None has a
 committed date. Each needs evidence of demand before it is started;
@@ -517,11 +518,11 @@ see the risk of scope creep in §12.
 | Drill-down or interactive HTML | Needs a second, interactive HTML mode | Separate pipeline from fixed-layout |
 | Visual designer | ADR 0007 and §11: a separate application consuming the public API | Not an engine milestone |
 | Template inheritance and reusable styles | Schema extension; the schema is otherwise stable | ADR + schema bump discussion |
-| Typed office cells | Documented limitation in v1.4/v1.5: cells are strings | Change the office writers |
 | B4i | Not targeted; architecture should not preclude it | A platform adapter |
 | ODF application verification | No LibreOffice on the dev machine; verification is structural (Tier-2) | A build machine or a second opinion |
 
-The office-formats family (DOCX, XLSX, ODT, ODS) is now symmetric, and
-RTL/mixed-script coverage in the B4J PDF is complete. The next engine
-milestone, if any, is most likely the one with the clearest demand
-signal — see the decision below.
+Typed office cells were scheduled as M16 (v1.7.0); see `M16_TASKS.md`
+and ADR 0011. The remaining items stay demand-gated: none is started
+until a user, a fixture or a integration attempt shows it is needed.
+The office-formats family (DOCX, XLSX, ODT, ODS) is otherwise symmetric,
+and RTL/mixed-script coverage in the B4J PDF is complete.
