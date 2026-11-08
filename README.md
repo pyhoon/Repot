@@ -8,7 +8,7 @@
 <p align="center">
   <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.7.0-blue" alt="version 1.7.0"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license"></a>
-  <img src="https://img.shields.io/badge/B4J-510%20checks%20%2F%200%20errors-success" alt="B4J 510 checks, 0 errors">
+  <img src="https://img.shields.io/badge/B4J-578%20checks%20%2F%200%20errors-success" alt="B4J 578 checks, 0 errors">
   <img src="https://img.shields.io/badge/B4A-353%20checks%20%2F%200%20errors-success" alt="B4A 353 checks, 0 errors">
 </p>
 
@@ -22,12 +22,12 @@ by the host application into paginated documents and structured exports.
 The same template works from B4J desktop, B4J server, and B4A, and
 renders to HTML for browsers.
 
-> **Project status: v1.6.0 (M15 complete).** The `Repot` facade
-> (load → bind → build → export/print) is stable. v1.6.0 adds
-> `Repot.GetHtml` (the exact HTML that `ExportHtml` writes), a viewport
-> meta in the HTML output, and fixes B4A Save As, which could leave a
-> 0-byte file. B4A produces vector PDF synchronously through the
-> `Printing` library, verifies exported PDFs (`GetPdfPageCount` via
+> **Project status: v1.7.0 (M16 complete).** The `Repot` facade
+> (load → bind → build → export/print) is stable. v1.7.0 adds
+> typed XLSX/ODS cells with field-level display formats (ADR 0011),
+> verified end-to-end through Excel COM (`tools/verify-office.ps1`). B4A
+> produces vector PDF synchronously through the `Printing` library,
+> verifies exported PDFs (`GetPdfPageCount` via
 > `PdfRenderer`), prints through the system print dialog, and saves to a
 > user-chosen location through the Storage Access Framework
 > (`ReportSaveAs`). The B4J PDF embeds TrueType fonts, renders
@@ -154,7 +154,7 @@ Central). B4A needs nothing extra. See
 
 Inline preview is **not part of the shipped library**. `RepotViewer.b4xlib`
 and the `preview/` projects are test artifacts for the inline-preview work:
-they build, and the B4A branch is verified on an emulator, but v1.6.0
+they build, and the B4A branch is verified on an emulator, but v1.7.0
 releases only the core `Repot.b4xlib`. If you build the viewer yourself
 (`tools/package-viewer-b4xlib.ps1`), install it the same way — one copy in
 `Additional\B4X` covers both IDEs. It contains `ReportHtmlViewer`, a B4X
