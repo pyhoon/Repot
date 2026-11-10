@@ -18,7 +18,7 @@ accepted; a later ADR supersedes an earlier one.
 | [0007](0007-project-name.md) | Project name: Repot | accepted | 2026-10-31 |
 | [0008](0008-render-document.md) | Render document is a versioned display list | accepted | 2026-10-31 |
 | [0009](0009-schema-clarifications.md) | Fixture-driven schema clarifications | accepted | 2026-10-31 |
-| [0010](0010-file-extension.md) | File extension: `.repot` (was `.b4xr`) | proposed | 2026-11-01 |
+| [0010](0010-file-extension.md) | File extension: `.repot` (was `.b4xr`) | accepted | 2026-11-05 |
 | [0011](0011-spreadsheet-cell-types.md) | Spreadsheet cell types and field display formats | accepted | 2026-11-05 |
 
 ## Template

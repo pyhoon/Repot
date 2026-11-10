@@ -1,6 +1,6 @@
 # v1.7.0: Typed Spreadsheet Cells (M16)
 
-**Current stage:** planned. Scope: XLSX and ODS write real cell types
+**Current stage:** done. Scope: XLSX and ODS write real cell types
 (numbers, booleans, dates) instead of string cells, with display formats
 declared on dataset fields. No layout change, no new dependency, no schema
 version bump. Decision record: [ADR 0011](docs/decisions/0011-spreadsheet-cell-types.md).
